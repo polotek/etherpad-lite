@@ -246,20 +246,25 @@ function Ace2Editor()
         iframeHTML: iframeHTML
       });
 
+      var loc = '../';
+      if(window.padConfig && padConfig.paddieURL) {
+        loc = padConfig.paddieURL;
+      }
+
       // these lines must conform to a specific format because they are passed by the build script:      
-      iframeHTML.push($$INCLUDE_CSS_Q("../static/css/iframe_editor.css"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/ace2_common.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/skiplist.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/virtual_lines.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/easysync2.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/cssmanager.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/colorutils.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/undomodule.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/contentcollector.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/changesettracker.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/linestylefilter.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/domline.js"));
-      iframeHTML.push($$INCLUDE_JS_Q("../static/js/ace2_inner.js"));
+      iframeHTML.push($$INCLUDE_CSS_Q(loc + "static/css/iframe_editor.css"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/ace2_common.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/skiplist.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/virtual_lines.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/easysync2.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/cssmanager.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/colorutils.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/undomodule.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/contentcollector.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/changesettracker.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/linestylefilter.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/domline.js"));
+      iframeHTML.push($$INCLUDE_JS_Q(loc + "static/js/ace2_inner.js"));
 
       iframeHTML.push('\'\\n<style type="text/css" title="dynamicsyntax"></style>\\n\'');
       iframeHTML.push('\'</head><body id="innerdocbody" class="syntax" spellcheck="false">&nbsp;</body></html>\'');
