@@ -35,6 +35,16 @@ var padJS = ["jquery.min.js", "pad_utils.js", "plugins.js", "undo-xpopup.js", "j
 
 var timesliderJS = ["jquery.min.js", "plugins.js", "undo-xpopup.js", "json2.js", "colorutils.js", "draggable.js", "pad_utils.js", "pad_cookie.js", "pad_editor.js", "pad_editbar.js", "pad_docbar.js", "pad_modals.js", "easysync2_client.js", "domline_client.js", "linestylefilter_client.js", "cssmanager_client.js", "broadcast.js", "broadcast_slider.js", "broadcast_revisions.js"];
 
+
+function getCacheBustingHeaders() {
+  var headers = {};
+  headers['Cache-Control'] = 'max-age=-1, must-revalidate';
+  headers['Expires'] = new Date(0).toString();
+  headers['Last-Modified'] = new Date().toString();
+  headers['ETag'] = new Date().getTime().toString() + Math.random();
+  return headers;
+}
+
 /**
  * creates the minifed javascript for the given minified name
  * @param req the Express request
@@ -43,7 +53,12 @@ var timesliderJS = ["jquery.min.js", "plugins.js", "undo-xpopup.js", "json2.js",
 exports.minifyJS = function(req, res, jsFilename)
 {
   res.header("Content-Type","text/javascript");
-  
+
+  var cacheHeaders = getCacheBustingHeaders();
+  for(var h in cacheHeaders) {
+    res.header(h, cacheHeaders[h]);
+  }
+
   //choose the js files we need
   if(jsFilename == "pad.js")
   {
