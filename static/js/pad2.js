@@ -19,7 +19,6 @@
 var socket;
 var LineNumbersDisabled = false;
 var globalUserName = false;
-
 $(document).ready(function()
 {
   //start the costum js
@@ -125,8 +124,15 @@ function getUrlVars()
 function handshake()
 {
   var loc = document.location;
+  if(window.padConfig && padConfig.paddieURL) {
+    loc = yam.uri.parse(padConfig.paddieURL);
+    loc.hostname = loc.host;
+    loc.pathname = loc.path;
+    if(loc.protocol.indexOf(':') < 0) { loc.protocol += ':'; }
+  }
+
   //get the correct port
-  var port = loc.port == "" ? (loc.protocol == "https:" ? 443 : 80) : loc.port;
+  var port = loc.port == 80 ? '' : loc.port;
   //create the url
   var url = loc.protocol + "//" + loc.hostname + ":" + port + "/";
   //find out in which subfolder we are
@@ -139,6 +145,10 @@ function handshake()
   socket.once('connect', function()
   {
     var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
+    if(window.padConfig && padConfig.padId) {
+      padId = padConfig.padId;
+    }
+
     document.title = document.title + " | " + padId;
 
     var token = readCookie("token");
