@@ -9,10 +9,10 @@
   "port" : 9001,
   
   //The Type of the database. You can choose between sqlite and mysql
-  "dbType" : "sqlite",
+  "dbType" : "dirty",
   //the database specific settings
   "dbSettings" : {
-                   "filename" : "../var/sqlite.db"
+                   "filename" : "../var/dirty.db"
                  },
                  
   /* An Example of MySQL Configuration
@@ -34,5 +34,8 @@
   
   /* This is the path to the Abiword executable. Setting it to null, disables abiword.
      Abiword is needed to enable the import/export of pads*/  
-  "abiword" : null
+  "abiword" : null,
+  
+  /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
+  "loglevel": "INFO"
 }
