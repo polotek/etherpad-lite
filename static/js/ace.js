@@ -238,6 +238,8 @@ function Ace2Editor()
 
     (function()
     {
+      var config = yam.config();
+
       var doctype = "<!doctype html>";
 
       var iframeHTML = ["'" + doctype + "<html><head>'"];
@@ -246,10 +248,7 @@ function Ace2Editor()
         iframeHTML: iframeHTML
       });
 
-      var loc = '../';
-      if(window.padConfig && padConfig.paddieURL) {
-        loc = padConfig.paddieURL;
-      }
+      var loc = config.paddieURL || '../';
 
       // these lines must conform to a specific format because they are passed by the build script:      
       iframeHTML.push($$INCLUDE_CSS_Q(loc + "static/css/iframe_editor.css"));
