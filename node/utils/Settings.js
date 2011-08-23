@@ -20,6 +20,7 @@
  */
 
 var fs = require("fs");
+var path = require("path");
 
 /**
  * The IP ep-lite should listen to
@@ -37,7 +38,7 @@ exports.dbType = "sqlite";
 /**
  * This setting is passed with dbType to ueberDB to set up the database
  */
-exports.dbSettings = { "filename" : "../var/sqlite.db" };
+exports.dbSettings = { "filename" : path.join(__dirname, "../../var/sqlite.db") };
 /**
  * The default Text of a new pad
  */
@@ -53,7 +54,7 @@ exports.minify = true;
 exports.abiword = null;
 
 //read the settings sync
-var settingsStr = fs.readFileSync("../settings.json").toString();
+var settingsStr = fs.readFileSync(path.join(__dirname, "../../settings.json")).toString();
 
 //remove all comments
 settingsStr = settingsStr.replace(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/gm,"").replace(/#.*/g,"").replace(/\/\/.*/g,"");

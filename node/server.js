@@ -42,8 +42,8 @@ var readOnlyManager;
 var version = "";
 try
 {
-  var ref = fs.readFileSync("../.git/HEAD", "utf-8");
-  var refPath = "../.git/" + ref.substring(5, ref.indexOf("\n"));
+  var ref = fs.readFileSync(path.join(__dirname, "../.git/HEAD"), "utf-8");
+  var refPath = path.join(__dirname, "../.git/") + ref.substring(5, ref.indexOf("\n"));
   version = fs.readFileSync(refPath, "utf-8");
   version = version.substring(0, 8);
 }
@@ -289,6 +289,7 @@ async.waterfall([
       },
     });
     
+        
     //minify socket.io javascript
     if(settings.minify)
       io.enable('browser client minification');
