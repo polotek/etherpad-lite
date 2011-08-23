@@ -1,8 +1,7 @@
 #!/bin/sh
 
 #Move to the folder where ep-lite is installed
-FOLDER=$(dirname $(readlink -f $0))
-cd $FOLDER 
+cd `dirname $0`
 
 #Was this script started in the bin folder? if yes move out
 if [ -d "../bin" ]; then
@@ -10,8 +9,8 @@ if [ -d "../bin" ]; then
 fi
 
 #Is wget installed?
-hash wget > /dev/null 2>&1 || { 
-  echo "Please install wget" >&2
+hash curl > /dev/null 2>&1 || { 
+  echo "Please install curl" >&2
   exit 1 
 }
 
@@ -21,11 +20,25 @@ hash node > /dev/null 2>&1 || {
   exit 1 
 }
 
+#check node version
+NODE_VERSION=$(node --version)
+if [ ! $(echo $NODE_VERSION | cut -d "." -f 1-2) = "v0.4" ]; then
+  echo "You're running a wrong version of node, you're using $NODE_VERSION, we need v0.4.x" >&2
+  exit 1 
+fi
+
 #Is npm installed?
 hash npm > /dev/null 2>&1 || { 
   echo "Please install npm ( http://npmjs.org )" >&2
   exit 1 
 }
+
+#check npm version
+NPM_VERSION=$(npm --version)
+if [ ! $(echo $NPM_VERSION | cut -d "." -f 1-2) = "1.0" ]; then
+  echo "You're running a wrong version of npm, you're using $NPM_VERSION, we need 1.0.x" >&2
+  exit 1 
+fi
 
 #Does a settings.json exist? if no copy the template
 if [ ! -f "settings.json" ]; then
@@ -34,7 +47,10 @@ if [ ! -f "settings.json" ]; then
 fi
 
 echo "Ensure that all dependencies are up to date..."
-npm install || exit 1
+npm install || { 
+  rm -rf node_modules
+  exit 1 
+}
 
 echo "Ensure jQuery is downloaded and up to date..."
 DOWNLOAD_JQUERY="true"
@@ -48,7 +64,7 @@ if [ -f "static/js/jquery.min.js" ]; then
 fi
 
 if [ $DOWNLOAD_JQUERY = "true" ]; then
-  wget -O static/js/jquery.min.js http://code.jquery.com/jquery-$NEEDED_VERSION.min.js || exit 1
+  curl -lo static/js/jquery.min.js http://code.jquery.com/jquery-$NEEDED_VERSION.min.js || exit 1
 fi
 
 #Remove all minified data to force node creating it new
