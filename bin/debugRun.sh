@@ -1,8 +1,8 @@
 #!/bin/sh
 
 #Move to the folder where ep-lite is installed
-FOLDER=$(dirname $(readlink -f $0))
-cd $FOLDER 
+FOLDER=$(dirname $(stat -f $0))
+cd $FOLDER
 
 #Was this script started in the bin folder? if yes move out
 if [ -d "../bin" ]; then
@@ -12,11 +12,11 @@ fi
 #prepare the enviroment
 bin/installDeps.sh || exit 1
 
-hash node-inspector > /dev/null 2>&1 || { 
+hash node-inspector > /dev/null 2>&1 || {
   echo "You need to install node-inspector to run the tests!" >&2
   echo "You can install it with npm" >&2
   echo "Run: npm install -g node-inspector" >&2
-  exit 1 
+  exit 1
 }
 
 node-inspector &
@@ -26,5 +26,5 @@ echo "If you new to node-inspector, take a look at this video: http://youtu.be/A
 cd "node"
 node --debug server.js
 
-#kill node-inspector before ending 
+#kill node-inspector before ending
 kill $!
