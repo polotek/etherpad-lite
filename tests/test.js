@@ -7,12 +7,12 @@ function createClient () {
   c.token = Math.floor(Math.random()*111111111211111).toString()
   c.on('error', function (e) {console.error(e)})
   c.collabroom = new events.EventEmitter()
+  c.padid = Math.floor(Math.random()*111111111111111).toString()
   c.users = {}
   return c
 }
 
 function createPad (c) {
-  c.padid = Math.floor(Math.random()*111111111111111).toString()
   return c
 }
 
@@ -83,14 +83,13 @@ function joinPad (c, cb) {
   }
 }
 
-function test () {
+function megajoin (limit) {
   var i = 0
   var clients = []
-  while (i < 1000) {
+  while (i < limit) {
     clients.push(createClient())
     i++
   }
-  createPad(clients[0])
   var counter = 0
   clients.forEach(function (client) {
     client.padid = clients[0].padid
@@ -107,7 +106,40 @@ function test () {
   })
   console.log(clients.map(function (c) {return c.token}))
 }
-test()
+
+function testpads (padlimit, clientsPerPad) {
+  var i = 0
+    , pads = []
+    , clients = []
+    ;
+  while (i !== padlimit) {
+    clients.push(createClient())
+    var x = 0
+    while (x < (clientsPerPad - 1)) {
+      clients.push(createClient())
+      clients[clients.length - 1].padid = clients[clients.length - 2].padid
+      x++
+    }
+    i++
+  }
+  var counts = clients.length
+  clients.forEach(function (c) {
+    joinPad(c, function () {
+      console.error('joined '+c.padid+' '+(counts - 1)+' remaining')
+      counts--
+      if (counts === 0) {
+        console.error('finished.')
+        clients.forEach(function (c) {c.disconnect()})
+      }
+    })
+  })
+  
+}
+
+testpads(100, 10)
+
+// megajoin(1000)
+
 // joinPad(createPad(createClient()), function (c) {
 //   var changes = sample.map(function (obj) {
 //     return [obj.data.changeset, obj.data.apool]
