@@ -464,9 +464,7 @@ async.waterfall([
     socketIORouter.setSocketIO(io);
     socketIORouter.addComponent("pad", padMessageHandler);
     socketIORouter.addComponent("timeslider", timesliderMessageHandler);
-    
-    console.error(app.pause)
-    
+        
     callback(null);  
   }
 ]);
