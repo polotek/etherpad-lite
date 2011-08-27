@@ -406,11 +406,15 @@ async.waterfall([
         db.db.doShutdown(function()
         {
           console.log("db sucessfully closed.");
-          process.exit(0);
+          process.exit();
         });
+      } else {
+        console.log('no db shutdown.')
+        process.exit();
       }
       
       setTimeout(function(){
+        console.error('shutdown timeout')
         process.exit(1);
       }, 3000);
     }
