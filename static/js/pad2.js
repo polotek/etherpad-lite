@@ -150,13 +150,6 @@ function handshake()
 
   var loc = document.location;
 
-  if(config.paddieURL) {
-    loc = yam.uri.parse(config.paddieURL);
-    loc.hostname = loc.host;
-    loc.pathname = loc.path;
-    if(loc.protocol.indexOf(':') < 0) { loc.protocol += ':'; }
-  }
-
   //get the correct port
   var port = loc.port == 80 ? '' : loc.port;
   //create the url
@@ -170,12 +163,9 @@ function handshake()
 
   socket.once('connect', function()
   {
-    var padId = config.padId
-    if(!padId) {
-      padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
-      padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
-    }
-
+    var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
+    padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
+ 
     document.title = document.title + " | " + padId;
 
     var token = readCookie("token");

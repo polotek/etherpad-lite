@@ -99,7 +99,7 @@ async.waterfall([
     app.get('/static/*', function(req, res)
     { 
       res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/.." + req.url.split("?")[0]);
+      var filePath = path.join(__dirname, "..", req.url.split("?")[0].slice(1));
       res.sendfile(filePath, { maxAge: exports.maxAge });
     });
     
@@ -370,8 +370,12 @@ async.waterfall([
     console.log("Server is listening at " + settings.ip + ":" + settings.port);
 
     var onShutdown = false;
+    var shutdownCalled = false;
     var gracefulShutdown = function(err)
     {
+      // stop accepting connections NOW!
+      app.pause()
+      
       if(err && err.stack)
       {
         console.error(err.stack);
@@ -380,6 +384,13 @@ async.waterfall([
       {
         console.error(err);
       }
+      
+      // If we already tried to run shutdown and get another signal hard kill our pid
+      if (shutdownCalled) {
+        console.error('hard kill')
+        return process.kill(process.pid, 'SIGKILL')
+      }
+      shutdownCalled = true;
       
       //ensure there is only one graceful shutdown running
       if(onShutdown) return;
@@ -391,14 +402,19 @@ async.waterfall([
       app.close();
 
       //do the db shutdown
-      db.db.doShutdown(function()
-      {
-        console.log("db sucessfully closed.");
-        
-        process.exit(0);
-      });
+      if (db && db.db && db.db.doShutdown) {
+        db.db.doShutdown(function()
+        {
+          console.log("db sucessfully closed.");
+          process.exit();
+        });
+      } else {
+        console.log('no db shutdown.')
+        process.exit();
+      }
       
       setTimeout(function(){
+        console.error('shutdown timeout')
         process.exit(1);
       }, 3000);
     }
@@ -452,7 +468,7 @@ async.waterfall([
     socketIORouter.setSocketIO(io);
     socketIORouter.addComponent("pad", padMessageHandler);
     socketIORouter.addComponent("timeslider", timesliderMessageHandler);
-    
+        
     callback(null);  
   }
 ]);
