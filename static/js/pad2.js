@@ -146,7 +146,7 @@ function savePassword()
 
 function handshake()
 {
-  var config = yam.config();
+  var config = window.yam && yam.config() || {};
 
   var loc = document.location;
 

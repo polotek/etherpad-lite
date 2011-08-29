@@ -238,7 +238,7 @@ function Ace2Editor()
 
     (function()
     {
-      var config = yam.config();
+      var config = window.yam && yam.config() || {};
 
       var doctype = "<!doctype html>";
 
