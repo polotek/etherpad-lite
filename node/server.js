@@ -426,8 +426,10 @@ async.waterfall([
       //https://github.com/joyent/node/issues/1553
       process.on('SIGINT', gracefulShutdown);
     }
-    
-    process.on('uncaughtException', gracefulShutdown);
+    process.on('SIGHUP', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
+
+    process.on('uncaughtException', gracefulShutdown)
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
