@@ -248,7 +248,7 @@ function Ace2Editor()
         iframeHTML: iframeHTML
       });
 
-      var loc = '../';
+      var loc = config.paddieURL || '../';
 
       // these lines must conform to a specific format because they are passed by the build script:      
       iframeHTML.push($$INCLUDE_CSS_Q(loc + "static/css/iframe_editor.css"));
