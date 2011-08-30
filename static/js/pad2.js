@@ -163,7 +163,14 @@ function handshake()
 
   socket.once('connect', function()
   {
+    var config = window.yam && yam.config() || {};
+
     var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
+
+    if(config.padId) {
+      padId = config.padId;
+    }
+
     padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
  
     document.title = document.title + " | " + padId;
