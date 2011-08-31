@@ -314,7 +314,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
   function sendMessage(msg)
   {
     console.log("message sent", msg)
-    msg.user_id = yam.currentUser.id;
     socket.json.send(
     {
       type: "COLLABROOM",
