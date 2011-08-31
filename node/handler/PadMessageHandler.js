@@ -633,6 +633,7 @@ function handleClientReady(client, message)
     {
       securityManager.checkAccess (message.padId, message.sessionID, message.token, message.password, message.user_id, function(err, statusObject)
       {
+        console.log("Status Object: ", statusObject)
         if(err) {callback(err); return}
 
         //access was granted

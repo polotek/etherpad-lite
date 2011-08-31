@@ -81,6 +81,7 @@ exports.createAuthorIfNotExistsFor = function (authorMapper, name, callback)
  */
 function mapAuthorWithDBKey (mapperkey, mapper, userID, callback)
 {
+  console.log(mapperkey +":"+ mapper + "  ", userID)
   //try to map to an author
   db.get(mapperkey + ":" + mapper, function (err, author)
   {
@@ -92,7 +93,7 @@ function mapAuthorWithDBKey (mapperkey, mapper, userID, callback)
     }
 
     //there is no author with this mapper, so create one
-    if(author == null && userID)
+    if(author == null)
     {
       // Yammer ToDo: Pass in a User ID here
       exports.createAuthor(userID, function(err, author)
@@ -188,6 +189,7 @@ exports.getAuthorName = function (author, callback)
  */
 exports.setAuthorName = function (author, name, callback)
 {
+  console.log(author, name)
   db.setSub("globalAuthor:" + author, ["name"], name, callback);
 }
 

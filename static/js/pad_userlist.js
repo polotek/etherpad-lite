@@ -466,7 +466,7 @@ var paduserlist = (function()
         $("#myusernameedit").addClass('myusernameedithoverable');
         setUpEditable($("#myusernameedit"), function()
         {
-          return myUserInfo.name || '';
+          return myUserInfo.name || yam.currentUser.id;
         }, function(newValue)
         {
           myUserInfo.name = newValue;
@@ -504,7 +504,7 @@ var paduserlist = (function()
       {
         info.colorId = clientVars.colorPalette[info.colorId];
       }
-      
+
       myUserInfo = $.extend(
       {}, info);
 
@@ -512,6 +512,7 @@ var paduserlist = (function()
     },
     userJoinOrUpdate: function(info)
     {
+      console.log("info", info);
       if ((!info.userId) || (info.userId == myUserInfo.userId))
       {
         // not sure how this would happen
@@ -709,7 +710,7 @@ var paduserlist = (function()
       {
         $("#myswatchbox").addClass('myswatchboxhoverable').removeClass('myswatchboxunhoverable');
       }
-      
+
       $("#myswatch").css({'background-color': myUserInfo.colorId});
     }
   };
@@ -725,7 +726,7 @@ function getColorPickerSwatchIndex(jnode)
 function closeColorPicker(accept)
 {
   if (accept)
-  {    
+  {
     var newColor = $("#mycolorpickerpreview").css("background-color");
     var parts = newColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
     // parts now should be ["rgb(0, 70, 255", "0", "70", "255"]
@@ -735,7 +736,7 @@ function closeColorPicker(accept)
         if (parts[i].length == 1) parts[i] = '0' + parts[i];
     }
     var newColor = "#" +parts.join(''); // "0070ff"
-    
+
     myUserInfo.colorId = newColor;
     pad.notifyChangeColor(newColor);
     paduserlist.renderMyUserInfo();

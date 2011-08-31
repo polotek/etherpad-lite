@@ -317,9 +317,9 @@ function loadBroadcastJS()
         str = '0' + str;
         return str;
         }
-        
-        
-        
+
+
+
     var date = new Date(padContents.currentTime);
     var dateFormat = function()
       {
@@ -331,18 +331,18 @@ function loadBroadcastJS()
         var seconds = zpad(date.getSeconds(), 2);
         return ([month, '/', day, '/', year, ' ', hours, ':', minutes, ':', seconds].join(""));
         }
-        
-        
-        
-        
-        
+
+
+
+
+
     $('#timer').html(dateFormat());
 
     var revisionDate = ["Saved", ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"][date.getMonth()], date.getDate() + ",", date.getFullYear()].join(" ")
     $('#revision_date').html(revisionDate)
 
   }
-  
+
   updateTimer();
 
   function goToRevision(newRevision)
@@ -457,16 +457,16 @@ function loadBroadcastJS()
       var requestID = Math.floor(Math.random() * 100000);
 
 /*var msg = { "component" : "timeslider",
-                  "type":"CHANGESET_REQ", 
+                  "type":"CHANGESET_REQ",
                   "padId": padId,
                   "token": token,
-                  "protocolVersion": 2, 
+                  "protocolVersion": 2,
                   "data"
                   {
                     "start": start,
                     "granularity": granularity
                   }};
-    
+
       socket.send(msg);*/
 
       sendSocketMsg("CHANGESET_REQ", {
@@ -595,6 +595,7 @@ function loadBroadcastJS()
 
   function sendMessage(msg)
   {
+    console.log("Broadcast Message sent: ", msg)
     socket.postMessage(JSON.stringify(
     {
       type: "COLLABROOM",
@@ -714,11 +715,11 @@ function loadBroadcastJS()
         goToRevision.apply(goToRevision, arguments);
       }
       }
-      
-      
-      
-      
-      
+
+
+
+
+
   BroadcastSlider.onSlider(goToRevisionIfEnabled);
 
   (function()

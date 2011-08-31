@@ -24,8 +24,11 @@ $(window).bind("load", function()
     "serverVars" are from calling doc.getCollabClientVars() on the server. */
 function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 {
-  var editor = ace2editor;
 
+  // set user workfeed id, we're hijacking paddie's user.name here
+  initialUserInfo.name = yam.currentUser.id;
+
+  var editor = ace2editor;
   var rev = serverVars.rev;
   var padId = serverVars.padId;
   var globalPadId = serverVars.globalPadId;
@@ -310,6 +313,8 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 
   function sendMessage(msg)
   {
+    console.log("message sent", msg)
+    msg.user_id = yam.currentUser.id;
     socket.json.send(
     {
       type: "COLLABROOM",
@@ -407,7 +412,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
     {
       var userInfo = msg.userInfo;
       var id = userInfo.userId;
-      
+
       if (userSet[id])
       {
         userSet[id] = userInfo;
@@ -454,6 +459,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 
   function updateUserInfo(userInfo)
   {
+    console.log("Update User Info called with: ", userInfo);
     userInfo.userId = userId;
     userSet[userId] = userInfo;
     tellAceActiveAuthorInfo(userInfo);
@@ -476,7 +482,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
     {
       colorId = clientVars.colorPalette[colorId];
     }
-    
+
     var cssColor = colorId;
     if (inactive)
     {

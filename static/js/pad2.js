@@ -42,10 +42,10 @@ function createCookie(name, value, days, path)
     var expires = "; expires=" + date.toGMTString();
   }
   else var expires = "";
-  
+
   if(!path)
     path = "/";
-  
+
   document.cookie = name + "=" + value + expires + "; path=" + path;
 }
 
@@ -85,7 +85,7 @@ function getParams()
   if(showControls)
   {
     if(showControls == "false")
-    { 
+    {
       $('#editbar').hide();
       $('#editorcontainer').css({"top":"0px"});
     }
@@ -179,7 +179,7 @@ function handshake()
     }
 
     padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
- 
+
     document.title = document.title + " | " + padId;
 
     var token = readCookie("token");
@@ -188,7 +188,7 @@ function handshake()
       token = randomString();
       createCookie("token", token, 60);
     }
-    
+
     var sessionID = readCookie("sessionID");
     var password = readCookie("password");
 
@@ -199,6 +199,7 @@ function handshake()
       "sessionID": sessionID,
       "password": password,
       "token": token,
+      "user_id": yam.currentUser.id,
       "protocolVersion": 2
     };
     socket.json.send(msg);
@@ -229,7 +230,7 @@ function handshake()
                                     "<button type='button' onclick='savePassword()'>ok</button>");
       }
     }
-    
+
     //if we haven't recieved the clientVars yet, then this message should it be
     else if (!receivedClientVars)
     {
@@ -346,7 +347,7 @@ var pad = {
   init: function()
   {
     pad.clientTimeOffset = new Date().getTime() - clientVars.serverTimestamp;
-  
+
     //initialize the chat
     chat.init();
     pad.diagnosticInfo.uniqueId = padutils.uniqueId();
@@ -450,7 +451,7 @@ var pad = {
     {
       type: 'padtitle',
       title: newTitle,
-      changedBy: pad.myUserInfo.name || "unnamed"
+      changedBy: pad.myUserInfo.name || yam.currentUser.id
     });
   },
   notifyChangePassword: function(newPass)
@@ -459,7 +460,7 @@ var pad = {
     {
       type: 'padpassword',
       password: newPass,
-      changedBy: pad.myUserInfo.name || "unnamed"
+      changedBy: pad.myUserInfo.name || yam.currentUser.id
     });
   },
   changePadOption: function(key, value)
@@ -471,7 +472,7 @@ var pad = {
     {
       type: 'padoptions',
       options: options,
-      changedBy: pad.myUserInfo.name || "unnamed"
+      changedBy: pad.myUserInfo.name || yam.currentUser.id
     });
   },
   changeViewOption: function(key, value)
@@ -488,7 +489,7 @@ var pad = {
       {
         type: 'padoptions',
         options: options,
-        changedBy: pad.myUserInfo.name || "unnamed"
+        changedBy: pad.myUserInfo.name || yam.currentUser.id
       });
     }
   },

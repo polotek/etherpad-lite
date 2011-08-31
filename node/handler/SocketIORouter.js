@@ -107,6 +107,7 @@ exports.setSocketIO = function(_socket)
         //this message has everything to try an authorization
         if(message.padId !== undefined && message.sessionID !== undefined && message.token !== undefined && message.password !== undefined)
         {
+          console.log("============ ", message);
           securityManager.checkAccess (message.padId, message.sessionID, message.token, message.password, message.user_id, function(err, statusObject)
           {
             if(err) throw err;
