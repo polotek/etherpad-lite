@@ -282,7 +282,7 @@ function handshake()
   });
 
   // Bind the colorpicker
-  var fb = $('#colorpicker').farbtastic({ callback: '#mycolorpickerpreview', width: 220});
+  //var fb = $('#colorpicker').farbtastic({ callback: '#mycolorpickerpreview', width: 220});
 }
 
 var pad = {
