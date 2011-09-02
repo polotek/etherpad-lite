@@ -793,18 +793,13 @@ function handleClientReady(client, message)
         "serverTimestamp": new Date().getTime(),
         "globalPadId": message.padId,
         "userId": author,
+        "userName": authorName,
         "cookiePrefsToSet": {
             "fullWidth": false,
             "hideSidebar": false
         },
         "abiwordAvailable": abiwordAvailable,
         "hooks": {}
-      }
-
-      //Add a username to the clientVars if one avaiable
-      if(authorName != null)
-      {
-        clientVars.userName = authorName;
       }
 
       //Send the clientVars to the Client
@@ -822,17 +817,12 @@ function handleClientReady(client, message)
           userInfo: {
             "ip": "127.0.0.1",
             "colorId": authorColorId,
+            "name": authorName,
             "userAgent": "Anonymous",
             "userId": author
           }
         }
       };
-
-      //Add the authorname of this new User, if avaiable
-      if(authorName != null)
-      {
-        messageToTheOtherUsers.data.userInfo.name = authorName;
-      }
 
       //Run trough all sessions of this pad
       async.forEach(pad2sessions[message.padId], function(sessionID, callback)

@@ -313,7 +313,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 
   function sendMessage(msg)
   {
-    console.log("message sent", msg)
     socket.json.send(
     {
       type: "COLLABROOM",
@@ -354,8 +353,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 
   function handleMessageFromServer(evt)
   {
-    if (window.console) console.log("message recieved", evt);
-
     if (!socket) return;
     if (!evt.data) return;
     var wrapper = evt;

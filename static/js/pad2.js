@@ -234,9 +234,6 @@ function handshake()
     //if we haven't recieved the clientVars yet, then this message should it be
     else if (!receivedClientVars)
     {
-      //log the message
-      if (window.console) console.log("Connection Message", obj);
-
       receivedClientVars = true;
 
       //set some client vars
