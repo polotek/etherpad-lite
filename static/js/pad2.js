@@ -235,7 +235,7 @@ function handshake()
     else if (!receivedClientVars)
     {
       //log the message
-      if (window.console) console.log(obj);
+      if (window.console) console.log("Connection Message", obj);
 
       receivedClientVars = true;
 
@@ -536,11 +536,13 @@ var pad = {
   },
   handleUserJoin: function(userInfo)
   {
+    yam.publish('/ui/pages/addOrUpdateUser', [userInfo]);
     paduserlist.userJoinOrUpdate(userInfo);
     //padchat.handleUserJoinOrUpdate(userInfo);
   },
   handleUserUpdate: function(userInfo)
   {
+    yam.publish('/ui/pages/addOrUpdateUser', [userInfo]);
     paduserlist.userJoinOrUpdate(userInfo);
     //padchat.handleUserJoinOrUpdate(userInfo);
   },

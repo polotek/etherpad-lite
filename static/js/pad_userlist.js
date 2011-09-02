@@ -512,7 +512,6 @@ var paduserlist = (function()
     },
     userJoinOrUpdate: function(info)
     {
-      console.log("info", info);
       if ((!info.userId) || (info.userId == myUserInfo.userId))
       {
         // not sure how this would happen

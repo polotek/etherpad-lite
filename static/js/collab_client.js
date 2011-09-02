@@ -354,7 +354,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 
   function handleMessageFromServer(evt)
   {
-    if (window.console) console.log(evt);
+    if (window.console) console.log("message recieved", evt);
 
     if (!socket) return;
     if (!evt.data) return;
@@ -458,7 +458,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 
   function updateUserInfo(userInfo)
   {
-    console.log("Update User Info called with: ", userInfo);
     userInfo.userId = userId;
     userSet[userId] = userInfo;
     tellAceActiveAuthorInfo(userInfo);
