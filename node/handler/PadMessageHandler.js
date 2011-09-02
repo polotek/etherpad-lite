@@ -105,7 +105,7 @@ exports.handleDisconnect = function(client)
     var author = sessioninfos[client.id].author;
 
     //get the author color out of the db
-    authorManager.getAuthorColorId(author, function(err, color)
+    authorManager.getAuthor(author, function(err, authorObj)
     {
       if(err) throw err;
 
@@ -116,9 +116,10 @@ exports.handleDisconnect = function(client)
           type: "USER_LEAVE",
           userInfo: {
             "ip": "127.0.0.1",
-            "colorId": color,
+            "colorId": authorObj.colorId,
             "userAgent": "Anonymous",
-            "userId": author
+            "userId": author,
+            "name": authorObj.name
           }
         }
       };
