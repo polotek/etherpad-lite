@@ -548,6 +548,7 @@ var pad = {
   },
   handleUserLeave: function(userInfo)
   {
+    yam.publish('/ui/pages/removeUser', [userInfo]);
     paduserlist.userLeave(userInfo);
     //padchat.handleUserLeave(userInfo);
   },
