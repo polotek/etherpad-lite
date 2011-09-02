@@ -78,10 +78,10 @@ function randomString()
 function getParams()
 {
   var showControls = getUrlVars()["showControls"];
-  var showChat = getUrlVars()["showChat"];
+  var showChat = false; //getUrlVars()["showChat"];
   var userName = getUrlVars()["userName"];
-  var showLineNumbers = getUrlVars()["showLineNumbers"];
-  var useMonospaceFont = getUrlVars()["useMonospaceFont"];
+  var showLineNumbers = false; //getUrlVars()["showLineNumbers"];
+  var useMonospaceFont = false; //getUrlVars()["useMonospaceFont"];
   if(showControls)
   {
     if(showControls == "false")
