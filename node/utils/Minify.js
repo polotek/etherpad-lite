@@ -162,7 +162,7 @@ exports.minifyJS = function(req, res, jsFilename)
         }
       
         var founds = fileValues["ace.js"].match(/\$\$INCLUDE_[a-zA-Z_]+\([a-zA-Z0-9.\/_"]+\)/gi);
-        
+
         //go trough all includes
         async.forEach(founds, function (item, callback)
         {
@@ -174,7 +174,7 @@ exports.minifyJS = function(req, res, jsFilename)
           var quote = item.search("_Q") != -1;
         
           //read the included file
-          fs.readFile(filename, "utf-8", function(err, data)
+          fs.readFile('../' + filename, "utf-8", function(err, data)
           {         
             //compress the file               
             if(type == "JS")
