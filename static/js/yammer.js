@@ -1,3 +1,3 @@
-if (yam) {
-  console.log("yamjs is on this page");
+if (typeof yam != 'undefined') {
+  //console.log("yamjs is on this page");
 }
