@@ -20,7 +20,6 @@ var socket;
 var LineNumbersDisabled = false;
 var useMonospaceFontGlobal = false;
 var globalUserName = false;
-
 $(document).ready(function()
 {
   //start the costum js
@@ -147,9 +146,11 @@ function savePassword()
 
 function handshake()
 {
+
   var loc = document.location;
+
   //get the correct port
-  var port = loc.port == "" ? (loc.protocol == "https:" ? 443 : 80) : loc.port;
+  var port = loc.port == 80 ? '' : loc.port;
   //create the url
   var url = loc.protocol + "//" + loc.hostname + ":" + port + "/";
   //find out in which subfolder we are
@@ -163,7 +164,7 @@ function handshake()
   {
     var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
     padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
-
+ 
     document.title = document.title + " | " + padId;
 
     var token = readCookie("token");

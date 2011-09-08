@@ -44,8 +44,8 @@ var socketIORouter;
 var version = "";
 try
 {
-  var ref = fs.readFileSync("../.git/HEAD", "utf-8");
-  var refPath = "../.git/" + ref.substring(5, ref.indexOf("\n"));
+  var ref = fs.readFileSync(path.join(__dirname, "../.git/HEAD"), "utf-8");
+  var refPath = path.join(__dirname, "../.git/") + ref.substring(5, ref.indexOf("\n"));
   version = fs.readFileSync(refPath, "utf-8");
   version = version.substring(0, 7);
   console.log("Your Etherpad Lite git version is " + version);
@@ -371,8 +371,12 @@ async.waterfall([
     console.log("Server is listening at " + settings.ip + ":" + settings.port);
 
     var onShutdown = false;
+    var shutdownCalled = false;
     var gracefulShutdown = function(err)
     {
+      // stop accepting connections NOW!
+      app.pause()
+      
       if(err && err.stack)
       {
         console.error(err.stack);
@@ -381,6 +385,13 @@ async.waterfall([
       {
         console.error(err);
       }
+      
+      // If we already tried to run shutdown and get another signal hard kill our pid
+      if (shutdownCalled) {
+        console.error('hard kill')
+        return process.kill(process.pid, 'SIGKILL')
+      }
+      shutdownCalled = true;
       
       //ensure there is only one graceful shutdown running
       if(onShutdown) return;
@@ -392,14 +403,19 @@ async.waterfall([
       app.close();
 
       //do the db shutdown
-      db.db.doShutdown(function()
-      {
-        console.log("db sucessfully closed.");
-        
-        process.exit(0);
-      });
+      if (db && db.db && db.db.doShutdown) {
+        db.db.doShutdown(function()
+        {
+          console.log("db sucessfully closed.");
+          process.exit();
+        });
+      } else {
+        console.log('no db shutdown.')
+        process.exit();
+      }
       
       setTimeout(function(){
+        console.error('shutdown timeout')
         process.exit(1);
       }, 3000);
     }
@@ -441,6 +457,7 @@ async.waterfall([
       },
     });
     
+        
     //minify socket.io javascript
     if(settings.minify)
       io.enable('browser client minification');
@@ -452,7 +469,7 @@ async.waterfall([
     socketIORouter.setSocketIO(io);
     socketIORouter.addComponent("pad", padMessageHandler);
     socketIORouter.addComponent("timeslider", timesliderMessageHandler);
-    
+        
     callback(null);  
   }
 ]);
