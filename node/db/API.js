@@ -126,6 +126,7 @@ exports.getText = function(padID, rev, callback)
       //get the text of this revision
       pad.getInternalRevisionAText(rev, function(err, atext)
       {
+        var data;
         if(!err)
         {
           data = {text: atext.text};
