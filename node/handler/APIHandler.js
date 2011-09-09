@@ -49,6 +49,7 @@ var functions = {
   "listSessionsOfGroup"       : ["groupID"], 
   "listSessionsOfAuthor"      : ["authorID"], 
   "getText"                   : ["padID", "rev"],
+  "getHTML"                   : ["padID", "rev"],
   "setText"                   : ["padID", "text"],
   "getRevisionsCount"         : ["padID"], 
   "deletePad"                 : ["padID"], 

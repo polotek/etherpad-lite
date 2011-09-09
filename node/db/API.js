@@ -24,6 +24,7 @@ var readOnlyManager = require("./ReadOnlyManager");
 var groupManager = require("./GroupManager");
 var authorManager = require("./AuthorManager");
 var sessionManager = require("./SessionManager");
+var exportHtml = require('../utils/ExportHtml')
 var async = require("async");
 
 /**********************/
@@ -166,6 +167,80 @@ exports.setText = function(padID, text, callback)
     
     //update the clients on the pad
     padMessageHandler.updatePadClients(pad, callback);
+  });
+}
+
+/**
+getHTML(padID, [rev]) returns the pad text in html format
+
+Example returns:
+
+{code: 0, message:"ok", data: {html:"text<br/>more pad text<br/><a href=\"http://www.example.com/\">example</a>"}
+{code: 1, message:"padID does not exist", data: null}
+*/
+exports.getHTML = function(padID, rev, callback)
+{
+  //check if rev is set
+  if(typeof rev == "function")
+  {
+    callback = rev;
+    rev = undefined;
+  }
+  
+  //check if rev is a number
+  if(rev !== undefined && typeof rev != "number")
+  {
+    //try to parse the number
+    if(!isNaN(parseInt(rev)))
+    {
+      rev = parseInt(rev);
+    }
+    else
+    {
+      callback({stop: "rev is not a number"});
+      return;
+    }
+  }
+  
+  //ensure this is not a negativ number
+  if(rev !== undefined && rev < 0)
+  {
+    callback({stop: "rev is a negativ number"});
+    return;
+  }
+  
+  //ensure this is not a float value
+  if(rev !== undefined && !is_int(rev))
+  {
+    callback({stop: "rev is a float value"});
+    return;
+  }
+  
+  //get the pad
+  getPadSafe(padID, true, function(err, pad)
+  {
+    if(err)
+    {
+      callback(err);
+      return;
+    }
+    
+    //the client asked for a special revision
+    if(rev !== undefined && rev > pad.getHeadRevisionNumber())
+    {
+      callback({stop: "rev is higher than the head revision of the pad"});
+      return;
+    }
+
+    exportHtml.getPadHTMLDocument(pad.id, rev, {full:false}, function(err, html) {
+      var data;
+      if(!err)
+      {
+        data = {html: html};
+      }
+      
+      callback(err, data);
+    });
   });
 }
 
