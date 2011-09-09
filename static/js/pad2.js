@@ -199,7 +199,7 @@ function handshake()
       "sessionID": sessionID,
       "password": password,
       "token": token,
-      "user_id": yam.currentUser.id,
+      "user_id": window.yam ? yam.currentUser.id : undefined,
       "protocolVersion": 2
     };
     socket.json.send(msg);
