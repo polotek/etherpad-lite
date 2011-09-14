@@ -20,6 +20,7 @@
  * limitations under the License.
  */
 
+var nopt = require('nopt');
 var log4js = require('log4js');
 var os = require("os");
 var socketio = require('socket.io');
@@ -39,6 +40,15 @@ var readOnlyManager;
 var padManager;
 var securityManager;
 var socketIORouter;
+
+var argv = nopt({
+    'port':Number
+    , 'environment':['staging', 'production']
+  }
+  , {
+    'p': ['--port']
+    , 'e': ['--environment']
+}, process.argv);
 
 //try to get the git version
 var version = "";
@@ -367,8 +377,9 @@ async.waterfall([
     });
     
     //let the server listen
-    app.listen(settings.port, settings.ip);
-    console.log("Server is listening at " + settings.ip + ":" + settings.port);
+    var port = argv.port || settings.port;
+    app.listen(port, settings.ip);
+    console.log("Server is listening at " + settings.ip + ":" + port);
 
     var onShutdown = false;
     var gracefulShutdown = function(err)
