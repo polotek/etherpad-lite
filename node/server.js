@@ -375,15 +375,19 @@ async.waterfall([
         }
       });
     });
-    
+
     //let the server listen
     var port = argv.port || settings.port;
     app.listen(port, settings.ip);
     console.log("Server is listening at " + settings.ip + ":" + port);
 
     var onShutdown = false;
+    var shutdownCalled = false;
     var gracefulShutdown = function(err)
     {
+      // stop accepting connections NOW!
+      app.pause()
+
       if(err && err.stack)
       {
         console.error(err.stack);
@@ -392,25 +396,37 @@ async.waterfall([
       {
         console.error(err);
       }
-      
+
+      // If we already tried to run shutdown and get another signal hard kill our pid
+      if (shutdownCalled) {
+        console.error('hard kill')
+        return process.kill(process.pid, 'SIGKILL')
+      }
+      shutdownCalled = true;
+
       //ensure there is only one graceful shutdown running
       if(onShutdown) return;
       onShutdown = true;
-    
+
       console.log("graceful shutdown...");
-      
+
       //stop the http server
       app.close();
 
       //do the db shutdown
-      db.db.doShutdown(function()
-      {
-        console.log("db sucessfully closed.");
-        
-        process.exit(0);
-      });
-      
+      if (db && db.db && db.db.doShutdown) {
+        db.db.doShutdown(function()
+        {
+          console.log("db sucessfully closed.");
+          process.exit();
+        });
+      } else {
+        console.log('no db shutdown.')
+        process.exit();
+      }
+
       setTimeout(function(){
+        console.error('shutdown timeout')
         process.exit(1);
       }, 3000);
     }
@@ -422,8 +438,11 @@ async.waterfall([
       //https://github.com/joyent/node/issues/1553
       process.on('SIGINT', gracefulShutdown);
     }
-    
-    process.on('uncaughtException', gracefulShutdown);
+
+    process.on('SIGHUP', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
+
+    process.on('uncaughtException', gracefulShutdown)
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
