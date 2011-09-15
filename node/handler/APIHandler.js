@@ -25,7 +25,7 @@ var api = require("../db/API");
 var apikey = null;
 try
 {
-  apikey = fs.readFileSync("../APIKEY.txt","utf8");
+  apikey = fs.readFileSync("../APIKEY.txt","utf8").trim();
 }
 catch(e) 
 {
