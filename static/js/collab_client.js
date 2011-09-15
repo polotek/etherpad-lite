@@ -26,8 +26,10 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 {
 
   // set user workfeed id, we're hijacking paddie's user.name here
-  initialUserInfo.name = yam.currentUser.id;
-
+  if(window.yam) {
+    initialUserInfo.name = yam.currentUser.id;
+  }
+  
   var editor = ace2editor;
   var rev = serverVars.rev;
   var padId = serverVars.padId;

@@ -369,19 +369,36 @@ function _analyzeLine(text, aline, apool)
   return line;
 }
 
-exports.getPadHTMLDocument = function (padId, revNum, noDocType, callback)
+exports.getPadHTMLDocument = function (padId, revNum, opts, callback)
 {
+  if(typeof opts === 'boolean') {
+    opts = {noDocType:opts};
+  } else {
+    opts = opts || {}    
+  }
+  if(opts.noDocType === undefined) {
+    opts.noDocType = true;
+  }
+  if(opts.full === undefined) {
+    opts.full = true;
+  }
+
   padManager.getPad(padId, function (err, pad)
   {
+    var head = '',
+        foot = '';
+
     if (err)
     {
       callback(err);
       return;
     }
 
-    var head = (noDocType ? '' : '<!doctype html>\n') + '<html lang="en">\n' + (noDocType ? '' : '<head>\n' + '<meta charset="utf-8">\n' + '<style> * { font-family: arial, sans-serif;\n' + 'font-size: 13px;\n' + 'line-height: 17px; }</style>\n' + '</head>\n') + '<body>';
+    if(opts.full) {
+      var head = (opts.noDocType ? '' : '<!doctype html>\n') + '<html lang="en">\n' + (opts.noDocType ? '' : '<head>\n' + '<meta charset="utf-8">\n' + '<style> * { font-family: arial, sans-serif;\n' + 'font-size: 13px;\n' + 'line-height: 17px; }</style>\n' + '</head>\n') + '<body>';
 
-    var foot = '</body>\n</html>\n';
+      var foot = '</body>\n</html>\n';
+    }
 
     getPadHTML(pad, revNum, function (err, html)
     {

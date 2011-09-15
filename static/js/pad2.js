@@ -199,7 +199,7 @@ function handshake()
       "sessionID": sessionID,
       "password": password,
       "token": token,
-      "user_id": yam.currentUser.id,
+      "user_id": window.yam ? yam.currentUser.id : undefined,
       "protocolVersion": 2
     };
     socket.json.send(msg);
@@ -259,6 +259,7 @@ function handshake()
       if (globalUserName !== false)
       {
         pad.notifyChangeName(globalUserName); // Notifies the server
+	pad.myUserInfo.name = globalUserName;
         $('#myusernameedit').attr({"value":globalUserName}); // Updates the current users UI
       }
     }

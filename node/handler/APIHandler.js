@@ -25,7 +25,7 @@ var api = require("../db/API");
 var apikey = null;
 try
 {
-  apikey = fs.readFileSync("../APIKEY.txt","utf8");
+  apikey = fs.readFileSync("../APIKEY.txt","utf8").trim();
 }
 catch(e) 
 {
@@ -49,6 +49,7 @@ var functions = {
   "listSessionsOfGroup"       : ["groupID"], 
   "listSessionsOfAuthor"      : ["authorID"], 
   "getText"                   : ["padID", "rev"],
+  "getHTML"                   : ["padID", "rev"],
   "setText"                   : ["padID", "text"],
   "getRevisionsCount"         : ["padID"], 
   "deletePad"                 : ["padID"], 
