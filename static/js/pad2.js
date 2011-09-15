@@ -78,10 +78,10 @@ function randomString()
 function getParams()
 {
   var showControls = getUrlVars()["showControls"];
-  var showChat = false; //getUrlVars()["showChat"];
+  var showChat = 'false'; //getUrlVars()["showChat"];
   var userName = getUrlVars()["userName"];
-  var showLineNumbers = false; //getUrlVars()["showLineNumbers"];
-  var useMonospaceFont = false; //getUrlVars()["useMonospaceFont"];
+  var showLineNumbers = 'false'; //getUrlVars()["showLineNumbers"];
+  var useMonospaceFont = 'false'; //getUrlVars()["useMonospaceFont"];
   if(showControls)
   {
     if(showControls == "false")
@@ -380,6 +380,8 @@ var pad = {
       colorId: clientVars.userColor,
       userAgent: pad.getDisplayUserAgent()
     };
+
+    yam.publish('/ui/pages/curentUserReady', [pad.myUserInfo]);
 
     if (clientVars.specialKey)
     {
