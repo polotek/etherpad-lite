@@ -107,6 +107,10 @@ Class('Pad', {
                               passwordHash: this.passwordHash});
     }, //appendRevision
     
+    getRevision: function(revNum, callback) {
+      db.get("pad:" + this.id + ":revs:" + revNum, callback);
+    }, // getRevision
+
     getRevisionChangeset : function(revNum, callback) 
     {
       db.getSub("pad:"+this.id+":revs:"+revNum, ["changeset"], callback);
@@ -137,6 +141,90 @@ Class('Pad', {
       return authors;
     },
     
+    getRevisionSet: function(startRev, endRev, callback) {
+      startRev = (startRev !== null || startRev !== undefined) && parseInt(startRev, 10);
+      endRev = (endRev !== null || endRev !== undefined) && parseInt(endRev, 10);
+
+      if(typeof startRev != 'number') { return callback(new Error('You must specify a start revision')); }
+
+      var head = this.getHeadRevisionNumber();
+      if(typeof endRev == 'number') {
+        if(endRev > head) { return callback(new Error('Invalid end revision')) };
+      } else {
+        endRev = head;
+      }
+      if(startRev < 0 || startRev > endRev) { return callback(new Error('Invalid start revision')); }
+
+      var self = this
+         , curRev = startRev
+         , revisions = []
+         , changesets;
+
+      while(curRev < endRev) {
+        revisions.push(curRev);
+        curRev++;
+      }
+
+      changesets = new Array(revisions.length);
+      async.forEach(revisions, function(rev, callback) {
+          self.getRevision(rev, function(err, changeset) {
+            if(!err) {
+              if(changeset) {
+                changeset.rev = rev;
+
+                // Find the index from the already sorted list of revisions
+                // That way changesets is already ordered
+                // TODO: Get rid of this when we can pull sorted ranges
+                // from the db
+                var idx = revisions.indexOf(rev);
+                changesets[idx] = changeset;
+              } else {
+                err = new Error('No changeset found for revision ' + rev);
+              }
+            }
+
+            callback(err);
+          });
+        },
+      function(err) {
+        callback(err, changesets)
+      });
+    },
+
+    getAuthorsForRevisionSet: function(startRev, endRev, callback) {
+      this.getRevisionSet(startRev, endRev, function(err, changesets) {
+        if(err) { return callback(err); }
+
+        var authors = []
+          , found = {};
+
+        changesets.forEach(function(changeset) {
+          var authorId = changeset.meta.author
+            , timestamp = changeset.meta.timestamp;
+
+          // Take the most recent timestamp
+          if(!found[authorId] || found[authorId] < timestamp) {
+            found[authorId] = timestamp;
+          }
+        });
+
+        var authorIds = Object.keys(found);
+        async.forEach(authorIds, function(authorId, callback) {
+          authorManager.getAuthor(authorId, function(err, author) {
+            if(author) {
+              author.id = authorId;
+              author.last_updated = found[authorId];
+              authors.push(author);
+            }
+            callback(err);
+          });  
+        },
+        function(err) {
+          callback(err, authors);
+        });
+      })
+    },
+
     getInternalRevisionAText : function(targetRev, callback) 
     {
       var _this = this;
