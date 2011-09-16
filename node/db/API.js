@@ -174,6 +174,20 @@ exports.setText = function(padID, text, callback)
 /*****************/
 
 /**
+ * getAuthorsForRevisionSet(padID) returns the set of unique authors contributing
+ * to a set of revisions
+ *
+ * {code:0, message:"ok", data: { authors:[...]} }
+ */
+exports.getAuthorsForRevisionSet = function(padID, startRev, endRev, callback) {
+  getPadSafe(padID, true, function(err, pad) {
+    if(err) { return callback(err); }
+
+    pad.getAuthorsForRevisionSet(startRev, endRev, callback);
+  });
+}
+
+/**
 getRevisionsCount(padID) returns the number of revisions of this pad 
 
 Example returns:
