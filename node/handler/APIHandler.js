@@ -51,6 +51,7 @@ var functions = {
   "getText"                   : ["padID", "rev"],
   "getHTML"                   : ["padID", "rev"],
   "setText"                   : ["padID", "text"],
+  "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev"],
   "getRevisionsCount"         : ["padID"], 
   "deletePad"                 : ["padID"], 
   "getReadOnlyID"             : ["padID"],
