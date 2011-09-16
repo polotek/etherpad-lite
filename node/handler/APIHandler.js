@@ -20,6 +20,8 @@
 
 var fs = require("fs");
 var api = require("../db/API");
+var log4js = require('log4js');
+var apiLogger = log4js.getLogger("API");
 
 //ensure we have an apikey
 var apikey = null;
@@ -120,8 +122,9 @@ exports.handle = function(functionName, fields, req, res)
     //an unkown error happend
     else
     {
-      res.send({code: 2, message: "internal error", data: null});
-      throw (err);
+      res.send({code: 2, message: err.message || "internal error", data: null});
+      //throw (err);
+      apiLogger.error('Unknown api error: ' + err.message + '\n' + err.stack);
     }
   });
   
