@@ -59,7 +59,7 @@ exports.listSessionsOfAuthor = sessionManager.listSessionsOfAuthor;
 /************************/
 
 /**
-getText(padID, [rev]) returns the text of a pad 
+getText(padID, [rev]) returns the text of a pad
 
 Example returns:
 
@@ -74,7 +74,7 @@ exports.getText = function(padID, rev, callback)
     callback = rev;
     rev = undefined;
   }
-  
+
   //check if rev is a number
   if(rev !== undefined && typeof rev != "number")
   {
@@ -89,21 +89,21 @@ exports.getText = function(padID, rev, callback)
       return;
     }
   }
-  
+
   //ensure this is not a negativ number
   if(rev !== undefined && rev < 0)
   {
     callback({stop: "rev is a negativ number"});
     return;
   }
-  
+
   //ensure this is not a float value
   if(rev !== undefined && !is_int(rev))
   {
     callback({stop: "rev is a float value"});
     return;
   }
-  
+
   //get the pad
   getPadSafe(padID, true, function(err, pad)
   {
@@ -112,7 +112,7 @@ exports.getText = function(padID, rev, callback)
       callback(err);
       return;
     }
-    
+
     //the client asked for a special revision
     if(rev !== undefined)
     {
@@ -122,7 +122,7 @@ exports.getText = function(padID, rev, callback)
         callback({stop: "rev is higher than the head revision of the pad"});
         return;
       }
-      
+
       //get the text of this revision
       pad.getInternalRevisionAText(rev, function(err, atext)
       {
@@ -131,7 +131,7 @@ exports.getText = function(padID, rev, callback)
         {
           data = {text: atext.text};
         }
-        
+
         callback(err, data);
       })
     }
@@ -144,7 +144,7 @@ exports.getText = function(padID, rev, callback)
 }
 
 /**
-setText(padID, text) sets the text of a pad 
+setText(padID, text) sets the text of a pad
 
 Example returns:
 
@@ -153,7 +153,7 @@ Example returns:
 {code: 1, message:"text too long", data: null}
 */
 exports.setText = function(padID, text, callback)
-{    
+{
   //get the pad
   getPadSafe(padID, true, function(err, pad)
   {
@@ -162,10 +162,10 @@ exports.setText = function(padID, text, callback)
       callback(err);
       return;
     }
-    
+
     //set the text
     pad.setText(text);
-    
+
     //update the clients on the pad
     padMessageHandler.updatePadClients(pad, callback);
   });
@@ -187,7 +187,7 @@ exports.getHTML = function(padID, rev, callback)
     callback = rev;
     rev = undefined;
   }
-  
+
   //check if rev is a number
   if(rev !== undefined && typeof rev != "number")
   {
@@ -202,21 +202,21 @@ exports.getHTML = function(padID, rev, callback)
       return;
     }
   }
-  
+
   //ensure this is not a negativ number
   if(rev !== undefined && rev < 0)
   {
     callback({stop: "rev is a negativ number"});
     return;
   }
-  
+
   //ensure this is not a float value
   if(rev !== undefined && !is_int(rev))
   {
     callback({stop: "rev is a float value"});
     return;
   }
-  
+
   //get the pad
   getPadSafe(padID, true, function(err, pad)
   {
@@ -225,7 +225,7 @@ exports.getHTML = function(padID, rev, callback)
       callback(err);
       return;
     }
-    
+
     //the client asked for a special revision
     if(rev !== undefined && rev > pad.getHeadRevisionNumber())
     {
@@ -239,7 +239,7 @@ exports.getHTML = function(padID, rev, callback)
       {
         data = {html: html};
       }
-      
+
       callback(err, data);
     });
   });
@@ -264,7 +264,20 @@ exports.getAuthorsForRevisionSet = function(padID, startRev, endRev, callback) {
 }
 
 /**
-getRevisionsCount(padID) returns the number of revisions of this pad 
+ * getRevisionSet(padID) returns a set of revisions for a pad
+ *
+ * {code:0, message:"ok", data: { revisions:[...]} }
+ */
+exports.getRevisionSet = function(padID, startRev, endRev, callback) {
+  getPadSafe(padID, true, function(err, pad) {
+    if(err) { return callback(err); }
+
+    pad.getRevisionSet(startRev, endRev, callback);
+  });
+}
+
+/**
+getRevisionsCount(padID) returns the number of revisions of this pad
 
 Example returns:
 
@@ -281,13 +294,13 @@ exports.getRevisionsCount = function(padID, callback)
       callback(err);
       return;
     }
-    
+
     callback(null, {revisions: pad.getHeadRevisionNumber()});
   });
 }
 
 /**
-createPad(padName [, text]) creates a new pad in this group 
+createPad(padName [, text]) creates a new pad in this group
 
 Example returns:
 
@@ -295,14 +308,14 @@ Example returns:
 {code: 1, message:"pad does already exist", data: null}
 */
 exports.createPad = function(padID, text, callback)
-{  
+{
   //ensure there is no $ in the padID
   if(padID.indexOf("$") != -1)
   {
     callback({stop: "createPad can't create group pads"});
     return;
   }
-  
+
   //create pad
   getPadSafe(padID, false, text, function(err)
   {
@@ -311,7 +324,7 @@ exports.createPad = function(padID, text, callback)
 }
 
 /**
-deletePad(padID) deletes a pad 
+deletePad(padID) deletes a pad
 
 Example returns:
 
@@ -327,13 +340,13 @@ exports.deletePad = function(padID, callback)
       callback(err);
       return;
     }
-    
+
     pad.remove(callback);
   });
 }
 
 /**
-getReadOnlyLink(padID) returns the read only link of a pad 
+getReadOnlyLink(padID) returns the read only link of a pad
 
 Example returns:
 
@@ -350,7 +363,7 @@ exports.getReadOnlyID = function(padID, callback)
       callback(err);
       return;
     }
-    
+
     //get the readonlyId
     readOnlyManager.getReadOnlyId(padID, function(err, readOnlyId)
     {
@@ -360,7 +373,7 @@ exports.getReadOnlyID = function(padID, callback)
 }
 
 /**
-setPublicStatus(padID, publicStatus) sets a boolean for the public status of a pad 
+setPublicStatus(padID, publicStatus) sets a boolean for the public status of a pad
 
 Example returns:
 
@@ -384,20 +397,20 @@ exports.setPublicStatus = function(padID, publicStatus, callback)
       callback(err);
       return;
     }
-    
+
     //convert string to boolean
     if(typeof publicStatus == "string")
       publicStatus = publicStatus == "true" ? true : false;
-    
+
     //set the password
     pad.setPublicStatus(publicStatus);
-    
+
     callback();
   });
 }
 
 /**
-getPublicStatus(padID) return true of false 
+getPublicStatus(padID) return true of false
 
 Example returns:
 
@@ -412,7 +425,7 @@ exports.getPublicStatus = function(padID, callback)
     callback({stop: "You can only get/set the publicStatus of pads that belong to a group"});
     return;
   }
-  
+
   //get the pad
   getPadSafe(padID, true, function(err, pad)
   {
@@ -421,13 +434,13 @@ exports.getPublicStatus = function(padID, callback)
       callback(err);
       return;
     }
-    
+
     callback(null, {publicStatus: pad.getPublicStatus()});
   });
 }
 
 /**
-setPassword(padID, password) returns ok or a error message 
+setPassword(padID, password) returns ok or a error message
 
 Example returns:
 
@@ -442,7 +455,7 @@ exports.setPassword = function(padID, password, callback)
     callback({stop: "You can only get/set the password of pads that belong to a group"});
     return;
   }
-  
+
   //get the pad
   getPadSafe(padID, true, function(err, pad)
   {
@@ -451,16 +464,16 @@ exports.setPassword = function(padID, password, callback)
       callback(err);
       return;
     }
-    
+
     //set the password
     pad.setPassword(password);
-    
+
     callback();
   });
 }
 
 /**
-isPasswordProtected(padID) returns true or false 
+isPasswordProtected(padID) returns true or false
 
 Example returns:
 
@@ -484,7 +497,7 @@ exports.isPasswordProtected = function(padID, callback)
       callback(err);
       return;
     }
-    
+
     callback(null, {isPasswordProtected: pad.isPasswordProtected()});
   });
 }
@@ -495,7 +508,7 @@ exports.isPasswordProtected = function(padID, callback)
 
 //checks if a number is an int
 function is_int(value)
-{ 
+{
   return (parseFloat(value) == parseInt(value)) && !isNaN(value)
 }
 
@@ -514,19 +527,19 @@ function getPadSafe(padID, shouldExist, text, callback)
     callback({stop: "padID is not a string"});
     return;
   }
-  
+
   //check if the padID maches the requirements
   if(!padManager.isValidPadId(padID))
   {
     callback({stop: "padID did not match requirements"});
     return;
   }
-  
+
   //check if the pad exists
   padManager.doesPadExists(padID, function(err, exists)
   {
     //error
-    if(err) 
+    if(err)
     {
       callback(err);
     }
