@@ -90,6 +90,25 @@ var padeditbar = (function()
     {
       $("#editbar").addClass('disabledtoolbar').removeClass("enabledtoolbar");
     },
+    formatChange: function(selection) {
+      if(!self.isEnabled()) { return; }
+
+      selection = selection.split(':');
+      var attr = selection.shift();
+      var val = selection.join('');
+
+      padeditor.ace.callWithAce(function(ace) {
+        var attrTable = ace.ace_getAttributeLookup();
+        if(!attrTable[attr]) { return; }
+
+        if(val) {
+          ace.ace_setAttributeOnSelection(attr, val);
+        } else {
+          ace.ace_setAttributeOnSelection(attr, '');
+        }
+      }, attr, true);
+      padeditor.ace.focus();
+    },
     toolbarClick: function(cmd)
     {  
       if (self.isEnabled())
@@ -127,7 +146,10 @@ var padeditbar = (function()
         {
           padeditor.ace.callWithAce(function(ace)
           {
-            if (cmd == 'bold' || cmd == 'italic' || cmd == 'underline' || cmd == 'strikethrough') ace.ace_toggleAttributeOnSelection(cmd);
+            var attrTable = ace.ace_getAttributeLookup();
+            if (attrTable[cmd]) {
+              if(attrTable[cmd] == 'inline') ace.ace_toggleAttributeOnSelection(cmd);
+            }
             else if (cmd == 'undo' || cmd == 'redo') ace.ace_doUndoRedo(cmd);
             else if (cmd == 'insertunorderedlist') ace.ace_doInsertUnorderedList();
             else if (cmd == 'indent')

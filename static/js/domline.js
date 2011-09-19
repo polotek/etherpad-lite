@@ -100,6 +100,15 @@ domline.createDomLine = function(nonEmpty, doesWrap, optBrowser, optDocument)
         result.lineMarker += txt.length;
         return; // don't append any text
       }
+    } else if(cls.indexOf('heading') >= 0) {
+      var headingType = /(?:^| )heading:(\S+)/.exec(cls);
+      if(headingType && headingType[1]) {
+        headingType = parseInt(headingType[1], 10);
+        if(headingType) {
+          preHtml = '<h' + headingType + '>';
+          postHtml = '</h' + headingType + '>';
+        }
+      }
     }
     var href = null;
     var simpleTags = null;

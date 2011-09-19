@@ -23,6 +23,15 @@
 <div id="editbar">
 
 <ul id="menu_left">
+<li class="select">
+  <select onChange="window.pad&&pad.editbarFormatChange(this);">
+    <option value="heading">paragraph</option>
+    <option value="heading:1">Heading 1</option>
+    <option value="heading:2">Heading 2</option>
+    <option value="heading:3">Heading 3</option>
+    <option value="heading:4">Heading 4</option>            
+  </select>
+</li>
 <li onClick="window.pad&&pad.editbarClick('bold');return false" >
   <a title="Bold (ctrl-B)">
     <div class="buttonicon" style="background-position:0px -116px"></div>
