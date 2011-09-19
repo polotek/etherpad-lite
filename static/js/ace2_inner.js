@@ -38,6 +38,15 @@ function OUTER(gscope)
 
   var editorInfo = parent.editorInfo;
 
+  var ATTRIBUTE_LOOKUP = {
+      'bold': 'inline',
+      'italic': 'inline',
+      'underline': 'inline',
+      'strikethrough': 'inline',
+      'heading':'block',
+      'author': 'ref'
+    }  
+
   var iframe = window.frameElement;
   var outerWin = iframe.ace_outerWin;
   iframe.ace_outerWin = null; // prevent IE 6 memory leak
@@ -128,6 +137,11 @@ function OUTER(gscope)
   window.dmesg = noop;
 
   var scheduler = parent;
+
+
+  function isBlockAttribute(attr) {
+    return attr && ATTRIBUTE_LOOKUP[attr] == 'block';
+  }
 
   var textFace = 'monospace';
   var textSize = 12;
@@ -1051,7 +1065,11 @@ function OUTER(gscope)
   editorInfo.ace_setEditable = setEditable;
   editorInfo.ace_execCommand = execCommand;
   editorInfo.ace_replaceRange = replaceRange;
-
+  
+  editorInfo.ace_getAttributeLookup = function() {
+    return ATTRIBUTE_LOOKUP;
+  }
+  
   editorInfo.ace_callWithAce = function(fn, callStack, normalize)
   {
     var wrapper = function()
@@ -2565,7 +2583,16 @@ function OUTER(gscope)
   {
     if (!(rep.selStart && rep.selEnd)) return;
 
-    performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [
+    var selStart = rep.selStart.slice();
+    var selEnd = rep.selEnd.slice();
+
+    // block attributes affect the whole line
+    if(isBlockAttribute(attributeName)) {
+      selStart[1] = 0;
+      selEnd[1] = rep.lines.atIndex(selEnd[0]).text.length;
+    }
+
+    performDocumentApplyAttributesToRange(selStart, selEnd, [
       [attributeName, attributeValue]
     ]);
   }
