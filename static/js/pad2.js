@@ -600,6 +600,13 @@ var pad = {
       padeditbar.toolbarClick(cmd);
     }
   },
+  editbarFormatChange: function(select) {
+    if(padeditbar && select) {
+      var val = select.options[select.selectedIndex];
+      val = val ? val.value : '';
+      padeditbar.formatChange(val);
+    }
+  },
   dmesg: function(m)
   {
     if (pad.getIsDebugEnabled())

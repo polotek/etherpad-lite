@@ -68,6 +68,10 @@ a img
   width: 18px;
 }
 
+#editbar ul .select
+{
+  width:auto;
+}
 #editbar ul li a
 {
   text-decoration: none;
