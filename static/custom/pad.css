@@ -1,0 +1,39 @@
+/*
+  You may have to use !important to override css attributs, for example:
+  
+  * {color: blue !important;}
+*/
+
+#editbar {
+  width: 498px;
+  border: 1px solid #ccc;
+  border-color: #ddd #ddd #ccc
+  padding-top: 4px;
+}
+
+#editbar ul {
+  margin: 0;
+}
+
+#editorcontainerbox {
+  top: 62px;
+}
+
+#editorcontainer {
+  border: 1px solid #ddd;
+  border-top: 0;
+  width: 498px;
+}
+
+#innerdocbody h1 {
+  line-height: 28px;
+}
+
+#innerdocbody h2 {
+  line-height: 22px;
+}
+
+#innerdocbody h3 {
+  line-height: 19px;
+}
+
