@@ -91,8 +91,8 @@ function getHTMLFromAtext(pad, atext)
   var textLines = atext.text.slice(0, -1).split('\n');
   var attribLines = Changeset.splitAttributionLines(atext.attribs, atext.text);
 
-  var tags = ['h1', 'h2', 'strong', 'em', 'u', 's'];
-  var props = ['heading1', 'heading2', 'bold', 'italic', 'underline', 'strikethrough'];
+  var tags = ['strong', 'em', 'u', 's'];
+  var props = ['bold', 'italic', 'underline', 'strikethrough'];
   var anumMap = {};
 
   props.forEach(function (propName, i)
@@ -320,6 +320,9 @@ function getHTMLFromAtext(pad, atext)
         pieces.push('</li><li>', lineContent || '<br>');
       }
     }
+    else if(line.headerType) {
+      pieces.push('<h' + line.headerType + '>' + lineContent + '</h' + line.headerType + '>');
+    }
     else
     {
       pieces.push(lineContent, '<br>');
@@ -340,9 +343,11 @@ function _analyzeLine(text, aline, apool)
   if (aline)
   {
     var opIter = Changeset.opIterator(aline);
+    var op;
     if (opIter.hasNext())
     {
-      var listType = Changeset.opAttributeValue(opIter.next(), 'list', apool);
+      op = opIter.next();
+      var listType = Changeset.opAttributeValue(op, 'list', apool);
       if (listType)
       {
         lineMarker = 1;
@@ -352,6 +357,14 @@ function _analyzeLine(text, aline, apool)
           line.listTypeName = listType[1];
           line.listLevel = Number(listType[2]);
         }
+      }
+
+      var headerType = Changeset.opAttributeValue(op, 'heading', apool);
+      console.log(apool + '||' +  headerType);
+      headerType = headerType ? parseInt(headerType, 10) : '';
+      if(headerType && headerType > 0)
+      {
+        line.headerType = headerType;
       }
     }
   }
