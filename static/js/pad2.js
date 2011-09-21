@@ -23,7 +23,7 @@ var globalUserName = false;
 $(document).ready(function()
 {
   //start the costum js
-  if(typeof costumStart == "function") costumStart();
+  if(typeof customStart == "function") customStart();
   getParams();
   handshake();
 });
@@ -384,7 +384,7 @@ var pad = {
       userAgent: pad.getDisplayUserAgent()
     };
 
-    yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
+    window.yam && yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
 
     if (clientVars.specialKey)
     {
