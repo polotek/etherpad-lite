@@ -148,15 +148,12 @@ Class('Pad', {
       if(typeof startRev != 'number') { return callback(new Error('You must specify a start revision')); }
 
       var head = this.getHeadRevisionNumber();
-      console.error(head)
-      console.error(endRev)
       if(typeof endRev == 'number' && !isNaN(endRev)) {
         if(endRev > head) { return callback(new Error('Invalid end revision')) };
       } else {
         endRev = head;
       }
       if(startRev < 0 || startRev > endRev) { return callback(new Error('Invalid start revision')); }
-      console.error(endRev)
       var self = this
          , curRev = startRev
          , revisions = []

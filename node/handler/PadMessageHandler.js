@@ -693,21 +693,20 @@ function handleClientReady(client, message)
     //these db requests all need the pad object
     function(callback)
     {
-      var authors = pad.getAllAuthors();
+      //var authors = pad.getAllAuthors();
 
       async.parallel([
         //get all author data out of the database
         function(callback)
         {
-          async.forEach(authors, function(authorId, callback)
-          {
-            authorManager.getAuthor(authorId, function(err, author)
+          pad.getAuthorsForRevisionSet(0, undefined, function(err, authors){
+            async.forEach(authors, function(author, callback)
             {
               delete author.timestamp;
-              historicalAuthorData[authorId] = author;
-              callback(err);
-            });
-          }, callback);
+              historicalAuthorData[author.id] = author;
+              if (typeof callback == "function") callback(err);
+            }, callback);
+          });
         },
         //get the latest chat messages
         function(callback)

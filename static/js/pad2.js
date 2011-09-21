@@ -243,6 +243,8 @@ function handshake()
 
       //initalize the pad
       pad.init();
+      console.log("pad initialized");
+      yam.publish('/ui/pages/padInit', [clientVars]);
       initalized = true;
 
       // If the LineNumbersDisabled value is set to true then we need to hide the Line Numbers
