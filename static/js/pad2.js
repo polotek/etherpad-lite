@@ -23,7 +23,7 @@ var globalUserName = false;
 $(document).ready(function()
 {
   //start the costum js
-  if(typeof costumStart == "function") costumStart();
+  if(typeof customStart == "function") customStart();
   getParams();
   handshake();
 });
