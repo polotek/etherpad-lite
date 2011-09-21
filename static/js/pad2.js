@@ -384,7 +384,7 @@ var pad = {
       userAgent: pad.getDisplayUserAgent()
     };
 
-    yam.publish('/ui/pages/curentUserReady', [pad.myUserInfo]);
+    yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
 
     if (clientVars.specialKey)
     {
