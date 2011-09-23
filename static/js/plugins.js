@@ -7,8 +7,8 @@ plugins = {
     for (var i = 0, N = hook.length; i < N; i++)
     {
       var plugin = hook[i];
-      var pluginRes = eval(plugin.plugin)[plugin.original || hookName](args);
-      if (pluginRes != undefined && pluginRes != null) res = res.concat(pluginRes);
+      var pluginRes = plugin.process(args);
+      if (pluginRes !== undefined && pluginRes !== null) res = res.concat(pluginRes);
     }
     return res;
   },
