@@ -42,8 +42,15 @@ exports.getAuthor4Token = function (token, userID, callback)
 {
   mapAuthorWithDBKey("token2author", token, userID, function(err, author)
   {
-    //return only the sub value authorID
-    callback(err, author ? author.authorID : author);
+    var authorID = author && author.authorID;
+    if(authorID && userID) {
+      // set the new author name if given
+      exports.setAuthorName(authorID, userID, function(err) {
+        callback(err, authorID);
+      });
+    } else {
+      callback(err, authorID);
+    }
   });
 }
 
@@ -117,7 +124,6 @@ function mapAuthorWithDBKey (mapperkey, mapper, userID, callback)
     {
       //update the timestamp of this author
       db.setSub("globalAuthor:" + author, ["timestamp"], new Date().getTime());
-
       //return the author
       callback(null, {authorID: author});
     }

@@ -24,11 +24,6 @@ $(window).bind("load", function()
     "serverVars" are from calling doc.getCollabClientVars() on the server. */
 function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
 {
-
-  // set user workfeed id, we're hijacking paddie's user.name here
-  if(window.yam) {
-    initialUserInfo.name = yam.currentUser.id;
-  }
   
   var editor = ace2editor;
   var rev = serverVars.rev;

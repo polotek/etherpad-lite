@@ -191,6 +191,7 @@ function handshake()
 
     var sessionID = readCookie("sessionID");
     var password = readCookie("password");
+    var userId = window.yam ? (yam.currentUser.id+'') : undefined;
 
     var msg = {
       "component": "pad",
@@ -199,7 +200,7 @@ function handshake()
       "sessionID": sessionID,
       "password": password,
       "token": token,
-      "user_id": window.yam ? yam.currentUser.id : undefined,
+      "user_id": userId,
       "protocolVersion": 2
     };
     socket.json.send(msg);
@@ -261,7 +262,7 @@ function handshake()
       if (globalUserName !== false)
       {
         pad.notifyChangeName(globalUserName); // Notifies the server
-	pad.myUserInfo.name = globalUserName;
+      	pad.myUserInfo.name = globalUserName;
         $('#myusernameedit').attr({"value":globalUserName}); // Updates the current users UI
       }
     }
@@ -453,7 +454,7 @@ var pad = {
     {
       type: 'padtitle',
       title: newTitle,
-      changedBy: pad.myUserInfo.name || yam.currentUser.id
+      changedBy: pad.myUserInfo.name
     });
   },
   notifyChangePassword: function(newPass)
@@ -462,7 +463,7 @@ var pad = {
     {
       type: 'padpassword',
       password: newPass,
-      changedBy: pad.myUserInfo.name || yam.currentUser.id
+      changedBy: pad.myUserInfo.name
     });
   },
   changePadOption: function(key, value)
@@ -474,7 +475,7 @@ var pad = {
     {
       type: 'padoptions',
       options: options,
-      changedBy: pad.myUserInfo.name || yam.currentUser.id
+      changedBy: pad.myUserInfo.name
     });
   },
   changeViewOption: function(key, value)
@@ -491,7 +492,7 @@ var pad = {
       {
         type: 'padoptions',
         options: options,
-        changedBy: pad.myUserInfo.name || yam.currentUser.id
+        changedBy: pad.myUserInfo.name
       });
     }
   },
