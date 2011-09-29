@@ -23,6 +23,32 @@ var async = require("async");
 var authorManager = require("./AuthorManager");
 var padManager = require("./PadManager");
 var sessionManager = require("./SessionManager");
+var http = require('http');
+
+/**
+ * Check with Tokie here, if tokie allows then call this callback
+ *
+ */
+var tokieAuth = function(token, padID, callback) {
+  var body = '';
+  var req = http.get({host: 'localhost', port: 7070, path: '/v1/principals/' + token}, function(res){
+    res.on('data', function(d){
+      body += d;
+    });
+    res.on('end', function(){
+      var err;
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        err = e;
+      }
+      console.error(body);
+      console.error(res.statusCode);
+      if (res.statusCode != 200) { err = true;}
+      callback(err);
+    })
+  });
+}
 
 /**
  * This function controlls the access to a pad, it checks if the user can access a pad.
@@ -32,18 +58,21 @@ var sessionManager = require("./SessionManager");
  * @param password the password the user has given to access this pad, can be null
  * @param callback will be called with (err, {accessStatus: grant|deny|wrongPassword|needPassword, authorID: a.xxxxxx})
  */
-exports.checkAccess = function (padID, sessionID, token, password, userID, callback)
+exports.checkAccess = function (padID, sessionID, token, authToken, password, userID, callback)
 {
   // it's not a group pad, means we can grant access
   if(padID.indexOf("$") == -1)
   {
-    //get author for this token
-    authorManager.getAuthor4Token(token, userID, function(err, author)
-    {
-      console.log("Author: ", author)
-      // grant access, with author of token
-      callback(err, {accessStatus: "grant", authorID: author});
-    })
+    tokieAuth(authToken, padID, function(err){
+      if (err) { callback(false, {accessStatus: "Not Authorized"});}
+      //get author for this token
+      authorManager.getAuthor4Token(token, userID, function(err, author)
+      {
+        console.log("Author: ", author)
+        // grant access, with author of token
+        callback(err, {accessStatus: "grant", authorID: author});
+      })
+    });
 
     //don't continue
     return;

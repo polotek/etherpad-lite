@@ -134,7 +134,7 @@ async.waterfall([
     //checks for padAccess
     function hasPadAccess(req, res, callback)
     {
-      securityManager.checkAccess(req.params.pad, req.cookies.sessionid, req.cookies.token, req.cookies.password, undefined, function(err, accessObj)
+      securityManager.checkAccess(req.params.pad, req.cookies.sessionid, req.cookies.token, undefined, req.cookies.password, undefined, function(err, accessObj)
       {
         if(err) throw err;
 
