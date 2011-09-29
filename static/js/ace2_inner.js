@@ -3495,6 +3495,34 @@ function OUTER(gscope)
     return [rep.lines.offsetOfIndex(lineRange[0]), rep.lines.offsetOfIndex(lineRange[1])];
   }
 
+  function execCustomEventHooks(hookName, evt) {
+    var plugins_;
+    if (typeof(plugins) != 'undefined')
+    {
+      plugins_ = plugins;
+    }
+    else
+    {
+      plugins_ = parent.parent.plugins;
+    }
+
+    var ret;
+    // Run through custom handlers. These can preempt the default behavior
+    var handlers = plugins_.callHook(hookName, evt)
+      , handler;
+    if(handlers) {
+      for(var i = 0, len = handlers.length; i < len; i++) {
+        handler = handlers[i];
+        if(typeof handler ==='function') {
+          ret = handler(evt);
+          if(ret === false) { return ret; }   
+        }
+      }
+    }
+
+    return ret;
+  }
+
   function handleClick(evt)
   {
     //hide the dropdowns
@@ -3508,8 +3536,9 @@ function OUTER(gscope)
     // only want to catch left-click
     if ((!evt.ctrlKey) && (evt.button != 2) && (evt.button != 3))
     {
-      // find A tag with HREF
+      if(execCustomEventHooks('aceHandleClick', evt) === false) { return; }
 
+      // find A tag with HREF
 
       function isLink(n)
       {
@@ -3521,7 +3550,7 @@ function OUTER(gscope)
         n = n.parentNode;
       }
       if (n && isLink(n))
-      {
+      {        
         try
         {
           var newWindow = window.open(n.href, '_blank');
@@ -3632,6 +3661,11 @@ function OUTER(gscope)
           handled = true;
         }
       }
+
+      if(!handled) {
+        handled = (execCustomEventHooks('handleDeleteKey', evt) === false);
+      }
+
       if (!handled)
       {
         if (isCaret())
