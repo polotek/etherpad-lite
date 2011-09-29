@@ -298,13 +298,12 @@ async.waterfall([
 
     var apiLogger = log4js.getLogger("API");
 
-    //This is a api call, collect all post informations and pass it to the apiHandler
-    app.get('/api/1/:func', function(req, res)
-    {
+    //api middleware validates http verbs and api endpoints
+    function apiMiddleware(req, res, next){
+      var func = req.params.func;
+
       res.header("Server", serverName);
       res.header("Content-Type", "application/json; charset=utf-8");
-
-      apiLogger.info("REQUEST, " + req.params.func + ", " + JSON.stringify(req.query));
 
       //wrap the send function so we can log the response
       res._send = res.send;
@@ -319,6 +318,19 @@ async.waterfall([
 
         res._send(response);
       }
+
+      if(!apiHandler.isValidRequest(req, func)) {
+        // this api method doesn't respond to this verb
+        return res.send({code: 1, message: "Function does not respond to " + req.method, data: null});
+      } else {
+        next();
+      }
+    }
+
+    //This is a api call, collect all post informations and pass it to the apiHandler
+    app.all('/api/1/:func', apiMiddleware, function(req, res)
+    {
+      apiLogger.info("REQUEST, " + req.params.func + ", " + JSON.stringify(req.query));
 
       //call the api handler
       apiHandler.handle(req.params.func, req.query, req, res);

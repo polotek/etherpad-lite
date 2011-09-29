@@ -37,33 +37,64 @@ catch(e)
 
 //a list of all functions
 var functions = {
-  "createGroup"               : [],
-  "createGroupIfNotExistsFor"  : ["groupMapper"],
-  "deleteGroup"               : ["groupID"],
-  "listPads"                  : ["groupID"],
-  "createPad"                 : ["padID", "text"],
-  "createGroupPad"            : ["groupID", "padName", "text"],
-  "createAuthor"              : ["name"],
-  "createAuthorIfNotExistsFor": ["authorMapper" , "name"],
-  "createSession"             : ["groupID", "authorID", "validUntil"],
-  "deleteSession"             : ["sessionID"],
-  "getSessionInfo"            : ["sessionID"],
-  "listSessionsOfGroup"       : ["groupID"],
-  "listSessionsOfAuthor"      : ["authorID"],
-  "getText"                   : ["padID", "rev"],
-  "getHTML"                   : ["padID", "rev"],
-  "setText"                   : ["padID", "text"],
-  "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev"],
-  "getRevisionSet"            : ["padID", "startRev", "endRev"],
-  "getRevisionsCount"         : ["padID"],
-  "deletePad"                 : ["padID"],
-  "getReadOnlyID"             : ["padID"],
-  "setPublicStatus"           : ["padID", "publicStatus"],
-  "getPublicStatus"           : ["padID"],
-  "setPassword"               : ["padID", "password"],
-  "isPasswordProtected"       : ["padID"]
+  'GET': {
+    "listPads"                  : ["groupID"],
+    "getSessionInfo"            : ["sessionID"],
+    "listSessionsOfGroup"       : ["groupID"],
+    "listSessionsOfAuthor"      : ["authorID"],
+    "getText"                   : ["padID", "rev"],
+    "getHTML"                   : ["padID", "rev"],
+    "setText"                   : ["padID", "text"],
+    "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev"],
+    "getRevisionSet"            : ["padID", "startRev", "endRev"],
+    "getRevisionsCount"         : ["padID"],
+    "getReadOnlyID"             : ["padID"],
+    "setPublicStatus"           : ["padID", "publicStatus"],
+    "getPublicStatus"           : ["padID"],
+    "isPasswordProtected"       : ["padID"]
+  }
+  , 'POST': {
+    "createGroup"               : [],
+    "createGroupIfNotExistsFor"  : ["groupMapper"],
+    "deleteGroup"               : ["groupID"],
+    "createPad"                 : ["padID", "text"],
+    "createGroupPad"            : ["groupID", "padName", "text"],
+    "deletePad"                 : ["padID"],
+    "createAuthor"              : ["name"],
+    "createAuthorIfNotExistsFor": ["authorMapper" , "name"],
+    "createSession"             : ["groupID", "authorID", "validUntil"],
+    "deleteSession"             : ["sessionID"],    
+    "setPassword"               : ["padID", "password"],
+  }
 };
 
+functions.HEAD = functions.POST;
+
+exports.functions = functions;
+
+/**
+ * validates api requests
+ */
+exports.isValidRequest = function(req, functionName) {
+  if(req.method != 'GET' && req.method != 'POST' && req.method != 'HEAD') {
+    return false;
+  }
+
+  //check if this is a valid function name
+  var apiParams
+    , validFunctions = functions[req.method] || {}
+    , isKnownFunctionname = false;
+  for(var knownFunctionname in validFunctions)
+  {
+    if(knownFunctionname == functionName)
+    {
+      return true;
+      break;
+    }
+  }
+
+  return false;
+}
 /**
  * Handles a HTTP API call
  * @param functionName the name of the called function
@@ -77,33 +108,21 @@ exports.handle = function(functionName, fields, req, res)
   if(fields["apikey"] != apikey)
   {
     // TODO: DO NOT COMMIT THIS COMMENTED OUT
-    res.send({code: 4, message: "no or wrong API Key", data: null});
-    return;
+    //res.send({code: 4, message: "no or wrong API Key", data: null});
+    //return;
   }
 
-  //check if this is a valid function name
-  var isKnownFunctionname = false;
-  for(var knownFunctionname in functions)
-  {
-    if(knownFunctionname == functionName)
-    {
-      isKnownFunctionname = true;
-      break;
-    }
-  }
-
-  //say goodbye if this is a unkown function
-  if(!isKnownFunctionname)
-  {
+  var apiParams = functions[req.method] ? functions[req.method][functionName] : null;
+  if(!apiParams) {
     res.send({code: 3, message: "no such function", data: null});
-    return;
+    return;    
   }
 
   //put the function parameters in an array
   var functionParams = [];
-  for(var i=0;i<functions[functionName].length;i++)
+  for(var i=0;i<apiParams.length;i++)
   {
-    functionParams.push(fields[functions[functionName][i]]);
+    functionParams.push(fields[apiParams[i]]);
   }
 
   //add a callback function to handle the response
