@@ -1,5 +1,5 @@
 /**
- * The Settings Modul reads the settings out of settings.json and provides 
+ * The Settings Modul reads the settings out of settings.json and provides
  * this information to the other modules
  */
 
@@ -26,7 +26,7 @@ var path = require("path");
  * The IP ep-lite should listen to
  */
 exports.ip = "0.0.0.0";
-  
+
 /**
  * The Port ep-lite should listen to
  */
@@ -57,6 +57,8 @@ exports.abiword = null;
  * The log level of log4js
  */
 exports.loglevel = "INFO";
+
+exports.tokie = false;
 
 //read the settings sync
 var settingsStr = fs.readFileSync(path.join(__dirname, "../../settings.json")).toString();
