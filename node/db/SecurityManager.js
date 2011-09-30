@@ -24,30 +24,33 @@ var authorManager = require("./AuthorManager");
 var padManager = require("./PadManager");
 var sessionManager = require("./SessionManager");
 var http = require('http');
+var settings = require('../utils/Settings');
 
 /**
  * Check with Tokie here, if tokie allows then call this callback
  *
  */
 var tokieAuth = function(token, padID, callback) {
-  var body = '';
-  var req = http.get({host: 'localhost', port: 7070, path: '/v1/principals/' + token}, function(res){
-    res.on('data', function(d){
-      body += d;
+  if (settings.tokie) {
+    var body = '';
+    var req = http.get({host: settings.tokie.host, port: settings.tokie.port, path: '/v1/principals/' + token}, function(res){
+      res.on('data', function(d){
+        body += d;
+      });
+      res.on('end', function(){
+        var err;
+        try {
+          body = JSON.parse(body);
+        } catch (e) {
+          err = e;
+        }
+        console.error(body);
+        console.error(res.statusCode);
+        if (res.statusCode != 200) { err = true;}
+        callback(err);
+      })
     });
-    res.on('end', function(){
-      var err;
-      try {
-        body = JSON.parse(body);
-      } catch (e) {
-        err = e;
-      }
-      console.error(body);
-      console.error(res.statusCode);
-      if (res.statusCode != 200) { err = true;}
-      callback(err);
-    })
-  });
+  } else { callback(); }
 }
 
 /**
