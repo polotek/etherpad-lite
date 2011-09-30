@@ -108,7 +108,7 @@ exports.setSocketIO = function(_socket)
         if(message.padId !== undefined && message.sessionID !== undefined && message.token !== undefined && message.password !== undefined)
         {
           console.log("============ ", message);
-          securityManager.checkAccess (message.padId, message.sessionID, message.token, message.password, message.user_id, function(err, statusObject)
+          securityManager.checkAccess (message.padId, message.sessionID, message.token, message.authtoken, message.password, message.user_id, function(err, statusObject)
           {
             if(err) throw err;
 

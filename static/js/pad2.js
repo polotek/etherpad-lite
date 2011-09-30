@@ -192,6 +192,7 @@ function handshake()
     var sessionID = readCookie("sessionID");
     var password = readCookie("password");
     var userId = window.yam ? (yam.currentUser.id+'') : undefined;
+    var authToken = window.yam ? (yam.currentUser.web_oauth_access_token+'') : undefined;
 
     var msg = {
       "component": "pad",
@@ -201,6 +202,7 @@ function handshake()
       "password": password,
       "token": token,
       "user_id": userId,
+      "authtoken": authToken,
       "protocolVersion": 2
     };
     socket.json.send(msg);

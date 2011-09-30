@@ -368,6 +368,8 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         return;
       }
       rev = newRev;
+      yam.publish('/ui/page/newRevision',[rev]);
+      jq('#revision_number').val(rev);
       editor.applyChangesToBase(changeset, author, apool);
     }
     else if (msg.type == "ACCEPT_COMMIT")
