@@ -140,12 +140,12 @@ exports.handle = function(functionName, fields, req, res)
     // parameters were wrong and the api stopped execution, pass the error
     else if(err.stop)
     {
-      res.send({code: 1, message: err.stop, data: null});
+      res.send({code: 1, message: err.stop, data: null}, 400);
     }
     //an unkown error happend
     else
     {
-      res.send({code: 2, message: err.message || "internal error", data: null});
+      res.send({code: 2, message: err.message || "internal error", data: null}, 500);
       //throw (err);
       apiLogger.error('Unknown api error: ' + err.message + '\n' + err.stack);
     }

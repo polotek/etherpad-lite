@@ -316,7 +316,7 @@ async.waterfall([
         if(req.query.jsonp)
           response = req.query.jsonp + "(" + response + ")";
 
-        res._send(response);
+        res._send.apply(res, arguments);
       }
 
       if(!apiHandler.isValidRequest(req, func)) {
