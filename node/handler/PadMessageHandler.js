@@ -549,6 +549,32 @@ exports.updatePadClients = function(pad, callback)
 }
 
 /**
+ * Broadcast to connected clients that a pad has been published
+ */
+exports.broadcastPublish = function(pad, rev, author, callback) {
+  console.log(pad, rev, author, pad2sessions[pad.id]);
+
+  //skip this step if noone is on this pad
+  if(!pad2sessions[pad.id]) { return callback(); }
+
+  //go trough all sessions on this pad
+  async.forEach(pad2sessions[pad.id],
+    function(session, callback) {
+      console.log(socketio.sockets.sockets);
+      socketio.sockets.sockets[session].json.send({
+        type: "COLLABROOM",
+        data: {
+          type:"PAD_PUBLISH"
+          , newRev: rev
+          , author: author.name
+        }
+      });
+      callback();
+    },
+  callback);
+}
+
+/**
  * Copied from the Etherpad Source Code. Don't know what this methode does excatly...
  */
 function _correctMarkersInPad(atext, apool) {

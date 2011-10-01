@@ -345,6 +345,51 @@ exports.deletePad = function(padID, callback)
   });
 }
 
+
+exports.publishPad = function(padID, rev, authorID, authorName, callback) {
+  getPadSafe(padID, true, function(err, pad) {
+    if(err) { return callback(err); }
+
+    if(rev) {
+      rev = parseInt(rev, 10);
+      if(
+        rev < 0 || 
+        rev > pad.getHeadRevisionNumber() ||
+        !is_int(rev)
+      ) {
+        rev = null;
+      }
+    }
+
+    if(!rev) {
+      return callback({stop:'Invalid revision number'});
+    }
+
+    async.waterfall([
+        function(callback) {
+          if(authorID) {
+            authorManager.getAuthor(authorID, callback);
+          } else if (authorName) {
+            // TODO: How the hell do we lookup an author by name?
+            callback({stop: 'Can\'t lookup author by name'});
+          } else {
+            callback({stop: 'The author does not exist'});
+          }
+        },
+        function(author, callback) {
+          // TODO: Make this do something useful
+          // pad.publish(pad, rev, author, callback);
+          callback(null, author);
+        },
+        function(author, callback) {
+          padMessageHandler.broadcastPublish(pad, rev, author, callback);
+      }],
+      callback
+    );
+
+  });
+}
+
 /**
 getReadOnlyLink(padID) returns the read only link of a pad
 
