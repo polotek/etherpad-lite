@@ -368,7 +368,14 @@ exports.publishPad = function(padID, rev, authorID, authorName, callback) {
     async.waterfall([
         function(callback) {
           if(authorID) {
-            authorManager.getAuthor(authorID, callback);
+            authorManager.getAuthor(authorID, function(err, author) {
+              if(author) {
+                author.id = authorID;
+              } else {
+                err = {stop:'Author not found'}
+              }
+              callback(err, author);
+            });
           } else if (authorName) {
             // TODO: How the hell do we lookup an author by name?
             callback({stop: 'Can\'t lookup author by name'});
