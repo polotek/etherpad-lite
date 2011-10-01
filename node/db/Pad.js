@@ -472,6 +472,10 @@ Class('Pad', {
         callback(null);
       });
     },
+    // Not implemented yet
+    publish: function(callback) {
+      return callback();
+    },
     remove: function(callback)
     {
       var padID = this.id;
