@@ -61,6 +61,8 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
     {},
     onUpdateUserInfo: function()
     {},
+    onPadPublish: function()
+    {},
     onChannelStateChange: function()
     {},
     onClientMessage: function()
@@ -435,6 +437,17 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         callbacks.onUserLeave(userInfo);
         dmesgUsers();
       }
+    }
+    else if (msg.type == "PAD_PUBLISH")
+    {
+      var author;
+      if(userSet[msg.authorID]) {
+        author = userSet[msg.authorID];
+      } else {
+        author = { userId: msg.authorID, name: msg.name }
+      }
+
+      callbacks.onPadPublish(msg.newRev, author);
     }
     else if (msg.type == "DISCONNECT_REASON")
     {
@@ -838,6 +851,10 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
     setOnUpdateUserInfo: function(cb)
     {
       callbacks.onUpdateUserInfo = cb;
+    },
+    setOnPadPublish: function(cb)
+    {
+      callbacks.onPadPublish = cb;
     },
     setOnChannelStateChange: function(cb)
     {

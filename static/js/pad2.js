@@ -420,6 +420,7 @@ var pad = {
     pad.collabClient.setOnUserJoin(pad.handleUserJoin);
     pad.collabClient.setOnUpdateUserInfo(pad.handleUserUpdate);
     pad.collabClient.setOnUserLeave(pad.handleUserLeave);
+    pad.collabClient.setOnPadPublish(pad.handlePadPublish);
     pad.collabClient.setOnClientMessage(pad.handleClientMessage);
     pad.collabClient.setOnServerMessage(pad.handleServerMessage);
     pad.collabClient.setOnChannelStateChange(pad.handleChannelStateChange);
@@ -556,6 +557,12 @@ var pad = {
     yam.publish('/ui/pages/removeUser', [userInfo]);
     paduserlist.userLeave(userInfo);
     //padchat.handleUserLeave(userInfo);
+  },
+  handlePadPublish: function(rev, author) {
+    // TODO: clear pad changes up to published rev
+
+    var name = author && author.name;
+    yam.publish('/ui/pages/published', [name]);
   },
   handleClientMessage: function(msg)
   {
