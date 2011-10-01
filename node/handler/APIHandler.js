@@ -71,6 +71,12 @@ var functions = {
 
 functions.HEAD = functions.POST;
 
+// FIXME: Remove this when workfeed sends posts correctly
+for(var i in functions.POST) {
+  functions.GET[i] = functions.POST[i];
+}
+// end remove
+
 exports.functions = functions;
 
 /**
