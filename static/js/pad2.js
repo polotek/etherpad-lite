@@ -388,6 +388,7 @@ var pad = {
     };
 
     yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
+    yam.publish('/ui/pages/newRevision', [clientVars.collab_client_vars.rev || 0]);
 
     if (clientVars.specialKey)
     {
