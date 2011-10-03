@@ -389,7 +389,10 @@ exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
           callback(null, author);
         },
         function(author, callback) {
-          padMessageHandler.broadcastPublish(pad, rev, author, callback);
+          process.nextTick(function() {
+            padMessageHandler.broadcastPublish(pad, rev, author);
+          });
+          callback();
       }],
       callback
     );
