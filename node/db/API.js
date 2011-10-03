@@ -346,7 +346,7 @@ exports.deletePad = function(padID, callback)
 }
 
 
-exports.publishPad = function(padID, rev, authorID, authorName, callback) {
+exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
   getPadSafe(padID, true, function(err, pad) {
     if(err) { return callback(err); }
 

@@ -60,7 +60,7 @@ var functions = {
     "createPad"                 : ["padID", "text"],
     "createGroupPad"            : ["groupID", "padName", "text"],
     "deletePad"                 : ["padID"],
-    "publishPad"                : ["padID", "rev", "authorID", "authorName"],
+    "saveRevision"                : ["padID", "rev", "authorID", "authorName"],
     "createAuthor"              : ["name"],
     "createAuthorIfNotExistsFor": ["authorMapper" , "name"],
     "createSession"             : ["groupID", "authorID", "validUntil"],
