@@ -561,9 +561,8 @@ var pad = {
   },
   handlePadPublish: function(rev, author) {
     // TODO: clear pad changes up to published rev
-    padeditor.ace.execCommand('clearauthorship');
-    var name = author && author.name;
-    yam.publish('/ui/pages/published', [name]);
+    author = author || {};
+    yam.publish('/ui/pages/published', [author.userId, author.name]);
   },
   handleClientMessage: function(msg)
   {

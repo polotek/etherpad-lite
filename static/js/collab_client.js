@@ -442,7 +442,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
       if(userSet[msg.authorID]) {
         author = userSet[msg.authorID];
       } else {
-        author = { userId: msg.authorID, name: msg.name }
+        author = { userId: msg.authorID, name: msg.authorName }
       }
 
       callbacks.onPadPublish(msg.newRev, author);
