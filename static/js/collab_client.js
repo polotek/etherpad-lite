@@ -370,8 +370,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         return;
       }
       rev = newRev;
-      yam.publish('/ui/page/newRevision',[rev]);
-      jq('#revision_number').val(rev);
+      yam.publish('/ui/pages/newRevision',[rev]);
       editor.applyChangesToBase(changeset, author, apool);
     }
     else if (msg.type == "ACCEPT_COMMIT")
@@ -384,8 +383,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         return;
       }
       rev = newRev;
-      yam.publish('/ui/page/newRevision',[rev]);
-      jq('#revision_number').val(rev);
+      yam.publish('/ui/pages/newRevision',[rev]);
       editor.applyPreparedChangesetToBase();
       setStateIdle();
       callCatchingErrors("onInternalAction", function()
@@ -444,7 +442,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
       if(userSet[msg.authorID]) {
         author = userSet[msg.authorID];
       } else {
-        author = { userId: msg.authorID, name: msg.name }
+        author = { userId: msg.authorID, name: msg.authorName }
       }
 
       callbacks.onPadPublish(msg.newRev, author);

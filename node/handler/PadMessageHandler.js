@@ -558,6 +558,7 @@ exports.broadcastPublish = function(pad, rev, author, callback) {
   //go trough all sessions on this pad
   async.forEach(pad2sessions[pad.id],
     function(session, callback) {
+      console.error(arguments);
       socketio.sockets.sockets[session].json.send({
         type: "COLLABROOM",
         data: {
@@ -568,7 +569,7 @@ exports.broadcastPublish = function(pad, rev, author, callback) {
         }
       });
       callback();
-    },
+    },  
   callback);
 }
 

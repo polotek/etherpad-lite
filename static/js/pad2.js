@@ -387,7 +387,8 @@ var pad = {
       userAgent: pad.getDisplayUserAgent()
     };
 
-    window.yam && yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
+    yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
+    yam.publish('/ui/pages/newRevision', [clientVars.collab_client_vars.rev || 0]);
 
     if (clientVars.specialKey)
     {
@@ -560,9 +561,8 @@ var pad = {
   },
   handlePadPublish: function(rev, author) {
     // TODO: clear pad changes up to published rev
-
-    var name = author && author.name;
-    yam.publish('/ui/pages/published', [name]);
+    author = author || {};
+    yam.publish('/ui/pages/published', [author.userId, author.name]);
   },
   handleClientMessage: function(msg)
   {

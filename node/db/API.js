@@ -347,8 +347,13 @@ exports.deletePad = function(padID, callback)
 }
 
 
+<<<<<<< HEAD
 exports.publishPad = function(padID, rev, authorID, authorName, callback) {
   getPadSafe(padID, true, null, null, function(err, pad) {
+=======
+exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
+  getPadSafe(padID, true, function(err, pad) {
+>>>>>>> a5e03c7b89f3b9eccd3c4020833d707600395d2a
     if(err) { return callback(err); }
 
     if(rev) {
@@ -379,7 +384,8 @@ exports.publishPad = function(padID, rev, authorID, authorName, callback) {
             });
           } else if (authorName) {
             // TODO: How the hell do we lookup an author by name?
-            callback({stop: 'Can\'t lookup author by name'});
+            //callback({stop: 'Can\'t lookup author by name'});
+            callback(null, { id:null, name: authorName });
           } else {
             callback({stop: 'The author does not exist'});
           }
@@ -390,7 +396,10 @@ exports.publishPad = function(padID, rev, authorID, authorName, callback) {
           callback(null, author);
         },
         function(author, callback) {
-          padMessageHandler.broadcastPublish(pad, rev, author, callback);
+          process.nextTick(function() {
+            padMessageHandler.broadcastPublish(pad, rev, author, function() { /* we don't care */ });
+          });
+          callback();
       }],
       callback
     );
