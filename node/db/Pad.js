@@ -65,18 +65,21 @@ Class('Pad', {
 
     networkId : { is : 'r' },
 
-    groupId : { is : 'r' }
+    groupId : { is : 'r' },
+
+    isPrivate : { is : 'r' }
 
   },
 
   methods : {
 
-    BUILD : function (id, networkID, groupID)
+    BUILD : function (id, networkID, groupID, isPrivate)
     {
         return {
             'id' : id,
             'networkId' : networkID,
-            'groupId' : groupID
+            'groupId' : groupID,
+            'isPrivate' : isPrivate
         }
     },
 

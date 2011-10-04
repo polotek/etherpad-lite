@@ -57,7 +57,7 @@ var functions = {
     "createGroup"               : [],
     "createGroupIfNotExistsFor"  : ["groupMapper"],
     "deleteGroup"               : ["groupID"],
-    "createPad"                 : ["padID", "text", "network_id", "group_id"],
+    "createPad"                 : ["padID", "text", "network_id", "group_id", "is_private"],
     "createGroupPad"            : ["groupID", "padName", "text"],
     "deletePad"                 : ["padID"],
     "saveRevision"                : ["padID", "rev", "authorID", "authorName"],

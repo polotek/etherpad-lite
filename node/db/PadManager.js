@@ -31,7 +31,7 @@ globalPads = [];
  * @param id A String with the id of the pad
  * @param {Function} callback
  */
-exports.getPad = function(id, text, networkId, groupId, callback)
+exports.getPad = function(id, text, networkId, groupId, isPrivate, callback)
 {
   //check if this is a valid padId
   if(!exports.isValidPadId(id))
@@ -47,18 +47,25 @@ exports.getPad = function(id, text, networkId, groupId, callback)
     text = null;
   }
 
-  //make text an optional parameter
+  //make networkdId an optional parameter
   if(typeof networkId == "function")
   {
     callback = networkId;
     networkId = null;
   }
 
-  //make text an optional parameter
+  //make groupId an optional parameter
   if(typeof groupId == "function")
   {
     callback = groupId;
     groupId = null;
+  }
+
+  //make isPrivate an optional parameter
+  if(typeof isPrivate == "function")
+  {
+    callback = isPrivate;
+    isPrivate = null;
   }
 
   //check if this is a valid text
@@ -89,7 +96,7 @@ exports.getPad = function(id, text, networkId, groupId, callback)
   //try to load pad
   else
   {
-    pad = new Pad(id, networkId, groupId);
+    pad = new Pad(id, networkId, groupId, isPrivate);
 
     //initalize the pad
     pad.init({text: text}, function(err)

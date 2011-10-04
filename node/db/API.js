@@ -307,7 +307,7 @@ Example returns:
 {code: 0, message:"ok", data: null}
 {code: 1, message:"pad does already exist", data: null}
 */
-exports.createPad = function(padID, text, networkID, groupID, callback)
+exports.createPad = function(padID, text, networkID, groupID, isPrivate, callback)
 {
 
   //ensure there is no $ in the padID
@@ -571,12 +571,34 @@ function is_int(value)
 }
 
 //gets a pad safe
-function getPadSafe(padID, shouldExist, text, networkID, groupID, callback)
+function getPadSafe(padID, shouldExist, text, networkID, groupID, isPrivate, callback)
 {
+  //make text an optional parameter
   if(typeof text == "function")
   {
     callback = text;
     text = null;
+  }
+
+  //make networkdId an optional parameter
+  if(typeof networkId == "function")
+  {
+    callback = networkId;
+    networkId = null;
+  }
+
+  //make groupId an optional parameter
+  if(typeof groupId == "function")
+  {
+    callback = groupId;
+    groupId = null;
+  }
+
+  //make isPrivate an optional parameter
+  if(typeof isPrivate == "function")
+  {
+    callback = isPrivate;
+    isPrivate = null;
   }
 
   //check if padID is a string
@@ -614,7 +636,7 @@ function getPadSafe(padID, shouldExist, text, networkID, groupID, callback)
     //pad exists, let's get it
     else
     {
-      padManager.getPad(padID, text, networkID, groupID, callback);
+      padManager.getPad(padID, text, networkID, groupID, isPrivate, callback);
     }
   });
 }
