@@ -378,7 +378,8 @@ exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
             });
           } else if (authorName) {
             // TODO: How the hell do we lookup an author by name?
-            callback({stop: 'Can\'t lookup author by name'});
+            //callback({stop: 'Can\'t lookup author by name'});
+            callback(null, { id:null, name: authorName });
           } else {
             callback({stop: 'The author does not exist'});
           }
@@ -390,7 +391,7 @@ exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
         },
         function(author, callback) {
           process.nextTick(function() {
-            padMessageHandler.broadcastPublish(pad, rev, author);
+            padMessageHandler.broadcastPublish(pad, rev, author, function() { /* we don't care */ });
           });
           callback();
       }],
