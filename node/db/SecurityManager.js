@@ -28,26 +28,49 @@ var settings = require('../utils/Settings');
 
 /**
  * Check with Tokie here, if tokie allows then call this callback
- *
+ * @param token - the token to send to Tokie
+ * @param padId - the id of the pad to test against
+ * @param callback - will be called with (err) if auth fails, and () if it's all good.
  */
 var tokieAuth = function(token, padID, callback) {
+  // if we don't have tokie in the settings, then assume we're all good
   if (settings.tokie) {
     var body = '';
     var req = http.get({host: settings.tokie.host, port: settings.tokie.port, path: '/v1/principals/' + token}, function(res){
+
+      // collect all the data from the response
       res.on('data', function(d){
         body += d;
       });
+
+      // Do this once we have all the data
       res.on('end', function(){
         var err;
+        // Hacky, I know, but this is the safest way.
         try {
           body = JSON.parse(body);
         } catch (e) {
-          err = e;
+          callback(true);
+          return false;
         }
-        console.error(body);
-        console.error(res.statusCode);
-        if (res.statusCode != 200) { err = true;}
-        callback(err);
+
+        // if we don't get a 200, assume this user is bad
+        if (res.statusCode != 200 || err) {
+          callback(true);
+          return false;
+        }
+
+        // Get the pad from the DB and check to see if it's in the right network and group
+        padManager.getPad(padID, function(err, pad) {
+          console.error(pad, body);
+          if (pad.networkId != body.network) {
+            callback(true);
+            return false;
+          }
+          // the user is good to go
+          callback();
+        });
+
       })
     });
   } else { callback(); }

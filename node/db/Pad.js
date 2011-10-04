@@ -61,15 +61,22 @@ Class('Pad', {
       init: null
     }, // passwordHash
 
-    id : { is : 'r' }
+    id : { is : 'r' },
+
+    networkId : { is : 'r' },
+
+    groupId : { is : 'r' }
+
   },
 
   methods : {
 
-    BUILD : function (id)
+    BUILD : function (id, networkID, groupID)
     {
         return {
             'id' : id,
+            'networkId' : networkID,
+            'groupId' : groupID
         }
     },
 
@@ -417,14 +424,14 @@ Class('Pad', {
       });
     },
 
-    init : function (text, callback)
+    init : function (options, callback)
     {
       var _this = this;
 
       //replace text with default text if text isn't set
-      if(text == null)
+      if(options.text && options.text == null)
       {
-        text = settings.defaultPadText;
+        options.text = settings.defaultPadText;
       }
 
       //try to load the pad
@@ -464,7 +471,7 @@ Class('Pad', {
         //this pad doesn't exist, so create it
         else
         {
-          var firstChangeset = Changeset.makeSplice("\n", 0, 0, exports.cleanText(text));
+          var firstChangeset = Changeset.makeSplice("\n", 0, 0, exports.cleanText(options.text));
 
           _this.appendRevision(firstChangeset, '');
         }
@@ -578,6 +585,7 @@ Class('Pad', {
       this.passwordHash = password == null ? null : hash(password, generateSalt());
       db.setSub("pad:"+this.id, ["passwordHash"], this.passwordHash);
     },
+
     isCorrectPassword: function(password)
     {
       return compare(this.passwordHash, password)

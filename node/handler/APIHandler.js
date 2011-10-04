@@ -57,14 +57,14 @@ var functions = {
     "createGroup"               : [],
     "createGroupIfNotExistsFor"  : ["groupMapper"],
     "deleteGroup"               : ["groupID"],
-    "createPad"                 : ["padID", "text"],
+    "createPad"                 : ["padID", "text", "network_id", "group_id"],
     "createGroupPad"            : ["groupID", "padName", "text"],
     "deletePad"                 : ["padID"],
     "publishPad"                : ["padID", "rev", "authorID", "authorName"],
     "createAuthor"              : ["name"],
     "createAuthorIfNotExistsFor": ["authorMapper" , "name"],
     "createSession"             : ["groupID", "authorID", "validUntil"],
-    "deleteSession"             : ["sessionID"],    
+    "deleteSession"             : ["sessionID"],
     "setPassword"               : ["padID", "password"],
   }
 };
@@ -122,7 +122,7 @@ exports.handle = function(functionName, fields, req, res)
   var apiParams = functions[req.method] ? functions[req.method][functionName] : null;
   if(!apiParams) {
     res.send({code: 3, message: "no such function", data: null});
-    return;    
+    return;
   }
 
   //put the function parameters in an array
@@ -158,7 +158,8 @@ exports.handle = function(functionName, fields, req, res)
   });
 
   //call the api function
-  api[functionName](functionParams[0],functionParams[1],functionParams[2],functionParams[3],functionParams[4]);
+  // TODO: Make this less hacky
+  api[functionName](functionParams[0],functionParams[1],functionParams[2],functionParams[3],functionParams[4],functionParams[5]);
 }
 
 /**

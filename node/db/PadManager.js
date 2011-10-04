@@ -29,24 +29,38 @@ globalPads = [];
 /**
  * Returns a Pad Object with the callback
  * @param id A String with the id of the pad
- * @param {Function} callback 
+ * @param {Function} callback
  */
-exports.getPad = function(id, text, callback)
-{    
+exports.getPad = function(id, text, networkId, groupId, callback)
+{
   //check if this is a valid padId
   if(!exports.isValidPadId(id))
   {
     callback({stop: id + " is not a valid padId"});
     return;
   }
-  
+
   //make text an optional parameter
   if(typeof text == "function")
   {
     callback = text;
     text = null;
   }
-  
+
+  //make text an optional parameter
+  if(typeof networkId == "function")
+  {
+    callback = networkId;
+    networkId = null;
+  }
+
+  //make text an optional parameter
+  if(typeof groupId == "function")
+  {
+    callback = groupId;
+    groupId = null;
+  }
+
   //check if this is a valid text
   if(text != null)
   {
@@ -56,7 +70,7 @@ exports.getPad = function(id, text, callback)
       callback({stop: "text is not a string"});
       return;
     }
-    
+
     //check if text is less than 100k chars
     if(text.length > 100000)
     {
@@ -64,9 +78,9 @@ exports.getPad = function(id, text, callback)
       return;
     }
   }
-  
+
   var pad = globalPads[id];
-  
+
   //return pad if its already loaded
   if(pad != null)
   {
@@ -75,10 +89,10 @@ exports.getPad = function(id, text, callback)
   //try to load pad
   else
   {
-    pad = new Pad(id);
-    
+    pad = new Pad(id, networkId, groupId);
+
     //initalize the pad
-    pad.init(text, function(err)
+    pad.init({text: text}, function(err)
     {
       if(err)
       {
@@ -98,7 +112,7 @@ exports.doesPadExists = function(padId, callback)
 {
   db.get("pad:"+padId, function(err, value)
   {
-    callback(err, value != null);  
+    callback(err, value != null);
   });
 }
 

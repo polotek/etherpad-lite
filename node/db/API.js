@@ -105,7 +105,7 @@ exports.getText = function(padID, rev, callback)
   }
 
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -155,7 +155,7 @@ Example returns:
 exports.setText = function(padID, text, callback)
 {
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -218,7 +218,7 @@ exports.getHTML = function(padID, rev, callback)
   }
 
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -256,7 +256,7 @@ exports.getHTML = function(padID, rev, callback)
  * {code:0, message:"ok", data: { authors:[...]} }
  */
 exports.getAuthorsForRevisionSet = function(padID, startRev, endRev, callback) {
-  getPadSafe(padID, true, function(err, pad) {
+  getPadSafe(padID, true, null, null, function(err, pad) {
     if(err) { return callback(err); }
 
     pad.getAuthorsForRevisionSet(startRev, endRev, callback);
@@ -287,7 +287,7 @@ Example returns:
 exports.getRevisionsCount = function(padID, callback)
 {
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -307,8 +307,9 @@ Example returns:
 {code: 0, message:"ok", data: null}
 {code: 1, message:"pad does already exist", data: null}
 */
-exports.createPad = function(padID, text, callback)
+exports.createPad = function(padID, text, networkID, groupID, callback)
 {
+
   //ensure there is no $ in the padID
   if(padID.indexOf("$") != -1)
   {
@@ -317,7 +318,7 @@ exports.createPad = function(padID, text, callback)
   }
 
   //create pad
-  getPadSafe(padID, false, text, function(err)
+  getPadSafe(padID, false, text, networkID, groupID, function(err)
   {
     callback(err);
   });
@@ -333,7 +334,7 @@ Example returns:
 */
 exports.deletePad = function(padID, callback)
 {
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -347,13 +348,13 @@ exports.deletePad = function(padID, callback)
 
 
 exports.publishPad = function(padID, rev, authorID, authorName, callback) {
-  getPadSafe(padID, true, function(err, pad) {
+  getPadSafe(padID, true, null, null, function(err, pad) {
     if(err) { return callback(err); }
 
     if(rev) {
       rev = parseInt(rev, 10);
       if(
-        rev < 0 || 
+        rev < 0 ||
         rev > pad.getHeadRevisionNumber() ||
         !is_int(rev)
       ) {
@@ -442,7 +443,7 @@ exports.setPublicStatus = function(padID, publicStatus, callback)
   }
 
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -509,7 +510,7 @@ exports.setPassword = function(padID, password, callback)
   }
 
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -542,7 +543,7 @@ exports.isPasswordProtected = function(padID, callback)
   }
 
   //get the pad
-  getPadSafe(padID, true, function(err, pad)
+  getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err)
     {
@@ -565,7 +566,7 @@ function is_int(value)
 }
 
 //gets a pad safe
-function getPadSafe(padID, shouldExist, text, callback)
+function getPadSafe(padID, shouldExist, text, networkID, groupID, callback)
 {
   if(typeof text == "function")
   {
@@ -608,7 +609,7 @@ function getPadSafe(padID, shouldExist, text, callback)
     //pad exists, let's get it
     else
     {
-      padManager.getPad(padID, text, callback);
+      padManager.getPad(padID, text, networkID, groupID, callback);
     }
   });
 }
