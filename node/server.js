@@ -458,6 +458,7 @@ async.waterfall([
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
+    io.set('transports', ['xhr-polling', 'htmlfile', 'flashsocket', 'jsonp-polling']);
 
     var socketIOLogger = log4js.getLogger("socket.io");
     io.set('logger', {
