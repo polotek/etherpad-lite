@@ -10,8 +10,8 @@
                       "name": "Robin Buse"}
                   ],
   "dependencies"  : {
-                      "nopt"       : ">=1.0.0",
-                      "socket.io"  : "0.7.9",
+                      "nopt"       : "1.0.9",
+                      "socket.io"  : "0.8.4",
                       "ueberDB"    : "0.1.2",
                       "async"      : "0.1.9",
                       "joose"      : "3.18.0",
