@@ -459,10 +459,6 @@ async.waterfall([
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
 
-    //this is only a workaround to ensure it works with all browers behind a proxy
-    //we should remove this when the new socket.io version is more stable
-    io.set('transports', ['jsonp-polling', 'xhr-polling']);
-
     var socketIOLogger = log4js.getLogger("socket.io");
     io.set('logger', {
       debug: function (str)
