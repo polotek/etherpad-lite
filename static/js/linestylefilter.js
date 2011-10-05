@@ -307,10 +307,13 @@ linestylefilter.getFilterStack = function(lineText, textAndClassFunc, browser)
     plugins_ = parent.parent.plugins;
   }
 
+  var hookFilters = [];
+/* Temporarily disabled
   var hookFilters = plugins_.callHook("aceGetFilterStack", {
     linestylefilter: linestylefilter,
     browser: browser
   });
+*/
   hookFilters.map(function(hookFilter)
   {
     func = hookFilter(lineText, func);
