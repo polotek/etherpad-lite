@@ -432,7 +432,7 @@ Class('Pad', {
       var _this = this;
 
       //replace text with default text if text isn't set
-      if(options.text && options.text == null)
+      if(options.text == null)
       {
         options.text = settings.defaultPadText;
       }
