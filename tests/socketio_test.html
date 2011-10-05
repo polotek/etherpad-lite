@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Testing socket.io</title>
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+			<script src="http://marogers.com:9001/socket.io/socket.io.js"></script>
+			<script>
+				if(!window.console) {
+					console = {
+						log: function() {
+							var out = '';
+							for(var i=0; i<arguments.length; i++) {
+								out += String(arguments[i]);
+							}
+							jQuery('#out').prepend('<p>' + out + '</p>');
+						}
+					}
+				}
+				var socket = io.connect('http://marogers.com:9001');
+    			socket.on('connect', function () {
+    				alert('connected');
+    				socket.on('message', function(msg) {
+    					console.log('from server ', msg);
+    				});
+  				});
+
+  				function send() {
+  					socket.send('foo');
+  				}
+			</script>
+		</script>
+	</head>
+	<body>
+	  <p><a href="#" onclick="send(); return false;">send</a></p>
+	  <div id="out"></div>
+	</body>
+</html>
