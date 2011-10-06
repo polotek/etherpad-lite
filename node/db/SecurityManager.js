@@ -107,7 +107,7 @@ exports.checkAccess = function (padID, sessionID, token, authToken, password, us
   if(padID.indexOf("$") == -1)
   {
     tokieAuth(authToken, padID, function(err){
-      if (err) { callback(false, {accessStatus: "deny"});}
+      if (err) { return callback(false, {accessStatus: "deny"});}
       //get author for this token
       authorManager.getAuthor4Token(token, userID, function(err, author)
       {
