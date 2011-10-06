@@ -175,8 +175,10 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         type: "USER_CHANGES",
         baseRev: rev,
         changeset: userChangesData.changeset,
-        apool: userChangesData.apool
+        apool: userChangesData.apool,
+        references: yam.ui.pages.refBank.getReferences()
       };
+      yam.ui.pages.refBank.clearReferences();
       stateMessageSocketId = socketId;
       sendMessage(stateMessage);
       sentMessage = true;
@@ -370,7 +372,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         return;
       }
       rev = newRev;
-      yam.publish('/ui/pages/newRevision',[rev]);
+      yam.publish('/ui/pages/newRevision', [rev, msg.references]);
       editor.applyChangesToBase(changeset, author, apool);
     }
     else if (msg.type == "ACCEPT_COMMIT")
