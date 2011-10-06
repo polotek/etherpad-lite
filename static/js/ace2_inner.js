@@ -2499,7 +2499,7 @@ function OUTER(gscope)
     performDocumentReplaceRange(lineAndColumnFromChar(startChar), lineAndColumnFromChar(endChar), newText);
   }
 
-  function performDocumentReplaceRange(start, end, newText)
+  function performDocumentReplaceRange(start, end, newText, newAttrs)
   {
     if (start == undefined) start = rep.selStart;
     if (end == undefined) end = rep.selEnd;
@@ -2512,9 +2512,14 @@ function OUTER(gscope)
     var builder = Changeset.builder(rep.lines.totalWidth());
     buildKeepToStartOfRange(builder, start);
     buildRemoveRange(builder, start, end);
-    builder.insert(newText, [
+
+    var attrs = [
       ['author', thisAuthor]
-    ], rep.apool);
+    ];
+    if(newAttrs && newAttrs.length) {
+      attrs = attrs.concat(newAttrs);      
+    }
+    builder.insert(newText, attrs, rep.apool);
     var cs = builder.toString();
 
     performDocumentApplyChangeset(cs);
@@ -2666,10 +2671,10 @@ function OUTER(gscope)
   }
   editorInfo.ace_toggleAttributeOnSelection = toggleAttributeOnSelection;
 
-  function performDocumentReplaceSelection(newText)
+  function performDocumentReplaceSelection(newText, newAttrs)
   {
     if (!(rep.selStart && rep.selEnd)) return;
-    performDocumentReplaceRange(rep.selStart, rep.selEnd, newText);
+    performDocumentReplaceRange(rep.selStart, rep.selEnd, newText, newAttrs);
   }
 
   // Change the abstract representation of the document to have a different set of lines.
