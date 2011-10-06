@@ -367,6 +367,7 @@ function handleUserChanges(client, message)
   var baseRev = message.data.baseRev;
   var wireApool = (AttributePoolFactory.createAttributePool()).fromJsonable(message.data.apool);
   var changeset = message.data.changeset;
+  var references = message.data.references;
 
   var r, apool, pad;
 
@@ -466,7 +467,7 @@ function handleUserChanges(client, message)
         pad.appendRevision(nlChangeset);
       }
 
-      exports.updatePadClients(pad, callback);
+      exports.updatePadClients(pad, references, callback);
     }
   ], function(err)
   {
@@ -474,8 +475,17 @@ function handleUserChanges(client, message)
   });
 }
 
-exports.updatePadClients = function(pad, callback)
+exports.updatePadClients = function(pad, references, callback)
 {
+  if(!references) {
+    references = [];  
+  }
+
+  if(typeof references == 'function') {
+    callback = references;
+    references = [];
+  }
+
   //skip this step if noone is on this pad
   if(!pad2sessions[pad.id])
   {
@@ -533,7 +543,8 @@ exports.updatePadClients = function(pad, callback)
             var wireMsg = {"type":"COLLABROOM","data":{type:"NEW_CHANGES", newRev:r,
                          changeset: forWire.translated,
                          apool: forWire.pool,
-                         author: author}};
+                         author: author,
+                         references: references}};
 
             socketio.sockets.sockets[session].json.send(wireMsg);
           }
