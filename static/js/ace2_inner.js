@@ -1052,6 +1052,17 @@ function OUTER(gscope)
     });
   }
 
+  function insertText(text, attrs) {
+    text = text + '';
+    if(!text) { return; }
+
+    if(isCaret()) {
+      performDocumentReplaceRange(rep.selStart, rep.selEnd, text, attrs);
+    } else {
+      performDocumentReplaceSelection(text, attrs);
+    }
+  }
+
   editorInfo.ace_focus = focus;
   editorInfo.ace_importText = importText;
   editorInfo.ace_importAText = importAText;
@@ -1065,7 +1076,8 @@ function OUTER(gscope)
   editorInfo.ace_setEditable = setEditable;
   editorInfo.ace_execCommand = execCommand;
   editorInfo.ace_replaceRange = replaceRange;
-  
+  editorInfo.ace_insertText = insertText;
+
   editorInfo.ace_getAttributeLookup = function() {
     return ATTRIBUTE_LOOKUP;
   }
