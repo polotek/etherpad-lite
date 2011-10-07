@@ -46,6 +46,7 @@ var functions = {
     "getHTML"                   : ["padID", "rev"],
     "setText"                   : ["padID", "text"],
     "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev"],
+    "getReferencesForRevisionSet"  : ["padID", "startRev", "endRev"],
     "getRevisionSet"            : ["padID", "startRev", "endRev"],
     "getRevisionsCount"         : ["padID"],
     "getReadOnlyID"             : ["padID"],

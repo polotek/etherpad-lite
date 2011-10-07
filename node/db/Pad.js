@@ -232,6 +232,41 @@ Class('Pad', {
       })
     },
 
+    getReferencesForRevisionSet: function(startRev, endRev, callback) {
+      var apool = this.pool;
+
+      this.getRevisionSet(startRev, endRev, function(err, changesets) {
+        if(err) { return callback(err); }
+
+        var refs = []
+          , found = {};
+
+        changesets.forEach(function(changeset) {
+          var cs = changeset.changeset;
+
+          Changeset.filterAttribNumbers(cs, function(num) {
+            num = num + '';
+            
+            var ref;
+            if(found[num]) {
+              return;
+            }
+
+            if(apool.numToAttrib[num]) {
+              ref = apool.numToAttrib[num];
+              if(ref[0] == 'yammer' && ref[1]) {
+                found[num] = true;
+                // values only
+                refs.push(ref[1]);
+              }
+            }
+          });
+        });
+
+        callback(err, refs);
+      });
+    },
+
     getInternalRevisionAText : function(targetRev, callback)
     {
       var _this = this;

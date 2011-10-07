@@ -264,6 +264,20 @@ exports.getAuthorsForRevisionSet = function(padID, startRev, endRev, callback) {
 }
 
 /**
+ * getReferencesForRevisionSet(padID) returns the set of unique references used in
+ * a set of revisions
+ *
+ * {code:0, message:"ok", data: { references:[...]} }
+ */
+exports.getReferencesForRevisionSet = function(padID, startRev, endRev, callback) {
+  getPadSafe(padID, true, null, null, function(err, pad) {
+    if(err) { return callback(err); }
+
+    pad.getReferencesForRevisionSet(startRev, endRev, callback);
+  });
+}
+
+/**
  * getRevisionSet(padID) returns a set of revisions for a pad
  *
  * {code:0, message:"ok", data: { revisions:[...]} }
