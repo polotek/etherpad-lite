@@ -246,7 +246,6 @@ function handshake()
 
       //initalize the pad
       pad.init();
-      console.log("pad initialized");
       yam.publish('/ui/pages/padInit', [clientVars]);
       initalized = true;
 
@@ -580,6 +579,7 @@ var pad = {
     }
     else if (msg.type == 'padtitle')
     {
+      yam.publish('/ui/pages/titleChange', [msg.title]);
       paddocbar.changeTitle(msg.title);
     }
     else if (msg.type == 'padpassword')
