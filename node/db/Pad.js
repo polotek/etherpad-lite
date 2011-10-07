@@ -218,6 +218,8 @@ Class('Pad', {
         var authorIds = Object.keys(found);
         async.forEach(authorIds, function(authorId, callback) {
           authorManager.getAuthor(authorId, function(err, author) {
+            if(err) { return callback(err); }
+
             if(author) {
               author.id = authorId;
               author.last_updated = found[authorId];
@@ -241,7 +243,7 @@ Class('Pad', {
         var refs = []
           , found = {};
 
-        changesets.forEach(function(changeset) {
+        async.forEach(changesets, function(changeset, callback) {
           var cs = changeset.changeset;
 
           Changeset.filterAttribNumbers(cs, function(num) {
@@ -261,9 +263,12 @@ Class('Pad', {
               }
             }
           });
-        });
 
-        callback(err, refs);
+          callback();
+        },
+        function(err) {
+          callback(err, refs);
+        });
       });
     },
 
