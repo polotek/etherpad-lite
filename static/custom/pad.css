@@ -52,13 +52,15 @@
 }
 
 #editorcontainerbox {
-  top: 58px;
+  position: relative;
+  height: 300px;
 }
 
 #editorcontainer {
   border: 1px solid #ddd;
   border-top: 0;
   width: 498px;
+  top: 0;
 }
 
 #innerdocbody h1 {
