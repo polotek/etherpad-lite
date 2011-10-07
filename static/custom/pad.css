@@ -47,6 +47,10 @@
   background: none;
 }
 
+#editbar ul li a span {
+  position: static;
+}
+
 #editorcontainerbox {
   top: 58px;
 }
