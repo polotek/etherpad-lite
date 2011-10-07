@@ -595,16 +595,16 @@ function getPadSafe(padID, shouldExist, text, networkID, groupID, isPrivate, cal
   }
 
   //make networkdId an optional parameter
-  if(typeof networkId == "function")
+  if(typeof networkID == "function")
   {
-    callback = networkId;
+    callback = networkID;
     networkId = null;
   }
 
   //make groupId an optional parameter
-  if(typeof groupId == "function")
+  if(typeof groupID == "function")
   {
-    callback = groupId;
+    callback = groupID;
     groupId = null;
   }
 
