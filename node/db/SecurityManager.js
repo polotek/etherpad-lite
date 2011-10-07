@@ -25,6 +25,7 @@ var padManager = require("./PadManager");
 var sessionManager = require("./SessionManager");
 var http = require('http');
 var settings = require('../utils/Settings');
+var securityLogger = require('log4js').getLogger("security");
 
 /**
  * Check with Tokie here, if tokie allows then call this callback
@@ -36,9 +37,9 @@ var tokieAuth = function(token, padID, callback) {
   // if we don't have tokie in the settings, then assume we're all good
   if (settings.tokie) {
     var body = '';
-    console.error('Tokie Auth started for: '+token);
+    securityLogger.error('Tokie Auth started for: '+token);
     var req = http.get({host: settings.tokie.host, port: settings.tokie.port, path: '/v1/principals/' + token}, function(res){
-      console.error('tokie auth response');
+      securityLogger.error('tokie auth response');
       // collect all the data from the response
       res.on('data', function(d){
         body += d;
@@ -51,14 +52,14 @@ var tokieAuth = function(token, padID, callback) {
         try {
           body = JSON.parse(body);
         } catch (e) {
-          console.error("tokie auth failed at parsing the json response");
+          securityLogger.error("tokie auth failed at parsing the json response");
           callback(true);
           return false;
         }
 
         // if we don't get a 200, assume this user is bad
         if (res.statusCode != 200 || err) {
-          console.error("tokie auth failed because tokie did not respond with a 200");
+          securityLogger.error("tokie auth failed because tokie did not respond with a 200");
           callback(true);
           return false;
         }
@@ -75,16 +76,16 @@ var tokieAuth = function(token, padID, callback) {
           }
           if (pad.networkId != body.network || (pad.isPrivate && !isInGroup)) {
             if (pad.isPrivate && !isInGroup) {
-              console.error("tokie auth failed because the user is not in the right group: pad group - ", pad.groupId, "tokie groups - ", body.groups);
+              securityLogger.error("tokie auth failed because the user is not in the right group: pad group - ", pad.groupId, "tokie groups - ", body.groups);
             }
             if (pad.networkId != body.network) {
-              console.error("tokie auth failed because the user is not in the right network: pad network - ", pad.networkId, 'tokie network - ', body.network);
+              securityLogger.error("tokie auth failed because the user is not in the right network: pad network - ", pad.networkId, 'tokie network - ', body.network);
             }
             callback(true);
             return false;
           }
           // the user is good to go
-          console.error('tokie auth granted');
+          securityLogger.error('tokie auth granted');
           callback();
         });
 
@@ -111,7 +112,7 @@ exports.checkAccess = function (padID, sessionID, token, authToken, password, us
       //get author for this token
       authorManager.getAuthor4Token(token, userID, function(err, author)
       {
-        console.log("Author: ", author)
+        securityLogger.log("Author: ", author)
         // grant access, with author of token
         callback(err, {accessStatus: "grant", authorID: author});
       })
