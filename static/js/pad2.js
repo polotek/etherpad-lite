@@ -729,7 +729,7 @@ var pad = {
     if (action == "commitPerformed")
     {
       padeditbar.setSyncStatus("syncing");
-      yam.publish('/ui/pages/activity', ['commiting']);
+      yam.publish('/ui/pages/activity', ['committing']);
     }
     else if (action == "newlyIdle")
     {
