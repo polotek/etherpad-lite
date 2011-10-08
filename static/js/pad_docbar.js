@@ -368,7 +368,6 @@ var paddocbar = (function()
         {
           newTitle = newTitle.substring(0, 80);
           self.title = newTitle;
-
           pad.notifyChangeTitle(newTitle);
         }
       }

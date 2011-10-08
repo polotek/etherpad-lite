@@ -46,6 +46,7 @@ var functions = {
     "getHTML"                   : ["padID", "rev"],
     "setText"                   : ["padID", "text"],
     "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev"],
+    "getReferencesForRevisionSet"  : ["padID", "startRev", "endRev"],
     "getRevisionSet"            : ["padID", "startRev", "endRev"],
     "getRevisionsCount"         : ["padID"],
     "getReadOnlyID"             : ["padID"],
@@ -55,12 +56,12 @@ var functions = {
   }
   , 'POST': {
     "createGroup"               : [],
-    "createGroupIfNotExistsFor"  : ["groupMapper"],
+    "createGroupIfNotExistsFor" : ["groupMapper"],
     "deleteGroup"               : ["groupID"],
     "createPad"                 : ["padID", "text", "network_id", "group_id", "is_private"],
     "createGroupPad"            : ["groupID", "padName", "text"],
     "deletePad"                 : ["padID"],
-    "saveRevision"                : ["padID", "rev", "authorID", "authorName"],
+    "saveRevision"              : ["padID", "rev", "authorID", "authorName"],
     "createAuthor"              : ["name"],
     "createAuthorIfNotExistsFor": ["authorMapper" , "name"],
     "createSession"             : ["groupID", "authorID", "validUntil"],
@@ -69,7 +70,7 @@ var functions = {
   }
 };
 
-functions.HEAD = functions.POST;
+functions.HEAD = functions.GET;
 
 // FIXME: Remove this when workfeed sends posts correctly
 for(var i in functions.POST) {

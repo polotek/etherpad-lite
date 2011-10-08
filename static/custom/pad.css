@@ -5,24 +5,62 @@
 */
 
 #editbar {
-  width: 498px;
+  width: 490px;
   border: 1px solid #ccc;
-  border-color: #ddd #ddd #ccc
-  padding-top: 4px;
+  border-color: #ddd #ddd #ccc;
+  padding: 3px 4px;
+  height: 28px;
 }
 
 #editbar ul {
   margin: 0;
 }
 
+#editbar ul li {
+  background: none;
+  border: none;
+  padding: 4px 1px;
+}
+
+#editbar ul .select {
+  margin-right: 5px;
+}
+
+#editbar ul .editor-button-text {
+  color: #666666;
+  font-size: 10px;
+  padding-top: 7px;
+  width: auto;
+}
+
+#editbar ul li.separator {
+  visibility: visible;
+  width: 0;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #fff;
+  margin: 4px 6px;
+  height: 18px;
+  padding: 0;
+}
+
+#editbar ul li:hover {
+  background: none;
+}
+
+#editbar ul li a span {
+  position: static;
+}
+
 #editorcontainerbox {
-  top: 62px;
+  position: relative;
+  height: 300px;
 }
 
 #editorcontainer {
   border: 1px solid #ddd;
   border-top: 0;
   width: 498px;
+  top: 0;
 }
 
 #innerdocbody h1 {

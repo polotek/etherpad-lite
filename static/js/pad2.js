@@ -246,7 +246,6 @@ function handshake()
 
       //initalize the pad
       pad.init();
-      console.log("pad initialized");
       yam.publish('/ui/pages/padInit', [clientVars]);
       initalized = true;
 
@@ -562,7 +561,7 @@ var pad = {
   handlePadPublish: function(rev, author) {
     // TODO: clear pad changes up to published rev
     author = author || {};
-    yam.publish('/ui/pages/published', [author.userId, author.name]);
+    yam.publish('/ui/pages/published', [rev, author.userId, author.name]);
   },
   handleClientMessage: function(msg)
   {
@@ -580,6 +579,7 @@ var pad = {
     }
     else if (msg.type == 'padtitle')
     {
+      yam.publish('/ui/pages/titleChange', [msg.title]);
       paddocbar.changeTitle(msg.title);
     }
     else if (msg.type == 'padpassword')
@@ -729,10 +729,13 @@ var pad = {
     if (action == "commitPerformed")
     {
       padeditbar.setSyncStatus("syncing");
+      yam.publish('/ui/pages/activity', ['committing']);
     }
     else if (action == "newlyIdle")
     {
       padeditbar.setSyncStatus("done");
+    } else if (action == 'commitAcceptedByServer') {
+      yam.publish('/ui/pages/activity', ['commit_accepted']);
     }
   },
   hideServerMessage: function()

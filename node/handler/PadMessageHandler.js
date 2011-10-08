@@ -191,10 +191,28 @@ exports.handleMessage = function(client, message)
   {
     handleSuggestUserName(client, message);
   }
+  else if(message.type == "COLLABROOM" &&
+          message.data.type == "CLIENT_MESSAGE" &&
+          message.data.payload.type == "padtitle")
+  {
+    handlePadTitle(client, message);
+  }
   //if the message type is unkown, throw an exception
   else
   {
     messageLogger.warn("Droped message, unkown Message Type " + message.type);
+  }
+}
+
+function handlePadTitle(client, message) {
+  var padId = session2pad[client.id];
+  //Send the other clients on the pad the update message
+  for(var i in pad2sessions[padId])
+  {
+    if(pad2sessions[padId][i] != client.id)
+    {
+      socketio.sockets.sockets[pad2sessions[padId][i]].json.send(message);
+    }
   }
 }
 
@@ -580,7 +598,7 @@ exports.broadcastPublish = function(pad, rev, author, callback) {
         }
       });
       callback();
-    },  
+    },
   callback);
 }
 

@@ -218,6 +218,8 @@ Class('Pad', {
         var authorIds = Object.keys(found);
         async.forEach(authorIds, function(authorId, callback) {
           authorManager.getAuthor(authorId, function(err, author) {
+            if(err) { return callback(err); }
+
             if(author) {
               author.id = authorId;
               author.last_updated = found[authorId];
@@ -230,6 +232,44 @@ Class('Pad', {
           callback(err, authors);
         });
       })
+    },
+
+    getReferencesForRevisionSet: function(startRev, endRev, callback) {
+      var apool = this.pool;
+
+      this.getRevisionSet(startRev, endRev, function(err, changesets) {
+        if(err) { return callback(err); }
+
+        var refs = []
+          , found = {};
+
+        async.forEach(changesets, function(changeset, callback) {
+          var cs = changeset.changeset;
+
+          Changeset.filterAttribNumbers(cs, function(num) {
+            num = num + '';
+            
+            var ref;
+            if(found[num]) {
+              return;
+            }
+
+            if(apool.numToAttrib[num]) {
+              ref = apool.numToAttrib[num];
+              if(ref[0] == 'yammer' && ref[1]) {
+                found[num] = true;
+                // values only
+                refs.push(ref[1]);
+              }
+            }
+          });
+
+          callback();
+        },
+        function(err) {
+          callback(err, refs);
+        });
+      });
     },
 
     getInternalRevisionAText : function(targetRev, callback)
