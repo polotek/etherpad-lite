@@ -561,7 +561,7 @@ var pad = {
   handlePadPublish: function(rev, author) {
     // TODO: clear pad changes up to published rev
     author = author || {};
-    yam.publish('/ui/pages/published', [author.userId, author.name]);
+    yam.publish('/ui/pages/published', [rev, author.userId, author.name]);
   },
   handleClientMessage: function(msg)
   {
@@ -729,10 +729,13 @@ var pad = {
     if (action == "commitPerformed")
     {
       padeditbar.setSyncStatus("syncing");
+      yam.publish('/ui/pages/activity', ['commiting']);
     }
     else if (action == "newlyIdle")
     {
       padeditbar.setSyncStatus("done");
+    } else if (action == 'commitAcceptedByServer') {
+      yam.publish('/ui/pages/activity', ['commit_accepted']);
     }
   },
   hideServerMessage: function()
