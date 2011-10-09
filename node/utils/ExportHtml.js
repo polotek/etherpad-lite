@@ -133,6 +133,14 @@ function getHTMLFromAtext(pad, atext)
       assem.append('>');
     }
 
+    function emitOpenURL(url) {
+      assem.append('<a href="' + url + '" target="_blank">');
+    }
+
+    function emitCloseURL() {
+      assem.append('</a>');      
+    }
+
     var urls = _findURLs(text);
     var mphs = _findModelPlaceholders(text);
     var regexAttrs = (function() {
@@ -164,6 +172,8 @@ function getHTMLFromAtext(pad, atext)
 
       while (iter.hasNext())
       {
+        // url is atomic, should only occur once per operation
+        var url;
         var o = iter.next();
         var propChanged = false;
         Changeset.eachAttribNumber(o.attribs, function (a)
@@ -180,6 +190,10 @@ function getHTMLFromAtext(pad, atext)
             {
               propVals[i] = STAY;
             }
+          }
+          var attr = apool.numToAttrib[a];
+          if(attr && attr[0] == 'url' && attr[1]) {
+            url = attr[1];
           }
         });
         for (var i = 0; i < propVals.length; i++)
@@ -248,7 +262,14 @@ function getHTMLFromAtext(pad, atext)
         }
         var s = taker.take(chars);
 
+        if(url) { emitOpenURL(url); }
+
         assem.append(_escapeHTML(s));
+
+        if(url) { emitCloseURL(); }
+
+        // reset url for next iteration
+        url = null;
       } // end iteration over spans in line
       for (var i = propVals.length - 1; i >= 0; i--)
       {
