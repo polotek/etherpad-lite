@@ -80,6 +80,8 @@ var padeditbar = (function()
     {
       $("#editbar .editbarbutton").attr("unselectable", "on"); // for IE
       $("#editbar").removeClass("disabledtoolbar").addClass("enabledtoolbar");
+
+      this._initMentionButton();
     },
     isEnabled: function()
     {
@@ -233,6 +235,69 @@ var padeditbar = (function()
       {
         syncAnimation.done();
       }
+    },
+    _initMentionButton: function()
+    {
+      var onSubmit = function(tagList, typeAhead) {
+        if(tagList.tags && tagList.tags.length) {
+          var sel = tagList.tags[0];
+
+          // FIXME: Why is the type wrong?
+          sel.type = sel.type.replace(/s$/, '');
+          var instance = yam.model.User.save(sel)
+            , mph = '[' + yam.camelize(sel.type, true) + ':' + sel.id + ']'
+            , attrs = [
+              ['yammer', mph]
+            ]
+            , text = '[' + mph + ']';
+
+          padeditor.ace.callWithAce(function(ace) {
+            ace.ace_insertText(text, attrs);
+          }, 'setText', true);
+
+          yam.publish('/ui/lightbox/close');
+          padeditor.ace.focus();
+        }
+      }
+
+      var $btn = $('#menu_right').find('.mention-icon');
+
+      $btn.click(function() {
+        var title = $btn.attr('title')
+          , opts = {
+            "typeaheadType": "custom"
+            , "watermarkText": yam.tr("Name")
+            , "buttonText": yam.tr("Link")
+            , "maxResults": 1
+          }
+          , key
+          , val
+          , component
+          , $content
+          , lightboxOpts;
+
+        var ctor = yam.ui.shared.BubbleTypeAhead
+          , fakeParent = { appState: {}, view: { $element: $(document) } }; // HACKS :(
+
+        component = new ctor(opts, fakeParent);
+        yam.hook(component, 'onCustomSubmit', onSubmit);
+
+        $content = jq('<div class="yj-lightbox-content yj-quick-link-lightbox"></div>')
+                      .append(component.render())
+                      .append('<div class="clear"></div>');
+
+        lightboxOpts = { 
+          title: title
+            , width: 500
+            , html: $content
+            , transition: 'none' // transition over-animates when textarea resizing
+            , onClosed: function () {
+              component && component.destroy();
+          }
+        };
+
+        yam.publish('/ui/lightbox/open', [lightboxOpts]);
+      });
     }
   };
   return self;
