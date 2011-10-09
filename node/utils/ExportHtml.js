@@ -134,6 +134,21 @@ function getHTMLFromAtext(pad, atext)
     }
 
     var urls = _findURLs(text);
+    var mphs = _findModelPlaceholders(text);
+    var regexAttrs = (function() {
+      var attrs = [];
+      var args = Array.prototype.slice.call(arguments);
+      args.forEach(function(l) {
+        if(l && l.length) {
+          attrs = attrs.concat(l);
+        }
+      });
+      attrs = attrs.sort(function(a, b) {
+        return a[0] <= b[0] ? -1 : 1;
+      });
+
+      return attrs;
+    })(urls, mphs);
 
     var idx = 0;
 
@@ -244,19 +259,13 @@ function getHTMLFromAtext(pad, atext)
         }
       }
     } // end processNextChars
-    if (urls)
+
+    regexAttrs.forEach(function (match)
     {
-      urls.forEach(function (urlData)
-      {
-        var startIndex = urlData[0];
-        var url = urlData[1];
-        var urlLength = url.length;
-        processNextChars(startIndex - idx);
-        assem.append('<a href="' + url.replace(/\"/g, '&quot;') + '">');
-        processNextChars(urlLength);
-        assem.append('</a>');
-      });
-    }
+      var filter = match[3];
+      filter(match, assem, idx, processNextChars);
+    });
+
     processNextChars(text.length - idx);
 
     return _processSpaces(assem.toString());
@@ -360,7 +369,6 @@ function _analyzeLine(text, aline, apool)
       }
 
       var headerType = Changeset.opAttributeValue(op, 'heading', apool);
-      console.log(apool + '||' +  headerType);
       headerType = headerType ? parseInt(headerType, 10) : '';
       if(headerType && headerType > 0)
       {
@@ -510,6 +518,22 @@ function _processSpaces(s)
   return parts.join('');
 }
 
+function _regexFinder(re, type, filter) {
+  return function(text) {
+    re.lastIndex = 0;
+    var matches = null;
+    var execResult;
+    while ((execResult = re.exec(text)))
+    {
+      matches = (matches || []);
+      var startIndex = execResult.index;
+      var m = execResult[0];
+      matches.push([startIndex, m, type, filter]);
+    }
+
+    return matches;
+  }
+}
 
 // copied from ACE
 var _REGEX_WORDCHAR = /[\u0030-\u0039\u0041-\u005A\u0061-\u007A\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\u1FFF\u3040-\u9FFF\uF900-\uFDFF\uFE70-\uFEFE\uFF10-\uFF19\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFDC]/;
@@ -519,19 +543,24 @@ var _REGEX_URL = new RegExp(/(?:(?:https?|s?ftp|ftps|file|smb|afp|nfs|(x-)?man|g
 
 // returns null if no URLs, or [[startIndex1, url1], [startIndex2, url2], ...]
 
+var _findURLs = _regexFinder(_REGEX_URL, 'url', function(urlData, assem, curIdx, processNextChars) {
+  var startIndex = urlData[0];
+  var url = urlData[1];
+  var urlLength = url.length;
+  processNextChars(startIndex - curIdx);
+  assem.append('<a href="' + url.replace(/\"/g, '&quot;') + '">');
+  processNextChars(urlLength);
+  assem.append('</a>');
+});
 
-function _findURLs(text)
-{
-  _REGEX_URL.lastIndex = 0;
-  var urls = null;
-  var execResult;
-  while ((execResult = _REGEX_URL.exec(text)))
-  {
-    urls = (urls || []);
-    var startIndex = execResult.index;
-    var url = execResult[0];
-    urls.push([startIndex, url]);
-  }
-
-  return urls;
-}
+// Yammer Model Placeholders
+var _REGEX_MPH = /\[\[(\w+):(\d+)\]\]/g;
+_findModelPlaceholders = _regexFinder(_REGEX_MPH, 'mph', function(match, assem, curIdx, processNextChars) {
+  var startIndex = match[0];
+  var mph = match[1];
+  var len = mph.length;
+  processNextChars(startIndex - curIdx);
+  assem.append('<span class="yj-page-model-placeholder">');
+  processNextChars(len);
+  assem.append('</span>');
+});
