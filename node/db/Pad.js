@@ -109,16 +109,6 @@ Class('Pad', {
       }
 
       db.set("pad:"+this.id+":revs:"+newRev, newRevData);
-      console.error("Saving pad to db: ", {atext: this.atext,
-                              pool: this.pool.toJsonable(),
-                              head: this.head,
-                              chatHead: this.chatHead,
-                              publicStatus: this.publicStatus,
-                              passwordHash: this.passwordHash,
-                              networkId: this.networkId,
-                              groupId: this.groupId,
-                              isPrivate: this.isPrivate
-                            })
       db.set("pad:"+this.id, {atext: this.atext,
                               pool: this.pool.toJsonable(),
                               head: this.head,

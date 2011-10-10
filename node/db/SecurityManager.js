@@ -66,7 +66,6 @@ var tokieAuth = function(token, padID, callback) {
 
         // Get the pad from the DB and check to see if it's in the right network and group
         padManager.getPad(padID, function(err, pad) {
-          console.error(pad);
           var isInGroup;
           if (pad.isPrivate) {
             for (var i in body.groups) {
