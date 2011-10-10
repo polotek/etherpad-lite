@@ -114,7 +114,11 @@ Class('Pad', {
                               head: this.head,
                               chatHead: this.chatHead,
                               publicStatus: this.publicStatus,
-                              passwordHash: this.passwordHash});
+                              passwordHash: this.passwordHash,
+                              networkId: this.networkId,
+                              groupId: this.groupId,
+                              isPrivate: this.isPrivate
+                            });
     }, //appendRevision
 
     getRevision: function(revNum, callback) {
@@ -248,7 +252,7 @@ Class('Pad', {
 
           Changeset.filterAttribNumbers(cs, function(num) {
             num = num + '';
-            
+
             var ref;
             if(found[num]) {
               return;
@@ -492,6 +496,9 @@ Class('Pad', {
           _this.head = value.head;
           _this.atext = value.atext;
           _this.pool = _this.pool.fromJsonable(value.pool);
+          _this.networkId = value.networkId;
+          _this.groupId = value.groupId;
+          _this.isPrivate = value.isPrivate;
 
           //ensure we have a local chatHead variable
           if(value.chatHead != null)
