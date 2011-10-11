@@ -360,7 +360,6 @@ var padeditbar = (function()
       });
     },
     _onLinkerSubmit: function() {
-      debugger;
       var url = this.$content.find('.link-url').val()
         , text = this.$content.find('.link-text').val();
 
