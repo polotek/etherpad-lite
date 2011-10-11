@@ -198,6 +198,7 @@ function handshake()
       "component": "pad",
       "type": "CLIENT_READY",
       "padId": padId,
+      "last_published_rev": yam.config().lastPublishedRevision,
       "sessionID": sessionID,
       "password": password,
       "token": token,

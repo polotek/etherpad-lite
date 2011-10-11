@@ -496,7 +496,7 @@ function handleUserChanges(client, message)
 exports.updatePadClients = function(pad, references, callback)
 {
   if(!references) {
-    references = [];  
+    references = [];
   }
 
   if(typeof references == 'function') {
@@ -753,7 +753,7 @@ function handleClientReady(client, message)
         //get all author data out of the database
         function(callback)
         {
-          pad.getAuthorsForRevisionSet(0, undefined, function(err, authors){
+          pad.getAuthorsForRevisionSet(message.last_published_rev, undefined, function(err, authors){
             async.forEach(authors, function(author, callback)
             {
               delete author.timestamp;
