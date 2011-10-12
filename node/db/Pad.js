@@ -172,7 +172,7 @@ Class('Pad', {
          , curRev = startRev
          , revisions = []
          , changesets;
-      while(curRev < endRev) {
+      while(curRev <= endRev) {
         revisions.push(curRev);
         curRev++;
       }
