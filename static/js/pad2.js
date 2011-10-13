@@ -387,9 +387,6 @@ var pad = {
       userAgent: pad.getDisplayUserAgent()
     };
 
-    yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
-    yam.publish('/ui/pages/newRevision', [clientVars.collab_client_vars.rev || 0]);
-
     if (clientVars.specialKey)
     {
       pad.myUserInfo.specialKey = clientVars.specialKey;
@@ -426,7 +423,8 @@ var pad = {
     pad.collabClient.setOnServerMessage(pad.handleServerMessage);
     pad.collabClient.setOnChannelStateChange(pad.handleChannelStateChange);
     pad.collabClient.setOnInternalAction(pad.handleCollabAction);
-
+    yam.publish('/ui/pages/currentUserReady', [pad.myUserInfo]);
+    yam.publish('/ui/pages/newRevision', [clientVars.collab_client_vars.rev || 0]);
     function postAceInit()
     {
       padeditbar.init();
