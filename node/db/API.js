@@ -298,7 +298,7 @@ Example returns:
 {code: 0, message:"ok", data: {revisions: 56}}
 {code: 1, message:"padID does not exist", data: null}
 */
-exports.getRevisionsCount = function(padID, attrFilter, callback)
+exports.getRevisionsCount = function(padID, callback)
 {
   //get the pad
   getPadSafe(padID, true, null, null, function(err, pad)

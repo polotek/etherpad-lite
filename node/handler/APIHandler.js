@@ -48,7 +48,7 @@ var functions = {
     "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev", "attrFilter"],
     "getReferencesForRevisionSet"  : ["padID", "startRev", "endRev"],
     "getRevisionSet"            : ["padID", "startRev", "endRev", "attrFilter"],
-    "getRevisionsCount"         : ["padID", "attrFilter"],
+    "getRevisionsCount"         : ["padID"],
     "getReadOnlyID"             : ["padID"],
     "setPublicStatus"           : ["padID", "publicStatus"],
     "getPublicStatus"           : ["padID"],
