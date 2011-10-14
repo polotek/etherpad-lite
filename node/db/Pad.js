@@ -155,7 +155,14 @@ Class('Pad', {
       return authors;
     },
 
-    getRevisionSet: function(startRev, endRev, callback) {
+    getRevisionSet: function(startRev, endRev, opts, callback) {
+      if(typeof opts == 'function') {
+        callback = opts;
+        opts = null;
+      }
+
+      opts = opts || {};
+
       startRev = (startRev !== null || startRev !== undefined) && parseInt(startRev, 10);
       endRev = (endRev !== null || endRev !== undefined) && parseInt(endRev, 10);
 
@@ -168,27 +175,32 @@ Class('Pad', {
         endRev = head;
       }
       if(startRev < 0 || startRev > endRev) { return callback(new Error('Invalid start revision')); }
+
       var self = this
+         , apool = self.pool
          , curRev = startRev
          , revisions = []
          , changesets;
+
       while(curRev <= endRev) {
         revisions.push(curRev);
         curRev++;
       }
-      changesets = new Array(revisions.length);
+
+      changesets = [];
       async.forEach(revisions, function(rev, callback) {
           self.getRevision(rev, function(err, changeset) {
             if(!err) {
               if(changeset) {
-                changeset.rev = rev;
+                // If there's an attribute filter and the attribute is
+                // not there, continue to the next item
+                if(opts.attrFilter && 
+                  !Changeset.attribsAttributeValue(changeset.changeset, opts.attrFilter, apool)) {
+                  return callback();
+                }
 
-                // Find the index from the already sorted list of revisions
-                // That way changesets is already ordered
-                // TODO: Get rid of this when we can pull sorted ranges
-                // from the db
-                var idx = revisions.indexOf(rev);
-                changesets[idx] = changeset;
+                changeset.rev = rev;
+                changesets.push(changeset);
               } else {
                 err = new Error('No changeset found for revision ' + rev);
               }
@@ -198,6 +210,13 @@ Class('Pad', {
           });
         },
       function(err) {
+        if(!err) {
+          // TODO: Get rid of this when we can pull sorted ranges
+          // from the db
+          changesets = changesets.sort(function(a, b) {
+            return a.rev < b.rev ? -1 : 1;
+          });
+        }
         callback(err, changesets)
       });
     },

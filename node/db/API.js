@@ -282,11 +282,11 @@ exports.getReferencesForRevisionSet = function(padID, startRev, endRev, callback
  *
  * {code:0, message:"ok", data: { revisions:[...]} }
  */
-exports.getRevisionSet = function(padID, startRev, endRev, callback) {
+exports.getRevisionSet = function(padID, startRev, endRev, attrFilter, callback) {
   getPadSafe(padID, true, function(err, pad) {
     if(err) { return callback(err); }
 
-    pad.getRevisionSet(startRev, endRev, callback);
+    pad.getRevisionSet(startRev, endRev, { attrFilter: attrFilter }, callback);
   });
 }
 
@@ -298,7 +298,7 @@ Example returns:
 {code: 0, message:"ok", data: {revisions: 56}}
 {code: 1, message:"padID does not exist", data: null}
 */
-exports.getRevisionsCount = function(padID, callback)
+exports.getRevisionsCount = function(padID, attrFilter, callback)
 {
   //get the pad
   getPadSafe(padID, true, null, null, function(err, pad)
