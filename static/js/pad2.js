@@ -182,12 +182,12 @@ function handshake()
 
     document.title = document.title + " | " + padId;
 
-    var token = readCookie("token");
-    if (token == null)
-    {
-      token = randomString();
-      createCookie("token", token, 60);
-    }
+    //var token = readCookie("token");
+    //if (token == null)
+    //{
+      token = window.yam ? (yam.currentUser.id+'') : undefined;//randomString();
+      //createCookie("token", token, 60);
+    //}
 
     var sessionID = readCookie("sessionID");
     var password = readCookie("password");
