@@ -221,8 +221,15 @@ Class('Pad', {
       });
     },
 
-    getAuthorsForRevisionSet: function(startRev, endRev, callback) {
-      this.getRevisionSet(startRev, endRev, function(err, changesets) {
+    getAuthorsForRevisionSet: function(startRev, endRev, opts, callback) {
+      if(typeof opts == 'function') {
+        callback = opts;
+        opts = null;
+      }
+
+      opts = opts || {};
+
+      this.getRevisionSet(startRev, endRev, opts, function(err, changesets) {
         if(err) { return callback(err); }
 
         var authors = []

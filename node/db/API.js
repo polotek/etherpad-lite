@@ -255,11 +255,11 @@ exports.getHTML = function(padID, rev, callback)
  *
  * {code:0, message:"ok", data: { authors:[...]} }
  */
-exports.getAuthorsForRevisionSet = function(padID, startRev, endRev, callback) {
+exports.getAuthorsForRevisionSet = function(padID, startRev, endRev, attrFilter, callback) {
   getPadSafe(padID, true, null, null, function(err, pad) {
     if(err) { return callback(err); }
 
-    pad.getAuthorsForRevisionSet(startRev, endRev, callback);
+    pad.getAuthorsForRevisionSet(startRev, endRev, { attrFilter: attrFilter }, callback);
   });
 }
 

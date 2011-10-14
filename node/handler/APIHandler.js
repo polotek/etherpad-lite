@@ -45,7 +45,7 @@ var functions = {
     "getText"                   : ["padID", "rev"],
     "getHTML"                   : ["padID", "rev"],
     "setText"                   : ["padID", "text"],
-    "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev"],
+    "getAuthorsForRevisionSet"  : ["padID", "startRev", "endRev", "attrFilter"],
     "getReferencesForRevisionSet"  : ["padID", "startRev", "endRev"],
     "getRevisionSet"            : ["padID", "startRev", "endRev", "attrFilter"],
     "getRevisionsCount"         : ["padID", "attrFilter"],
