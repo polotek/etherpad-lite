@@ -290,15 +290,28 @@ var padeditbar = (function()
       // FIXME: Why is the type wrong?
       sel.type = sel.type.replace(/s$/, '');
 
-      var instance = yam.model.User.save(sel)
+      var instance = yam.model.User.save(sel);
+
+      if(!instance) {
+        
+      }
+
+      var displayText = instance.full_name || instance.name
         , mph = '[' + yam.camelize(sel.type, true) + ':' + sel.id + ']'
         , attrs = [
           ['yammer', mph]
         ]
         , text = '[' + mph + ']';
 
+      // pad the insert text so it's 
+      if(text.length < displayText.length) {
+        for(var i = text.length; i <= displayText.length; i++) {
+          text += ' ';
+        }
+      }
       padeditor.ace.callWithAce(function(ace) {
         ace.ace_insertText(text, attrs);
+        ace.ace_insertText(' ');
       }, 'setText', true);
 
       yam.publish('/ui/lightbox/close');
