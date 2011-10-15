@@ -20,6 +20,7 @@ var socket;
 var LineNumbersDisabled = false;
 var useMonospaceFontGlobal = false;
 var globalUserName = false;
+var leavingPage = false;
 $(document).ready(function()
 {
   //start the costum js
@@ -27,7 +28,7 @@ $(document).ready(function()
   getParams();
   handshake();
 });
-
+$(window).bind('beforeunload', function(){leavingPage = true;})
 $(window).unload(function()
 {
   pad.dispose();
@@ -669,7 +670,7 @@ var pad = {
     {
       padconnectionstatus.reconnecting();
     }
-    else if (newState == "DISCONNECTED")
+    else if (newState == "DISCONNECTED" && !leavingPage)
     {
       pad.diagnosticInfo.disconnectedMessage = message;
       pad.diagnosticInfo.padInitTime = pad.initTime;

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 var padconnectionstatus = (function()
 {
 
@@ -48,7 +47,7 @@ var padconnectionstatus = (function()
     {
       if(status.what == "disconnected")
         return;
-      
+
       status = {
         what: 'disconnected',
         why: msg
@@ -58,7 +57,6 @@ var padconnectionstatus = (function()
       {
         k = 'unknown';
       }
-      
       var cls = 'modaldialog cboxdisconnected cboxdisconnected_' + k;
       $("#connectionbox").get(0).className = cls;
       padmodals.showModal("#connectionbox", 500);
