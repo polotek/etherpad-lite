@@ -699,7 +699,7 @@ function handleClientReady(client, message)
         }
         console.log(pad2sessions[message.padId]);
         if (pad2sessions[message.padId]) console.log("Pad sessions: ", pad2sessions[message.padId].length)
-        if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 0) {
+        if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 10) {
           client.json.send({accessStatus: "padFull"});
         }
         //no access, send the client a message that tell him why
