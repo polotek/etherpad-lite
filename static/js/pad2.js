@@ -16,6 +16,8 @@
 
 /* global $, window */
 
+$ = window.parent.yam.$;
+
 var socket;
 var LineNumbersDisabled = false;
 var useMonospaceFontGlobal = false;
@@ -247,6 +249,7 @@ function handshake()
 
       //initalize the pad
       pad.init();
+      window.console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
       yam.publish('/ui/pages/padInit', [clientVars]);
       initalized = true;
 

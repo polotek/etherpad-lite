@@ -37,11 +37,5 @@
   "abiword" : null,
 
   /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
-  "loglevel": "INFO",
-
-  /* Tokie details */
-  "tokie" : {
-    "host" : "localhost",
-    "port" : 7070
-  }
+  "loglevel": "INFO"
 }

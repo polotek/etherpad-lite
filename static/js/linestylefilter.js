@@ -43,7 +43,6 @@ linestylefilter.getAuthorClassName = function(author)
 // but may be falsy if lineLength == 0
 linestylefilter.getLineStyleFilter = function(lineLength, aline, textAndClassFunc, apool)
 {
-
   var plugins_;
   if (typeof(plugins) != 'undefined')
   {
@@ -57,6 +56,7 @@ linestylefilter.getLineStyleFilter = function(lineLength, aline, textAndClassFun
   if (lineLength == 0) return textAndClassFunc;
 
   var nextAfterAuthorColors = textAndClassFunc;
+
 
   var authorColorFunc = (function()
   {

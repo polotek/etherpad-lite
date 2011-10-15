@@ -312,6 +312,10 @@ function OUTER(gscope)
     return rep;
   }
 
+  editorInfo.ace_getChangeset = function () {
+    return Changeset;
+  }
+
   var currentCallStack = null;
 
   function inCallStack(type, action)
@@ -1055,10 +1059,12 @@ function OUTER(gscope)
   function insertText(text, attrs) {
     text = text + '';
     if(!text) { return; }
-
+    window.console.log('insertText', arguments)
     if(isCaret()) {
+      window.console.log('here', text, attrs)
       performDocumentReplaceRange(rep.selStart, rep.selEnd, text, attrs);
     } else {
+      window.console.log('there')
       performDocumentReplaceSelection(text, attrs);
     }
   }
@@ -1977,7 +1983,7 @@ function OUTER(gscope)
     {
       return false;
     });
-
+    // window.console.log('infoStructs', infoStructs)
     var lastEntry;
     var lineStartOffset;
     if (infoStructs.length < 1) return;
@@ -2013,6 +2019,8 @@ function OUTER(gscope)
       else p2.literal(0, "nonopt");
       lastEntry = entry;
       p2.mark("spans");
+      // window.console.log('insertDomLines', entry, 'key', key)
+      // window.console.log('the rep', rep)
       getSpansForLine(entry, function(tokenText, tokenClass)
       {
         info.appendSpan(tokenText, tokenClass);
@@ -2522,6 +2530,7 @@ function OUTER(gscope)
     //           CCCC\n
     // end[0]:   <CCC end[1] CCC>-------\n
     var builder = Changeset.builder(rep.lines.totalWidth());
+    window.console.log('Changeset.builder totalWidth', rep.lines.totalWidth());
     buildKeepToStartOfRange(builder, start);
     buildRemoveRange(builder, start, end);
 
@@ -2533,7 +2542,7 @@ function OUTER(gscope)
     }
     builder.insert(newText, attrs, rep.apool);
     var cs = builder.toString();
-
+    window.console.log('builder.insert toString', cs)
     performDocumentApplyChangeset(cs);
   }
 
@@ -3675,6 +3684,7 @@ function OUTER(gscope)
           var toDelete = ((col2 - 1) % tabSize) + 1;
           performDocumentReplaceRange([lineNum, col - toDelete], [lineNum, col], '');
           //scrollSelectionIntoView();
+          // probably dont want to set handled true here... may need to do the additional custom event hooks still
           handled = true;
         }
       }
