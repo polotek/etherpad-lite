@@ -37,9 +37,7 @@ var tokieAuth = function(token, padID, callback) {
   // if we don't have tokie in the settings, then assume we're all good
   if (settings.tokie) {
     var body = '';
-    securityLogger.error('Tokie Auth started for: '+token);
     var req = http.get({host: settings.tokie.host, port: settings.tokie.port, path: '/v1/principals/' + token}, function(res){
-      securityLogger.error('tokie auth response');
       // collect all the data from the response
       res.on('data', function(d){
         body += d;

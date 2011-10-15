@@ -697,10 +697,15 @@ function handleClientReady(client, message)
           author = statusObject.authorID;
           callback();
         }
+        console.log(pad2sessions[message.padId]);
+        if (pad2sessions[message.padId]) console.log("Pad sessions: ", pad2sessions[message.padId].length)
+        if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 0) {
+          client.json.send({accessStatus: "padFull"});
+        }
         //no access, send the client a message that tell him why
         else
         {
-          client.json.send({accessStatus: statusObject.accessStatus})
+          client.json.send({accessStatus: statusObject.accessStatus});
         }
       });
     },

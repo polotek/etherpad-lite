@@ -219,7 +219,11 @@ function handshake()
     {
       if(obj.accessStatus == "deny")
       {
-        $("#editorloadingbox").html("<b>You do not have permission to access this pad</b>");
+        $("#editorloadingbox").html("<b>You do not have permission to access this pad.</b>");
+      }
+      if(obj.accessStatus == "padFull")
+      {
+        $("#editorloadingbox").html("<b>This Page has reached its maximum number of editors.</b>");
       }
       else if(obj.accessStatus == "needPassword")
       {
@@ -229,7 +233,7 @@ function handshake()
       }
       else if(obj.accessStatus == "wrongPassword")
       {
-        $("#editorloadingbox").html("<b>You're password was wrong</b><br>" +
+        $("#editorloadingbox").html("<b>Your password was wrong</b><br>" +
                                     "<input id='passwordinput' type='password' name='password'>"+
                                     "<button type='button' onclick='savePassword()'>ok</button>");
       }
