@@ -301,12 +301,12 @@ var padeditbar = (function()
         , attrs = [
           ['yammer', mph]
         ]
-        , text = '[' + mph + ']';
+        , text = displayText //'[' + mph + ']';
 
       // pad the insert text so it's 
       if(text.length < displayText.length) {
         for(var i = text.length; i <= displayText.length; i++) {
-          text += ' ';
+          //text += ' ';
         }
       }
       padeditor.ace.callWithAce(function(ace) {
