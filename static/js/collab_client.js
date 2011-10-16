@@ -35,7 +35,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
   var stateMessageSocketId;
   var channelState = "CONNECTING";
   var appLevelDisconnectReason = null;
-  var leavingPage = false;
 
   var lastCommitTime = 0;
   var initialStartConnectTime = 0;
@@ -75,10 +74,8 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
     onServerMessage: function()
     {}
   };
-  $(window).bind('beforeunload', function(){ leavingPage = true;})
   $(window).bind("unload", function()
   {
-    leavingPage = true;
     if (socket)
     {
 /*socket.onclosed = function() {};
@@ -113,8 +110,7 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
       socket.disconnect();
     }
     socket = null;
-    console.log("Leaving Page? ", leavingPage);
-    if(!leavingPage){setChannelState("DISCONNECTED", reason);}
+    setChannelState("DISCONNECTED", reason);
   }
 
   function dmesg(str)
