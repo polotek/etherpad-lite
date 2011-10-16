@@ -693,7 +693,7 @@ function handleClientReady(client, message)
         //access was granted
         if(statusObject.accessStatus == "grant")
         {
-          if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 10) {
+          if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 0) {
             client.json.send({accessStatus: "padFull"});
           }
           author = statusObject.authorID;
@@ -803,8 +803,6 @@ function handleClientReady(client, message)
 
       //Saves in pad2sessions that this session belongs to this pad
       pad2sessions[message.padId].push(sessionId);
-
-      console.error("SESSION INFO: ", pad2sessions[message.padId], "Length of sessions: "+pad2sessions[message.padId].length);
 
       //prepare all values for the wire
       var atext = Changeset.cloneAText(pad.atext);

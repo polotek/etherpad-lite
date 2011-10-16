@@ -212,19 +212,29 @@ function handshake()
 
   var receivedClientVars = false;
   var initalized = false;
+  var denied = false;
 
   socket.on('message', function(obj)
   {
+    if (denied) {
+      console.log(obj);
+    }
     //the access was not granted, give the user a message
-    if(!receivedClientVars && obj.accessStatus)
+    else if(!receivedClientVars && obj.accessStatus)
     {
       if(obj.accessStatus == "deny")
       {
+        denied = true;
         $("#editorloadingbox").html("<b>You do not have permission to access this pad.</b>");
+        $(".yj-current-collaborators .yj-spinner").hide();
+        socket.disconnect();
       }
       if(obj.accessStatus == "padFull")
       {
+        denied = true;
         $("#editorloadingbox").html("<b>This Page has reached its maximum number of editors.</b>");
+        $(".yj-current-collaborators .yj-spinner").hide();
+        socket.disconnect();
       }
       else if(obj.accessStatus == "needPassword")
       {
