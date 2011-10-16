@@ -693,7 +693,7 @@ function handleClientReady(client, message)
         //access was granted
         if(statusObject.accessStatus == "grant")
         {
-          if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 0) {
+          if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 10) {
             client.json.send({accessStatus: "padFull"});
             return; // don't send any more messages
           }
