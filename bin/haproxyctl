@@ -1,4 +1,4 @@
-#!/opt/ruby-enterprise/bin/ruby
+#!/usr/bin/env ruby
 
 require 'socket'
 
