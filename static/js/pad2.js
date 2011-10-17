@@ -249,7 +249,6 @@ function handshake()
 
       //initalize the pad
       pad.init();
-      window.console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
       yam.publish('/ui/pages/padInit', [clientVars]);
       initalized = true;
 
