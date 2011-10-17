@@ -29,7 +29,7 @@
     <option value="heading:1">Heading 1</option>
     <option value="heading:2">Heading 2</option>
     <option value="heading:3">Heading 3</option>
-    <option value="heading:4">Heading 4</option>            
+    <option value="heading:4">Heading 4</option>
   </select>
 </li>
 <li onClick="window.pad&&pad.editbarClick('bold');return false" >
@@ -126,7 +126,7 @@
   </div>
 
   <div id="myuser">
-  
+
      <div id="mycolorpicker">
         <div id="colorpicker"></div>
 <!--
@@ -146,33 +146,33 @@
     <div id="myusernameform"><input type="text" id="myusernameedit" disabled="disabled" /></div>
     <div id="mystatusform"><input type="text" id="mystatusedit" disabled="disabled" /></div>
   </div>
-  
+
   <div id="otherusers">
     <div id="guestprompts"><!-- --></div>
-    
+
     <table id="otheruserstable" cellspacing="0" cellpadding="0" border="0">
   	<tr>
   	<td>
   	</td>
     </tr>
     </table>
-    
+
     <div id="nootherusers">
     </div>
   </div>
-  
+
   <div id="userlistbuttonarea">
     <!--<a href="javascript:void(0)" id="sharebutton">Share</a>-->
   </div>
-  
-</div> 
+
+</div>
 <!-- /padusers -->
-  
-  
+
+
 <!--<div id="users">
 
 	<!-- some example code so I can make the css --*>
-	
+
 </div>-->
 
 <div id="editorcontainerbox">
@@ -192,19 +192,19 @@
 <div id="import">
   Import from text file, HTML, PDF, Word, ODT or RTF:<br/><br/>
   <form id="importform" method="post" action="" target="importiframe" enctype="multipart/form-data">
-    <div class="importformdiv" id="importformfilediv"> 
-      <input type="file" name="file" size="15" id="importfileinput" /> 
-      <div class="importmessage" id="importmessagefail"></div> 
-    </div> 
-  <div class="importmessage" id="importmessagesuccess">Successful!</div> 
-  <div class="importformdiv" id="importformsubmitdiv"> 
-    <input type="hidden" name="padId" value="blpmaXT35R" /> 
-    <span class="nowrap"> 
-      <input type="submit" name="submit" value="Import Now" disabled="disabled" id="importsubmitinput" /> 
-      <img alt="" id="importstatusball" src="../static/img/loading.gif" align="top" /> 
-      <img alt="" id="importarrow" src="../static/img/leftarrow.png" align="top" /> 
-    </span> 
-  </div> 
+    <div class="importformdiv" id="importformfilediv">
+      <input type="file" name="file" size="15" id="importfileinput" />
+      <div class="importmessage" id="importmessagefail"></div>
+    </div>
+  <div class="importmessage" id="importmessagesuccess">Successful!</div>
+  <div class="importformdiv" id="importformsubmitdiv">
+    <input type="hidden" name="padId" value="blpmaXT35R" />
+    <span class="nowrap">
+      <input type="submit" name="submit" value="Import Now" disabled="disabled" id="importsubmitinput" />
+      <img alt="" id="importstatusball" src="../static/img/loading.gif" align="top" />
+      <img alt="" id="importarrow" src="../static/img/leftarrow.png" align="top" />
+    </span>
+  </div>
 </form>
 </div>
 
@@ -218,9 +218,9 @@
   <a id="exportpdfa" target="_blank" class="exportlink"><div class="exporttype" id="exportpdf">PDF</div></a>
   <a id="exportopena" target="_blank" class="exportlink"><div class="exporttype" id="exportopen">OpenDocument</div></a>
   <a id="exportwordlea" target="_blank" onClick="padimpexp.export2Wordle();return false;" class="exportlink"><div class="exporttype" id="exportwordle">Wordle</div></a>
-  <form id="wordlepost" name="wall" action="http://wordle.net/advanced" method="POST" style="margin-left:0px;"> 
-    <div id="hidetext" style=""><textarea id="text" name="text" id="text" style="display:none;">Coming soon!</textarea></div> 
-  </form> 
+  <form id="wordlepost" name="wall" action="http://wordle.net/advanced" method="POST" style="margin-left:0px;">
+    <div id="hidetext" style=""><textarea id="text" name="text" id="text" style="display:none;">Coming soon!</textarea></div>
+  </form>
 </div>
 </div>
 
@@ -242,7 +242,7 @@ Use this link to share a read-only version of your pad:<input id="readonlyInput"
 <div id="chatthrob">
 
 </div>
-
+<!--
 <div id="chaticon">
 <a onClick="chat.show();return false;"
 	title="Open the chat for this pad">
@@ -251,7 +251,7 @@ Use this link to share a read-only version of your pad:<input id="readonlyInput"
 </a>
 <span id="chatcounter">0</span>
 </div>
-
+-->
 <div id="chatbox">
   <div id="titlebar"><span id ="titlelabel">Chat</span><a id="titlecross" onClick="chat.hide();return false;">-&nbsp;</a></div>
   <div id="chattext" class="authorColors"></div>
@@ -286,49 +286,45 @@ Use this link to share a read-only version of your pad:<input id="readonlyInput"
 	<h2 class="h2_unauth">No Authorization.</h2>
 	<div id="disconnected_looping">
 		<p>
-			<b>We're having trouble talking to the EtherPad lite synchronization server.</b>
-			You may be connecting through an incompatible firewall or proxy server.
+			<b>Sorry, but we were unable to connect to the server.</b>
 		</p>
 	</div>
 	<div id="disconnected_initsocketfail">
 		<p>
-			<b>We were unable to connect to the EtherPad lite synchronization server.</b>
-			This may be due to an incompatibility with your web browser or internet connection.
+			<b>Sorry, but we were unable to connect to the server.</b>
 		</p>
 	</div>
 	<div id="disconnected_userdup">
 		<p>
-			<b>You seem to have opened this pad in another browser window.</b>
-			If you'd like to use this window instead, you can reconnect.
+			<b>This Page is open in another window.</b>
 		</p>
 	</div>
 	<div id="disconnected_unknown">
 		<p>
-			<b>Lost connection with the EtherPad lite synchronization server.</b> This may be due to a loss of network connectivity.
-		</p>
+			<b>We're sorry but we lost connection with the server</b>
 	</div>
 	<div id="disconnected_slowcommit">
 		<p>
-			<b>Server not responding.</b> This may be due to network connectivity issues or high load on the server.
+			<b>Sorry, but we were unable to connect to the server.</b>
 		</p>
 	</div>
 	<div id="disconnected_unauth">
 		<p>
-			Your browser's credentials or permissions have changed while viewing this pad. Try reconnecting.
+			<b>You do not have permission to edit this Page.</b>
 		</p>
 	</div>
 	<div id="disconnected_deleted">
 		<p>
-			This pad was deleted.
+			<b>You do not have permission to edit this Page.</b>
 		</p>
 	</div>
 	<div id="reconnect_advise">
 		<p>
-			If this continues to happen, please let us know
+			<b>Sorry, but we were unable to connect to the server.</b>
 		</p>
 	</div>
 	<div id="reconnect_form">
-		<button id="forcereconnect">Reconnect Now</button>
+		<button id="forcereconnect">Try Again</button>
 	</div>
 </div>
 
