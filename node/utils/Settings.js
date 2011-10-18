@@ -58,6 +58,10 @@ exports.abiword = null;
  */
 exports.loglevel = "INFO";
 
+exports.logDirectory = "";
+
+exports.archiveDirectory = "";
+
 exports.tokie = false;
 
 //read the settings sync

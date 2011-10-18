@@ -39,6 +39,10 @@
   /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
   "loglevel": "INFO",
 
+  "logDirectory": "logs",
+
+  "archiveDirectory": "logs/archives",
+
   /* Tokie details */
   "tokie" : {
     "host" : "localhost",
