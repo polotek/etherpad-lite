@@ -48,5 +48,7 @@
   "tokie" : {
     "host" : "localhost",
     "port" : 7070
-  }
+  },
+
+  "env": "development"
 }
