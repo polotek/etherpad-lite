@@ -7,6 +7,7 @@
   //Ip and port which etherpad should bind at
   "ip": "0.0.0.0",
   "port" : 9001,
+  "env": "production",
 
   //The Type of the database. You can choose between sqlite and mysql
   "dbType" : "dirty",
@@ -48,7 +49,5 @@
   "tokie" : {
     "host" : "localhost",
     "port" : 7070
-  },
-
-  "env": "development"
+  }
 }
