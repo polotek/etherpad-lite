@@ -24,7 +24,7 @@ var nopt = require('nopt');
 var log4js = require('log4js');
 var os = require("os");
 var socketio = require('socket.io');
-var fs = require('fs');
+var fs = require('node-fs');
 var settings = require('./utils/Settings');
 var db = require('./db/DB');
 var async = require('async');
@@ -50,6 +50,70 @@ var argv = nopt({
     , 'e': ['--environment']
 }, process.argv);
 
+//set loglevel
+log4js.setGlobalLogLevel(settings.loglevel);
+var port = argv.port || settings.port;
+var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port + '%n');
+
+var logDirectory = '';
+var archiveDirectory = '';
+
+var updateLogDirectories = function()
+{
+  try
+  {
+    logDirectory = settings.logDirectory.trim().length == 0 ? 'logs' : settings.logDirectory;
+    archiveDirectory = settings.archiveDirectory.trim().length == 0 ? 'logs/archives' : settings.archiveDirectory;
+  }
+  catch(e)
+  {
+    log4js.clearAppenders();
+    log4js.addAppender(log4js.consoleAppender());
+    console.log('Error updating log directory from settings.json. Pushing logs to console');
+    logDirectory = 'logs';
+    archiveDirectory = 'logs/archives';
+  }
+}
+
+// Sets up logging directory by reading in the directory path from 
+// externally configurable JSON file.
+var setupLogging = function()
+{ 
+  updateLogDirectories();
+  
+  if(!path.existsSync(logDirectory))
+  {
+    fs.mkdirSync(logDirectory, 0755, true);
+  }
+  if(!path.existsSync(archiveDirectory))
+  {
+    fs.mkdirSync(archiveDirectory, 0755, true);
+  }
+
+  log4js.clearAppenders();
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/api.log'), customPatternLayout), 'apiLog');
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
+  if(!settings.logDirectory)
+  {
+    log4js.clearAppenders();
+    log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  }
+}
+
+try
+{
+  setupLogging();
+}
+catch (e)
+{
+  log4js.clearAppenders();
+  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+}
+
+var runtimeLog = log4js.getLogger('runtimeLog');
+
 //try to get the git version
 var version = "";
 try
@@ -58,22 +122,21 @@ try
   var refPath = path.join(__dirname, "../.git/") + ref.substring(5, ref.indexOf("\n"));
   version = fs.readFileSync(refPath, "utf-8");
   version = version.substring(0, 7);
-  console.log("Your Etherpad Lite git version is " + version);
+  runtimeLog.info("Your Etherpad Lite git version is " + version);
 }
 catch(e)
 {
-  console.warn("Can't get git version for server header\n" + e.message)
+  runtimeLog.warn("Can't get git version for server header\n" + e.message)
 }
 
-console.log("Report bugs at https://github.com/Pita/etherpad-lite/issues")
+runtimeLog.info("Report bugs at https://github.com/Pita/etherpad-lite/issues")
 
 var serverName = "Etherpad-Lite " + version + " (http://j.mp/ep-lite)";
 
 //cache 6 hours
 exports.maxAge = 1000*60*60*6;
 
-//set loglevel
-log4js.setGlobalLogLevel(settings.loglevel);
+
 
 async.waterfall([
   //initalize the database
@@ -98,10 +161,12 @@ async.waterfall([
     socketIORouter = require("./handler/SocketIORouter");
 
     //install logging
-    var httpLogger = log4js.getLogger("http");
+    var httpLogger = log4js.getLogger("httpLog");
+    
     app.configure(function()
     {
-      app.use(log4js.connectLogger(httpLogger, { level: log4js.levels.INFO, format: ':status, :method :url'}));
+      //app.use(log4js.connectLogger(httpLogger, { level: log4js.levels.INFO, format: ':status, :method :url'}));
+      app.use(log4js.connectLogger(httpLogger));
       app.use(express.cookieParser());
     });
 
@@ -296,7 +361,8 @@ async.waterfall([
       });
     });
 
-    var apiLogger = log4js.getLogger("API");
+
+    var apiLogger = log4js.getLogger("apiLog");
 
     //api middleware validates http verbs and api endpoints
     function apiMiddleware(req, res, next){
@@ -341,7 +407,7 @@ async.waterfall([
     {
       new formidable.IncomingForm().parse(req, function(err, fields, files)
       {
-        console.log("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
+        runtimeLog.info("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
         res.end("OK");
       });
     });
@@ -351,7 +417,7 @@ async.waterfall([
     {
       new formidable.IncomingForm().parse(req, function(err, fields, files)
       {
-        console.error("CLIENT SIDE JAVASCRIPT ERROR: " + fields.errorInfo);
+        runtimeLog.error("CLIENT SIDE JAVASCRIPT ERROR: " + fields.errorInfo);
         res.end("OK");
       });
     });
@@ -389,9 +455,8 @@ async.waterfall([
     });
 
     //let the server listen
-    var port = argv.port || settings.port;
     app.listen(port, settings.ip);
-    console.log("Server is listening at " + settings.ip + ":" + port);
+    runtimeLog.info("Server is listening at " + settings.ip + ":" + port);
 
     var onShutdown = false;
     var shutdownCalled = false;
@@ -402,16 +467,16 @@ async.waterfall([
 
       if(err && err.stack)
       {
-        console.error(err.stack);
+        runtimeLog.error(err.stack);
       }
       else if(err)
       {
-        console.error(err);
+        runtimeLog.error(err);
       }
 
       // If we already tried to run shutdown and get another signal hard kill our pid
       if (shutdownCalled) {
-        console.error('hard kill')
+        runtimeLog.error('hard kill')
         return process.kill(process.pid, 'SIGKILL')
       }
       shutdownCalled = true;
@@ -420,7 +485,7 @@ async.waterfall([
       if(onShutdown) return;
       onShutdown = true;
 
-      console.log("graceful shutdown...");
+      runtimeLog.info("graceful shutdown...");
 
       //stop the http server
       app.close();
@@ -429,16 +494,16 @@ async.waterfall([
       if (db && db.db && db.db.doShutdown) {
         db.db.doShutdown(function()
         {
-          console.log("db sucessfully closed.");
+          runtimeLog.info("db sucessfully closed.");
           process.exit();
         });
       } else {
-        console.log('no db shutdown.')
+        runtimeLog.info('no db shutdown.')
         process.exit();
       }
 
       setTimeout(function(){
-        console.error('shutdown timeout')
+        runtimeLog.error('shutdown timeout')
         process.exit(1);
       }, 3000);
     }
@@ -451,16 +516,39 @@ async.waterfall([
       process.on('SIGINT', gracefulShutdown);
     }
 
-    process.on('SIGHUP', gracefulShutdown);
+    /**
+      * This function rotates logs by moving the current logs to the "archives/".
+      * When moving to archives, it renames the log file by appending timestamp to it.
+      * Eg: http.log_9_14_2011-23_17_3_763
+      * It then reloads log4j's appenders by forcing them to create new log files.  
+      */
+    function rotateLogs()
+    {
+      var date = new Date()
+      , newFileTimeStamp = date.getMonth()+'_'+date.getDate()+'_'+date.getFullYear()+'-'+date.getUTCHours()+
+        '_'+date.getUTCMinutes()+'_'+date.getUTCSeconds()+'_'+date.getUTCMilliseconds();
+      
+      fs.readdirSync(logDirectory).forEach(function(fileName) {
+        var filePath = path.normalize(logDirectory + '/' + fileName);
+        if( !fs.statSync(filePath).isDirectory())
+        {
+          fs.renameSync(filePath, path.normalize(archiveDirectory + '/' + fileName + '_' + newFileTimeStamp));
+        }
+      });
+      setupLogging();
+    }
+
+    // On SIGHUP, we will rotate logs.
+    process.on('SIGHUP', rotateLogs);
     process.on('SIGTERM', gracefulShutdown);
 
     process.on('uncaughtException', gracefulShutdown)
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
-    io.set('transports', ['xhr-polling', 'htmlfile', 'flashsocket', 'jsonp-polling']);
+    io.set('transports', ['xhr-polling', 'jsonp-polling']);
 
-    var socketIOLogger = log4js.getLogger("socket.io");
+    var socketIOLogger = log4js.getLogger("socketioLog");
     io.set('logger', {
       debug: function (str)
       {

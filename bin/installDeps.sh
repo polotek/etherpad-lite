@@ -1,7 +1,8 @@
 #!/bin/sh
 
 #Move to the folder where ep-lite is installed
-FOLDER=$0
+FOLDER=$(dirname $(stat -f $0))
+#FOLDER=$0
 cd $FOLDER
 
 echo 'install deps path' + pwd

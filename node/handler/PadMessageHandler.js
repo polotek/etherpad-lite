@@ -83,7 +83,7 @@ exports.kickSessionsFromPad = function(padID)
   if(!pad2sessions[padID])
     return;
 
-  //disconnect everyone from this pad
+  // everyone from this pad
   for(var i in pad2sessions[padID])
   {
     socketio.sockets.sockets[pad2sessions[padID][i]].json.send({disconnect:"deleted"});
@@ -137,7 +137,7 @@ exports.handleDisconnect = function(client)
   {
     if(pad2sessions[sessionPad][i] == client.id)
     {
-      delete pad2sessions[sessionPad][i];
+      pad2sessions[sessionPad].splice(i, 1);
       break;
     }
   }
@@ -587,7 +587,6 @@ exports.broadcastPublish = function(pad, rev, author, callback) {
   //go trough all sessions on this pad
   async.forEach(pad2sessions[pad.id],
     function(session, callback) {
-      console.error(arguments);
       socketio.sockets.sockets[session].json.send({
         type: "COLLABROOM",
         data: {
@@ -645,7 +644,7 @@ function _correctMarkersInPad(atext, apool) {
 }
 
 /**
- * Handles a CLIENT_READY. A CLIENT_READY is the first message from the client to the server. The Client sends his token
+ * Handles a. A CLIENT_READY is the first message from the client to the server. The Client sends his token
  * and the pad it wants to enter. The Server answers with the inital values (clientVars) of the pad
  * @param client the client that send this message
  * @param message the message from the client
@@ -694,13 +693,17 @@ function handleClientReady(client, message)
         //access was granted
         if(statusObject.accessStatus == "grant")
         {
+          if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 10) {
+            client.json.send({accessStatus: "padFull"});
+            return; // don't send any more messages
+          }
           author = statusObject.authorID;
           callback();
         }
         //no access, send the client a message that tell him why
         else
         {
-          client.json.send({accessStatus: statusObject.accessStatus})
+          client.json.send({accessStatus: statusObject.accessStatus});
         }
       });
     },

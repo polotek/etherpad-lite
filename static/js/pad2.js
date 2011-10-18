@@ -22,6 +22,7 @@ var socket;
 var LineNumbersDisabled = false;
 var useMonospaceFontGlobal = false;
 var globalUserName = false;
+var leavingPage = false;
 $(document).ready(function()
 {
   //start the costum js
@@ -29,7 +30,7 @@ $(document).ready(function()
   getParams();
   handshake();
 });
-
+$(window).bind('beforeunload', function(){leavingPage = true;})
 $(window).unload(function()
 {
   pad.dispose();
@@ -213,15 +214,29 @@ function handshake()
 
   var receivedClientVars = false;
   var initalized = false;
+  var denied = false;
 
   socket.on('message', function(obj)
   {
+    if (denied) {
+      console.log(obj);
+    }
     //the access was not granted, give the user a message
-    if(!receivedClientVars && obj.accessStatus)
+    else if(!receivedClientVars && obj.accessStatus)
     {
       if(obj.accessStatus == "deny")
       {
-        $("#editorloadingbox").html("<b>You do not have permission to access this pad</b>");
+        denied = true;
+        $("#editorloadingbox").html("<b>You do not have permission to access this pad.</b>");
+        $(".yj-current-collaborators .yj-spinner").hide();
+        socket.disconnect();
+      }
+      if(obj.accessStatus == "padFull")
+      {
+        denied = true;
+        $("#editorloadingbox").html("<b>This Page has reached its maximum number of editors.</b>");
+        $(".yj-current-collaborators .yj-spinner").hide();
+        socket.disconnect();
       }
       else if(obj.accessStatus == "needPassword")
       {
@@ -231,7 +246,7 @@ function handshake()
       }
       else if(obj.accessStatus == "wrongPassword")
       {
-        $("#editorloadingbox").html("<b>You're password was wrong</b><br>" +
+        $("#editorloadingbox").html("<b>Your password was wrong</b><br>" +
                                     "<input id='passwordinput' type='password' name='password'>"+
                                     "<button type='button' onclick='savePassword()'>ok</button>");
       }
@@ -543,12 +558,16 @@ var pad = {
   },
   handleUserJoin: function(userInfo)
   {
+    // delete old cookies
+    if(userInfo.userId.indexOf('.') !== -1) { createCookie('token', '', 0); }
     yam.publish('/ui/pages/addOrUpdateUser', [userInfo]);
     paduserlist.userJoinOrUpdate(userInfo);
     //padchat.handleUserJoinOrUpdate(userInfo);
   },
   handleUserUpdate: function(userInfo)
   {
+    // delete old cookies
+    if(userInfo.userId.indexOf('.') !== -1) { createCookie('token', '', 0); }
     yam.publish('/ui/pages/addOrUpdateUser', [userInfo]);
     paduserlist.userJoinOrUpdate(userInfo);
     //padchat.handleUserJoinOrUpdate(userInfo);
@@ -667,7 +686,7 @@ var pad = {
     {
       padconnectionstatus.reconnecting();
     }
-    else if (newState == "DISCONNECTED")
+    else if (newState == "DISCONNECTED" && !leavingPage)
     {
       pad.diagnosticInfo.disconnectedMessage = message;
       pad.diagnosticInfo.padInitTime = pad.initTime;

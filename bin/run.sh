@@ -1,7 +1,8 @@
 #!/bin/sh
 
 #Move to the folder where ep-lite is installed
-FOLDER=$0
+FOLDER=$(dirname $(stat -f $0))
+#FOLDER=$0
 cd $FOLDER
 
 echo 'run.sh' + pwd
@@ -19,7 +20,7 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 #prepare the enviroment
-bin/installDeps.sh || exit 1
+#bin/installDeps.sh || exit 1
 
 #Move to the node folder and start
 echo "start..."

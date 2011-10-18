@@ -74,7 +74,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
     onServerMessage: function()
     {}
   };
-
   $(window).bind("unload", function()
   {
     if (socket)

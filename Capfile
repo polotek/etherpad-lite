@@ -38,6 +38,11 @@ namespace :deploy do
   end 
   after "deploy:update_code", "deploy:update_code_fix_permissions"
 
+  task :update_application_configuration do
+    run "cp #{current_release}/settings-#{stage}.json #{current_release}/settings.json"
+  end
+  after "deploy:update_code", "deploy:update_application_configuration"
+
   task :start do
     find_servers.sort.each do |server|
       ports.each do |port|
@@ -61,28 +66,12 @@ namespace :deploy do
   before "deploy:restart", "deploy:update_system_etc"
 
   task :restart do
-    horrible_sh  = [:enable, :disable].map do |hacmd|
-      <<-DISABLE_IN_HAPROXY
-        nodes=`curl -s 'http://localhost:8081/;csv;norefresh'|grep node-|wc -l|awk '{print $1}'`
-        hadis=""
-        for nodeidx in {1..$nodes}; do
-          hadis="$hadis;#{hacmd} server paddie/$nodeidx"
-        done
-        echo '$hidis' | sudo socat - /var/run/haproxy/paddie'
-        true
-      DISABLE_IN_HAPROXY
-    end
-
     find_servers.sort.each do |server|
-      ## disable nodejs backends in haproxy
-      run horrible_sh[0], :hosts => [ server ]
-
+      sudo "#{current_release}/bin/haproxyctl disable; sleep 3"
+      sudo "initctl emit stop-all-paddies; sleep 3"
       ports.each do |port|
-        sudo "restart paddie PORT=#{port} ENV=#{stage}", :hosts => [ server ]
+        sudo "start paddie PORT=#{port}; sleep 3"
       end
-
-      ## enable nodejs backends in haproxy
-      run horrible_sh[1], :hosts => [ server ]
     end
   end
 end

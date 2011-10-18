@@ -3831,7 +3831,7 @@ function OUTER(gscope)
     if (!isEditable) return;
     var handled;
     handled =  (execCustomEventHooks('handleKeyEvent', evt) === false);
-    window.console.log('handleKeyEvent', handled)
+    //window.console.log('handleKeyEvent', handled)
     if (handled) {
       evt.preventDefault();
       return;
