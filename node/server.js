@@ -407,7 +407,7 @@ async.waterfall([
     {
       new formidable.IncomingForm().parse(req, function(err, fields, files)
       {
-        runtimeLog.info("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
+        runtimeLog.error("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
         res.end("OK");
       });
     });
