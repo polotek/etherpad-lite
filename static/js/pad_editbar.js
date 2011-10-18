@@ -83,6 +83,7 @@ var padeditbar = (function()
 
       this._initMentionButton();
       this._initLinkerButton();
+      this._initAttachmentButton();
     },
     isEnabled: function()
     {
@@ -237,13 +238,47 @@ var padeditbar = (function()
         syncAnimation.done();
       }
     },
+    _insertTextLink: function(url, text, opts) {
+      var attrs = [
+        ['url', url]
+      ];
+
+      padeditor.ace.callWithAce(function(ace) {
+        ace.ace_insertText(text, attrs);
+        ace.ace_insertText(' ');
+      }, 'setText', true);
+      padeditor.ace.focus();
+    },
+    _insertReferenceLink: function(linkType, linkData) {
+      // FIXME: Why is the type wrong?
+      linkData.type = linkData.type.replace(/s$/, '');
+
+      var model = yam.model.getModelByType(linkData.type);
+      if(model) {
+        var instance = model.save(linkData)
+          , mph = '[' + yam.camelize(linkData.type, true) + ':' + linkData.id + ']'
+          , attrs = [
+            ['yammer', mph]
+          ]
+          , text = '[' + mph + ']';
+
+        padeditor.ace.callWithAce(function(ace) {
+          ace.ace_insertText(text, attrs);
+        }, 'setText', true);
+      } else {
+        yam.log('pages', '[Error] attachment failed ', linkData);        
+      }
+      padeditor.ace.focus();
+    },
     _initMentionButton: function()
     {
       var self = this
         , $btn = $('#menu_right').find('.mention-icon-btn')
-        , title = $btn.attr('title')
-        , buttonText = 'Link'
-        , template = '<div class="yj-lightbox-content yj-quick-link-lightbox">\
+        , title = yam.tr( $btn.attr('title') );
+
+      var mentioner = self.mentioner = {
+        buttonText: yam.tr('Link')
+        , template: '<div class="yj-lightbox-content yj-quick-link-lightbox">\
                         <div class="yj-bubbles-container">\
                         <div class="yj-bubbles">\
                           <input type="text" class="yj-bubble-field" tabindex="1" wrap="off" />\
@@ -252,13 +287,12 @@ var padeditbar = (function()
                         <div class="yj-spinner"><span class="yj-inline-icon"></span></div>\
                         <div class="clear"></div>\
                       </div>'
-        , typeAheadOpts = {
+        }
+
+      var typeAheadOpts = {
           maxResults: 1
-          , onSelect: function(sel, evt) {
-            self.selection = sel;
-            if(self.$mentionField) {
-              self.$mentionField.val(sel.full_name || sel.name || '').focus();
-            }
+          , onSelect: function(linkData, evt) {
+            return self._onMentionSubmit(linkData);
           }
           , minSize: 200
           , completableModels : ['users']
@@ -266,59 +300,44 @@ var padeditbar = (function()
         };
 
       $btn.click(function() {
-        self.selection = null;
-        self.$content = jq(Mustache.to_html(template, { buttonText: buttonText }));
-        self.$mentionField = self.$content.find('.yj-bubble-field');
-        self.$submit = self.$content.find('.yj-bubbles-form-submit')
-                          .click(jq.proxy(self._onMentionSubmit, self));
+        mentioner.$content = jq(Mustache.to_html(mentioner.template, { buttonText: mentioner.buttonText }));
+        mentioner.$mentionField = mentioner.$content.find('.yj-bubble-field');
+        mentioner.$submit = mentioner.$content.find('.yj-bubbles-form-submit');
 
-        yam.ui.shared.typeAhead.registerField(self.$mentionField, typeAheadOpts);
+        yam.ui.shared.typeAhead.registerField(mentioner.$mentionField, typeAheadOpts);
 
         var lightboxOpts = { 
           title: title
           , width: 500
-          , html: self.$content
-          , transition: 'none' // transition over-animates when textarea resizing
-          , onClosed: jq.proxy(self._onMentionClose, self)
+          , html: mentioner.$content
+          , transition: 'none'
+          , onClosed: function() {
+            if(mentioner.$mentionField) {
+              yam.ui.shared.typeAhead.removeField(mentioner.$mentionField);
+            }
+            if(mentioner.$content) {
+              mentioner.$content.empty().remove();
+            }
+          }
         };
 
         yam.publish('/ui/lightbox/open', [lightboxOpts]);
       });
     },
-    _onMentionSubmit: function() {
-      var sel = this.selection;
-      // FIXME: Why is the type wrong?
-      sel.type = sel.type.replace(/s$/, '');
-
-      var instance = yam.model.User.save(sel)
-        , mph = '[' + yam.camelize(sel.type, true) + ':' + sel.id + ']'
-        , attrs = [
-          ['yammer', mph]
-        ]
-        , text = '[' + mph + ']';
-
-      padeditor.ace.callWithAce(function(ace) {
-        ace.ace_insertText(text, attrs);
-      }, 'setText', true);
-
+    _onMentionSubmit: function(linkData) {
+      if(!linkData) { return false; }
+      this._insertReferenceLink('user', linkData);
       yam.publish('/ui/lightbox/close');
-      padeditor.ace.focus();
-    },
-    _onMentionClose: function() {
-      if(this.$mentionField) {
-        yam.ui.shared.typeAhead.removeField(this.$mentionField);
-      }
-      if(this.$content) {
-        this.$content.empty().remove();
-      }
     },
     _initLinkerButton: function()
     {
       var self = this
         , $btn = $('#menu_right').find('.link-app-icon-btn')
-        , title = $btn.attr('title')
-        , buttonText = 'Link'
-        , template = '<div class="yj-lightbox-content yj-quick-link-lightbox">\
+        , title = yam.tr( $btn.attr('title') );
+
+      var linker = self.linker = {
+        buttonText: yam.tr('Link')
+        , template: '<div class="yj-lightbox-content yj-quick-link-lightbox">\
                         <div class="yj-bubbles-container">\
                         <div class="yj-bubbles">\
                           <input type="text" name="link_url" class="link-url yj-bubble-field" tabindex="1" wrap="off" />\
@@ -330,56 +349,70 @@ var padeditbar = (function()
                         <div class="yj-spinner"><span class="yj-inline-icon"></span></div>\
                         <div class="clear"></div>\
                       </div>'
-        , typeAheadOpts = {
-          maxResults: 1
-          , onSelect: function(sel, evt) {
-            self.selection = sel;
-          }
-          , minSize: 200
-          , completableModels : ['users']
-          , includeEmails : this.includeEmails
-          , triggerStrings: []
-        };
+        }
 
       $btn.click(function() {
-        self.selection = null;
-        self.$content = jq(Mustache.to_html(template, { buttonText: buttonText }));
-        self.$submit = self.$content.find('.yj-bubbles-form-submit')
-                          .click(jq.proxy(self._onLinkerSubmit, self));
-
+        linker.$content = jq(Mustache.to_html(linker.template, { buttonText: linker.buttonText }));
+        linker.$submitBtn = linker.$content.find('.yj-bubbles-form-submit')
+            .click(jq.proxy(self._onLinkerSubmit, self));
 
         var lightboxOpts = { 
-          title: title
-          , width: 500
-          , html: self.$content
-          , transition: 'none' // transition over-animates when textarea resizing
-          , onClosed: jq.proxy(self._onLinkerClose, self)
-        };
+            title: title
+            , width: 500
+            , html: linker.$content
+            , transition: 'none' // transition over-animates when textarea resizing
+            , onClosed: function() {
+              if(linker.$content) {
+                linker.$content.empty().remove();
+              }
+            }
+          };
 
         yam.publish('/ui/lightbox/open', [lightboxOpts]);
       });
     },
-    _onLinkerSubmit: function() {
-      var url = this.$content.find('.link-url').val()
-        , text = this.$content.find('.link-text').val();
+    _onLinkerSubmit: function(evt) {
+      var linker = this.linker
+        , url = linker.$content.find('.link-url').val()
+        , text = linker.$content.find('.link-text').val();
 
       if(!url || !text) { return false; }
 
-      var attrs = [
-        ['url', url]
-      ];
-
-      padeditor.ace.callWithAce(function(ace) {
-        ace.ace_insertText(text, attrs);
-      }, 'setText', true);
-
+      this._insertTextLink(url, text);
       yam.publish('/ui/lightbox/close');
-      padeditor.ace.focus();
     },
-    _onLinkerClose: function() {
-      if(this.$content) {
-        this.$content.empty().remove();
+    _initAttachmentButton: function() {
+      var self = this
+        , $btn = $('#menu_right').find('.file-icon-btn')
+        , title = yam.tr( $btn.attr('title') )
+        , componentOpts = {
+          inLightbox: true
+          , defaultActionText: yam.tr('Link')
+        }
+        , lbOpts = {
+          title: yam.tr('Select an File')
+          , width: '810'
+          , height: '480'
+        };
+
+      $btn.click(function() {
+        self.attacher = yam.ui.general.LightboxManager.openComponent('yam.ui.attachments.Selector', componentOpts, lbOpts);
+        self.attacher.on('select', jq.proxy(self._onAttach, self));
+      });
+    },
+    _onAttach: function(linkData) {
+      if(!linkData) { return false; }
+      var comp = this.attacher
+        , type;
+      if(!comp) { return false; }
+
+      if((/file/i).test(comp.currentSelector)) {
+        type = 'uploaded_file';
+      } else if((/page/i).test(comp.currentSelector)) {
+        type = 'page';
       }
+      this._insertReferenceLink(type, linkData);
+      yam.publish('/ui/lightbox/close');
     }
   };
   return self;
