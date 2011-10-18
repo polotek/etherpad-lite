@@ -15,18 +15,19 @@
                    "filename" : "../var/dirty.db"
                  },
 
-  /* An Example of MySQL Configuration
-   "dbType" : "mysql",
-   "dbSettings" : {
-                    "user"    : "root",
-                    "host"    : "localhost",
-                    "password": "",
-                    "database": "store"
-                  },
+  /* An Example of PostgreSQL Configuration
+  "dbType" : "pgsql",
+
+  "dbSettings" : {
+     "user"    : "postgres", 
+     "host"    : "localhost", 
+     "password": "", 
+     "database": "yam_pages"
+  },
   */
 
   //the default text of a pad
-  "defaultPadText" : "Welcome to Etherpad Lite!\n\nThis pad text is synchronized as you type, so that everyone viewing this page sees the same text. This allows you to collaborate seamlessly on documents!\n\nEtherpad Lite on Github: http:\/\/j.mp/ep-lite\n",
+  "defaultPadText" : "Yammer Pages allow you to easily create and share content. Use Pages to share ideas, notes, policies, documentation and other information with this group.\n\nGetting Started Tips\n\n* Multiple users can edit this Page at the same time\n* Changes are automatically saved in real-time\n* Click Follow (above) to receive notifications when changes are made\n* Click Link (above) to link to related Pages and Files\n",
 
   /* if true, all css & js will be minified before sending to the client. This will improve the loading performance massivly,
      but makes it impossible to debug the javascript/css */
