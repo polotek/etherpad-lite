@@ -256,14 +256,25 @@ var padeditbar = (function()
       var model = yam.model.getModelByType(linkData.type);
       if(model) {
         var instance = model.save(linkData)
+          , displayText = instance.full_name || instance.name
           , mph = '[' + yam.camelize(linkData.type, true) + ':' + linkData.id + ']'
           , attrs = [
             ['yammer', mph]
           ]
-          , text = '[' + mph + ']';
+          , text = displayText;
+
+        // pad the insert text so it's 
+        /*
+        if(text.length < displayText.length) {
+          for(var i = text.length; i <= displayText.length; i++) {
+            //text += ' ';
+          }
+        }
+        */
 
         padeditor.ace.callWithAce(function(ace) {
           ace.ace_insertText(text, attrs);
+          ace.ace_insertText(' ');
         }, 'setText', true);
       } else {
         yam.log('pages', '[Error] attachment failed ', linkData);        

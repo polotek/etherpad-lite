@@ -69,6 +69,7 @@ function newSkipList()
 
   function _getPoint(targetLoc)
   {
+    // console.log('_getPoint', targetLoc)
     var numLevels = start.levels;
     var lvl = numLevels - 1;
     var i = -1,
@@ -97,6 +98,7 @@ function newSkipList()
         nodes[lvl] = n;
       }
     }
+    // window.console.log('_getPoint return val', {  nodes: nodes, idxs: idxs, loc: targetLoc, widthSkips: widthSkips});
     return {
       nodes: nodes,
       idxs: idxs,
