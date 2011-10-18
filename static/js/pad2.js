@@ -558,12 +558,16 @@ var pad = {
   },
   handleUserJoin: function(userInfo)
   {
+    // delete old cookies
+    if(userInfo.userId.indexOf('.') !== -1) { createCookie('token', '', 0); }
     yam.publish('/ui/pages/addOrUpdateUser', [userInfo]);
     paduserlist.userJoinOrUpdate(userInfo);
     //padchat.handleUserJoinOrUpdate(userInfo);
   },
   handleUserUpdate: function(userInfo)
   {
+    // delete old cookies
+    if(userInfo.userId.indexOf('.') !== -1) { createCookie('token', '', 0); }
     yam.publish('/ui/pages/addOrUpdateUser', [userInfo]);
     paduserlist.userJoinOrUpdate(userInfo);
     //padchat.handleUserJoinOrUpdate(userInfo);
