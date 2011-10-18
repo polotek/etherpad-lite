@@ -326,7 +326,7 @@ function OUTER(gscope)
     {
       console.error("Can't enter callstack " + type + ", already in " + currentCallStack.type);
     }
-
+    
     var profiling = false;
 
     function profileRest()
@@ -1059,12 +1059,11 @@ function OUTER(gscope)
   function insertText(text, attrs) {
     text = text + '';
     if(!text) { return; }
-    window.console.log('insertText', arguments)
+
     if(isCaret()) {
-      window.console.log('here', text, attrs)
+
       performDocumentReplaceRange(rep.selStart, rep.selEnd, text, attrs);
     } else {
-      window.console.log('there')
       performDocumentReplaceSelection(text, attrs);
     }
   }
@@ -1083,6 +1082,9 @@ function OUTER(gscope)
   editorInfo.ace_execCommand = execCommand;
   editorInfo.ace_replaceRange = replaceRange;
   editorInfo.ace_insertText = insertText;
+  editorInfo.ace_performDocumentReplaceRange = performDocumentReplaceRange;
+  editorInfo.ace_setSelection = setSelection;
+  editorInfo.ace_getPointForLineAndChar = getPointForLineAndChar;
 
   editorInfo.ace_getAttributeLookup = function() {
     return ATTRIBUTE_LOOKUP;
@@ -1094,7 +1096,6 @@ function OUTER(gscope)
       {
         return fn(editorInfo);
         }
-        
         
         
     if (normalize !== undefined)
@@ -2530,7 +2531,6 @@ function OUTER(gscope)
     //           CCCC\n
     // end[0]:   <CCC end[1] CCC>-------\n
     var builder = Changeset.builder(rep.lines.totalWidth());
-    window.console.log('Changeset.builder totalWidth', rep.lines.totalWidth());
     buildKeepToStartOfRange(builder, start);
     buildRemoveRange(builder, start, end);
 
@@ -2542,7 +2542,7 @@ function OUTER(gscope)
     }
     builder.insert(newText, attrs, rep.apool);
     var cs = builder.toString();
-    window.console.log('builder.insert toString', cs)
+
     performDocumentApplyChangeset(cs);
   }
 
@@ -3829,6 +3829,13 @@ function OUTER(gscope)
   {
     // if (DEBUG && window.DONT_INCORP) return;
     if (!isEditable) return;
+    var handled;
+    handled =  (execCustomEventHooks('handleKeyEvent', evt) === false);
+    window.console.log('handleKeyEvent', handled)
+    if (handled) {
+      evt.preventDefault();
+      return;
+    }
 
     var type = evt.type;
     var charCode = evt.charCode;
@@ -4426,6 +4433,7 @@ function OUTER(gscope)
 
   function setSelection(selection)
   {
+    // window.console.log('setSelection', selection)
     function copyPoint(pt)
     {
       return {
@@ -4683,6 +4691,7 @@ function OUTER(gscope)
         }
       }
     }
+    // window.console.log('setSelection end', rep.selStart[1])
   }
 
   function childIndex(n)
