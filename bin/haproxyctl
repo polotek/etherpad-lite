@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+require 'socket'
+
+module Haproxy
+  class Command
+    def self.run(command)
+      sock = UNIXSocket.open('/var/run/haproxy/paddie.sock')
+      sock.puts command
+      ret  = sock.map
+      sock.close
+      ret
+    end
+  end
+
+  class Control
+    def self.nodes
+      nodes = []
+      stats = Haproxy::Command.run("show stat")
+      stats[3..-1].each do |stat|
+        next if stat =~ /BACKEND/
+        next if stat =~ /FRONTEND/
+        nodes << stat
+      end
+    end
+
+    def self.enable
+      server_action(:enable)
+    end
+
+    def self.disable
+      server_action(:disable)
+    end
+
+    def self.server_action(action=:disable)
+      nodes.map{|node| node.split(',')[1]}.compact.each_with_index do |node, node_id|
+        Haproxy::Command.run("#{action} server paddies/##{node_id+1}")
+      end
+    end
+  end
+end
+
+case ARGV[0]
+  when 'enable' : Haproxy::Control.enable
+  when 'disable': Haproxy::Control.disable
+  else
+    puts "haproxyctl <enable|disable>"
+end
