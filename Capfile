@@ -68,7 +68,7 @@ namespace :deploy do
   task :restart do
     find_servers.sort.each do |server|
       sudo "#{current_release}/bin/haproxyctl disable; sleep 3"
-      sudo "initctl stop-all-paddies; sleep 3"
+      sudo "initctl emit stop-all-paddies; sleep 3"
       ports.each do |port|
         sudo "start paddie PORT=#{port}; sleep 3"
       end
