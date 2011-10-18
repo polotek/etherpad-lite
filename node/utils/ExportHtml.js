@@ -173,7 +173,7 @@ function getHTMLFromAtext(pad, atext)
       while (iter.hasNext())
       {
         // url is atomic, should only occur once per operation
-        var url;
+        var url, yammerRef;
         var o = iter.next();
         var propChanged = false;
         Changeset.eachAttribNumber(o.attribs, function (a)
@@ -192,8 +192,15 @@ function getHTMLFromAtext(pad, atext)
             }
           }
           var attr = apool.numToAttrib[a];
-          if(attr && attr[0] == 'url' && attr[1]) {
-            url = attr[1];
+          if(attr && attr[1]) {
+            switch(attr[0]) {
+              case 'url':
+                url = attr[1];
+                break;
+              case 'yammer':
+                yammerRef = attr[1];
+                break;
+            }
           }
         });
         for (var i = 0; i < propVals.length; i++)
@@ -263,10 +270,16 @@ function getHTMLFromAtext(pad, atext)
         var s = taker.take(chars);
 
         if(url) { emitOpenURL(url); }
+        if(yammerRef) { assem.append('<span class="yj-page-model-placeholder">'); }
 
-        assem.append(_escapeHTML(s));
+        if(yammerRef) {
+          assem.append(_escapeHTML(yammerRef));
+        } else {
+          assem.append(_escapeHTML(s));
+        }
 
         if(url) { emitCloseURL(); }
+        if(yammerRef) { assem.append('</span>'); }
 
         // reset url for next iteration
         url = null;
