@@ -4936,6 +4936,13 @@ function OUTER(gscope)
       bindEventHandler(document.documentElement, "compositionstart", handleCompositionEvent);
       bindEventHandler(document.documentElement, "compositionend", handleCompositionEvent);
     }
+    // extra yammer event handlers
+    var $ = parent.parent.yam.$;
+    $(document).mousedown(function (evt) {
+      execCustomEventHooks('aceMouseDown', evt)
+    }).mouseup(function (evt) {
+      execCustomEventHooks('aceMouseUp', evt)
+    });
   }
 
   function handleIEOuterClick(evt)
