@@ -30,6 +30,10 @@
   /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
   "loglevel": "DEBUG",
 
+  "logDirectory": "logs",
+
+  "archiveDirectory": "logs/archives",
+
   "tokie": {
         "host":"stagetokie-004.sjc1.yammer.com",
         "port":7080

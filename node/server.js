@@ -53,59 +53,66 @@ var argv = nopt({
 //set loglevel
 log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
-var customPatternLayout = log4js.layouts.patternLayout( '%r %p %c - %m port:' + port + '%n' );
+var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port + '%n');
 
-var loadConfiguration = function( )
+var logDirectory = '';
+var archiveDirectory = '';
+
+var updateLogDirectories = function()
 {
   try
   {
-    var jsonFile = fs.readFileSync('logHandler.json', 'utf-8' );
-    var jsonData = JSON.parse(jsonFile);
-    var logDirectory = jsonData[ 'logDirectory' ];
-    var archiveDirectory = jsonData[ 'archiveDirectory' ];
-    if( !path.existsSync( logDirectory ) )
-    {
-      fs.mkdirSync( logDirectory, 0755, true );
-    }
-    if( !path.existsSync( archiveDirectory ) )
-    {
-      fs.mkdirSync( archiveDirectory, 0755, true );
-    }
-    return [ logDirectory, archiveDirectory ];
+    logDirectory = settings.logDirectory.trim().length == 0 ? 'logs' : settings.logDirectory;
+    archiveDirectory = settings.archiveDirectory.trim().length == 0 ? 'logs/archives' : settings.archiveDirectory;
   }
-  catch ( e )
+  catch(e)
   {
-    log4js.addAppender( log4js.consoleAppender( ), 'consoleLog' );
-    log4js.getLogger('consoleLog').error( 'Error reading JSON file. Logs will be sent to node/logs\n' + e.message );
     log4js.clearAppenders();
-    return [ 'logs', 'logs/archives' ];
+    log4js.addAppender(log4js.consoleAppender());
+    console.log('Error updating log directory from settings.json. Pushing logs to console');
+    logDirectory = 'logs';
+    archiveDirectory = 'logs/archives';
   }
 }
-log4js.clearAppenders();
 
 // Sets up logging directory by reading in the directory path from 
 // externally configurable JSON file.
-var setupLogging = function( )
-{
-  //re-read the JSON 
-  var directories = loadConfiguration();
-  var logDirectory = directories[0] || 'logs'
-  , archiveDirectory = directories[1] || 'logs/archives';
+var setupLogging = function()
+{ 
+  updateLogDirectories();
   
-  log4js.clearAppenders( );
-  log4js.addAppender( log4js.fileAppender( path.normalize( logDirectory + '/http.log' ), customPatternLayout ), 'httpLog' );
-  log4js.addAppender( log4js.fileAppender( path.normalize( logDirectory + '/api.log' ), customPatternLayout ), 'apiLog' );
-  log4js.addAppender( log4js.fileAppender( path.normalize( logDirectory + '/socketio.log' ), customPatternLayout ), 'socketioLog' );
-  log4js.addAppender( log4js.fileAppender( path.normalize( logDirectory + '/runtime.log' ), customPatternLayout ), 'runtimeLog' );
-  return directories;
+  if(!path.existsSync(logDirectory))
+  {
+    fs.mkdirSync(logDirectory, 0755, true);
+  }
+  if(!path.existsSync(archiveDirectory))
+  {
+    fs.mkdirSync(archiveDirectory, 0755, true);
+  }
+
+  log4js.clearAppenders();
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/api.log'), customPatternLayout), 'apiLog');
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
+  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
+  if(!settings.logDirectory)
+  {
+    log4js.clearAppenders();
+    log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  }
 }
 
-var directories = setupLogging();
-var logDirectory = directories[0]
-, archiveDirectory = directories[1];
+try
+{
+  setupLogging();
+}
+catch (e)
+{
+  log4js.clearAppenders();
+  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+}
 
-
-var runtimeLog = log4js.getLogger( 'runtimeLog' );
+var runtimeLog = log4js.getLogger('runtimeLog');
 
 //try to get the git version
 var version = "";
@@ -517,18 +524,18 @@ async.waterfall([
       */
     function rotateLogs()
     {
-      var date = new Date( )
+      var date = new Date()
       , newFileTimeStamp = date.getMonth()+'_'+date.getDate()+'_'+date.getFullYear()+'-'+date.getUTCHours()+
         '_'+date.getUTCMinutes()+'_'+date.getUTCSeconds()+'_'+date.getUTCMilliseconds();
       
-      fs.readdirSync( logDirectory ).forEach( function( fileName ) {
-        var filePath = path.normalize( logDirectory + '/' + fileName );
-        if( !fs.statSync( filePath ).isDirectory() )
+      fs.readdirSync(logDirectory).forEach(function(fileName) {
+        var filePath = path.normalize(logDirectory + '/' + fileName);
+        if( !fs.statSync(filePath).isDirectory())
         {
-          fs.renameSync( filePath, path.normalize( archiveDirectory + '/' + fileName + '_' + newFileTimeStamp ) );
+          fs.renameSync(filePath, path.normalize(archiveDirectory + '/' + fileName + '_' + newFileTimeStamp));
         }
       });
-      setupLogging( );
+      setupLogging();
     }
 
     // On SIGHUP, we will rotate logs.
