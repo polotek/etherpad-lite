@@ -399,7 +399,7 @@ var padeditbar = (function()
         linker.checkTimer = yam.setInterval(checker, 400);
         linker.check();
 
-        var defaultText = yam.ui.pages.getSelectedText();
+        var defaultText = yam.ui.pages.getSelectedText(true);
         if(defaultText) { linker.$textInput.val(defaultText); }
 
         var lightboxOpts = { 
