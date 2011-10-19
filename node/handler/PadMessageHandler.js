@@ -145,6 +145,12 @@ exports.handleDisconnect = function(client)
   //Delete the session2pad and sessioninfos entrys of this session
   delete session2pad[client.id];
   delete sessioninfos[client.id];
+
+  // if there are no more clients on this pad, flush data
+  // and evict from cache
+  if(!pad2sessions[sessionPad].length) {
+    padManager.evictFromCache(sessionPad);
+  }
 }
 
 /**

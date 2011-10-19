@@ -567,6 +567,9 @@ Class('Pad', {
       //kick everyone from this pad
       padMessageHandler.kickSessionsFromPad(padID);
 
+      // don't remove pads... ever
+      return callback();
+
       async.series([
         //delete all relations
         function(callback)
