@@ -289,15 +289,11 @@ var padeditbar = (function()
 
       var mentioner = self.mentioner = {
         buttonText: yam.tr('Link')
-        , template: '<div class="yj-lightbox-content yj-quick-link-lightbox">\
-                        <div class="yj-bubbles-container">\
-                        <div class="yj-bubbles">\
-                          <input type="text" class="yj-bubble-field" tabindex="1" wrap="off" />\
-                        </div>\
-                        <a class="yj-btn yj-bubbles-form-submit" href="javascript://">{{ buttonText }}</a>\
-                        <div class="yj-spinner"><span class="yj-inline-icon"></span></div>\
-                        <div class="clear"></div>\
-                      </div>'
+        , template: '<div class="yj-lightbox-content yj-editor-lightbox yj-mention-lightbox">\
+                       <div class="yj-editor-lightbox-field-wrap">\
+                         <input type="text" class="yj-mention-field" tabindex="1" wrap="off" />\
+                       </div>\
+                     </div>'
         }
 
       var typeAheadOpts = {
@@ -311,9 +307,8 @@ var padeditbar = (function()
         };
 
       $btn.click(function() {
-        mentioner.$content = jq(Mustache.to_html(mentioner.template, { buttonText: mentioner.buttonText }));
-        mentioner.$mentionField = mentioner.$content.find('.yj-bubble-field');
-        mentioner.$submit = mentioner.$content.find('.yj-bubbles-form-submit');
+        mentioner.$content = jq(mentioner.template);
+        mentioner.$mentionField = mentioner.$content.find('.yj-mention-field');
 
         yam.ui.shared.typeAhead.registerField(mentioner.$mentionField, typeAheadOpts);
 
@@ -333,6 +328,7 @@ var padeditbar = (function()
         };
 
         yam.publish('/ui/lightbox/open', [lightboxOpts]);
+        mentioner.$mentionField.focus();
       });
     },
     _onMentionSubmit: function(linkData) {
@@ -347,24 +343,31 @@ var padeditbar = (function()
         , title = yam.tr( $btn.attr('title') );
 
       var linker = self.linker = {
-        buttonText: yam.tr('Link')
-        , template: '<div class="yj-lightbox-content yj-quick-link-lightbox">\
-                        <div class="yj-bubbles-container">\
-                        <div class="yj-bubbles">\
-                          <input type="text" name="link_url" class="link-url yj-bubble-field" tabindex="1" wrap="off" />\
-                        </div>\
-                        <div class="yj-bubbles">\
-                          <input type="text" name="link_text" class="link-text yj-bubble-field" tabindex="1" wrap="off" />\
-                        </div>\
-                        <a class="yj-btn yj-bubbles-form-submit" href="javascript://">{{ buttonText }}</a>\
-                        <div class="yj-spinner"><span class="yj-inline-icon"></span></div>\
-                        <div class="clear"></div>\
-                      </div>'
+        buttonText: yam.tr('OK')
+        , template: '<div class="yj-lightbox-content yj-editor-lightbox yj-linker-lightbox">\
+                       <div class="yj-editor-lightbox-field-wrap">\
+                         <label class="yj-editor-lightbox-label" name="link_text">{{textLabel}}</label>\
+                         <input type="text" name="link_text" class="yj-link-text yj-editor-lightbox-field" tabindex="1" wrap="off" />\
+                         <div class="clear"></div>\
+                       </div>\
+                       <div class="yj-editor-lightbox-field-wrap">\
+                         <label class="yj-editor-lightbox-label" name="link_url">{{ urlLabel }}</label>\
+                         <input type="text" name="link_url" class="yj-link-url yj-editor-lightbox-field" tabindex="1" wrap="off" />\
+                         <div class="clear"></div>\
+                       </div>\
+                       <div class="yj-editor-submit-wrap">\
+                         <a class="yj-btn yj-linker-form-submit" href="javascript://">{{ buttonText }}</a>\
+                       </div>\
+                     </div>'
         }
 
       $btn.click(function() {
-        linker.$content = jq(Mustache.to_html(linker.template, { buttonText: linker.buttonText }));
-        linker.$submitBtn = linker.$content.find('.yj-bubbles-form-submit')
+        linker.$content = jq(Mustache.to_html(linker.template, { 
+            buttonText: linker.buttonText
+            , textLabel: yam.tr('Text to Display')
+            , urlLabel: yam.tr('URL')
+          }));
+        linker.$submitBtn = linker.$content.find('.yj-linker-form-submit')
             .click(jq.proxy(self._onLinkerSubmit, self));
 
         var lightboxOpts = { 
@@ -380,12 +383,13 @@ var padeditbar = (function()
           };
 
         yam.publish('/ui/lightbox/open', [lightboxOpts]);
+        linker.$content.find('.yj-link-text').focus();
       });
     },
     _onLinkerSubmit: function(evt) {
       var linker = this.linker
-        , url = linker.$content.find('.link-url').val()
-        , text = linker.$content.find('.link-text').val();
+        , url = linker.$content.find('.yj-link-url').val()
+        , text = linker.$content.find('.yj-link-text').val();
 
       if(!url || !text) { return false; }
 
