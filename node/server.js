@@ -53,6 +53,7 @@ var argv = nopt({
 //set loglevel
 log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
+settings.env = argv.environment || settings.env;
 var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port);
 
 var logDirectory = '';
@@ -113,6 +114,7 @@ catch (e)
 
 var runtimeLog = log4js.getLogger('runtimeLog');
 
+/*
 //try to get the git version
 var version = "";
 try
@@ -127,10 +129,10 @@ catch(e)
 {
   runtimeLog.warn("Can't get git version for server header\n" + e.message)
 }
+*/
 
-runtimeLog.info("Report bugs at https://github.com/Pita/etherpad-lite/issues")
+var serverName = "Paddie";
 
-var serverName = "Etherpad-Lite " + version + " (http://j.mp/ep-lite)";
 
 //cache 6 hours
 exports.maxAge = 1000*60*60*6;
