@@ -142,7 +142,7 @@ function getHTMLFromAtext(pad, atext)
     }
 
     var urls = _findURLs(text);
-    var mphs = _findModelPlaceholders(text);
+    var mphs = []; //_findModelPlaceholders(text);
     var regexAttrs = (function() {
       var attrs = [];
       var args = Array.prototype.slice.call(arguments);
@@ -278,11 +278,12 @@ function getHTMLFromAtext(pad, atext)
           assem.append(_escapeHTML(s));
         }
 
-        if(url) { emitCloseURL(); }
         if(yammerRef) { assem.append('</span>'); }
+        if(url) { emitCloseURL(); }
 
         // reset url for next iteration
         url = null;
+        yammerRef = null;
       } // end iteration over spans in line
       for (var i = propVals.length - 1; i >= 0; i--)
       {
