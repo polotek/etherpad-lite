@@ -64,6 +64,8 @@ exports.archiveDirectory = "";
 
 exports.tokie = false;
 
+exports.env = "production";
+
 //read the settings sync
 var settingsStr = fs.readFileSync(path.join(__dirname, "../../settings.json")).toString();
 

@@ -765,12 +765,17 @@ var pad = {
   asyncSendDiagnosticInfo: function()
   {
     pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
+    var config = window.yam ? yam.config() : {}
+      , url = '/ep/pad/connection-diagnostic-info';
+    
+    if(config.paddieURL) { url = config.paddiURL + url; }
+
     window.setTimeout(function()
     {
       $.ajax(
       {
         type: 'post',
-        url: '/ep/pad/connection-diagnostic-info',
+        url: url,
         data: {
           padId: pad.getPadId(),
           diagnosticInfo: JSON.stringify(pad.diagnosticInfo)
