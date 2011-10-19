@@ -135,11 +135,8 @@ catch(e)
 
 var serverName = "Paddie";
 
-
 //cache 6 hours
 exports.maxAge = 1000*60*60*6;
-
-
 
 async.waterfall([
   //initalize the database
@@ -197,6 +194,51 @@ async.waterfall([
       {
         next();
       }
+    });
+
+    var code = ''
+    , response ='';
+    
+    function databaseCheck() {
+      try
+      {
+        // DB call.
+        db.db.db.wrappedDB.db.query('SELECT 1', function(error, result) {
+          if(error)
+          {
+            code = 404;
+            response = error;
+          }
+          else
+          {
+            code = 200;
+            response = 'Database health: OK'
+          }
+        });
+      }
+      catch(e)
+      {
+        // If we ever have problem with one of the DB objects being udefined
+        // we hit this code and send back a 404 with the trace.
+        code = 404;
+        response = "Exception performing DB query check: " + e.message;
+      }
+      runtimeLog.info(response);
+    }
+
+    databaseCheck();
+
+    // Ping database every 30 seconds and update code and response values.
+    setInterval( function() { 
+      databaseCheck();
+      }, 30000);
+
+    //api for database health check.
+    app.get('/int/healthcheck', function(req,res) {
+      res.header('Cache-Control', 'max_age=-1, must-revalidate, no-cache, no-store');
+      res.header('ETag', new Date().getTime().toString() + Math.random());
+      res.send( response, code);
+      return;
     });
 
     //checks for padAccess
