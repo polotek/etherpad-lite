@@ -75,3 +75,26 @@
   line-height: 19px;
 }
 
+.yj-editor-submit-wrap {
+  text-align: right;
+  margin: 15px 0 4px;
+}
+
+.yj-editor-lightbox-field {
+  width: 365px;
+  margin-left: 5px;
+  float: right;
+  padding: 5px
+}
+
+.yj-editor-lightbox-field-wrap {
+  margin: 5px 0 10px;
+}
+
+.yj-editor-lightbox-label {
+  line-height: 18px;
+}
+
+.yj-mention-field {
+  width: 470px;
+}
