@@ -53,9 +53,8 @@ namespace :deploy do
 
   task :stop do 
     find_servers.sort.each do |server|
-      ports.each do |port| 
-        sudo "stop paddie PORT=#{port} ENV=#{stage}", :hosts => [ server ]
-      end
+      logger.info "stopping all paddies on #{server}"
+      sudo "initctl emit stop-all-paddies"
     end
   end
 
@@ -67,11 +66,21 @@ namespace :deploy do
 
   task :restart do
     find_servers.sort.each do |server|
-      sudo "#{current_release}/bin/haproxyctl disable; sleep 3"
-      sudo "initctl emit stop-all-paddies; sleep 3"
+      logger.info "disabling haproxy on #{server}"
+      sudo "#{current_release}/bin/haproxyctl disable"
+      sudo "initctl emit stop-all-paddies; sleep 1"
+
+      logger.info "resting for ten seconds"
+      sleep 10
+
+      logger.info "starting paddie on ports #{ports.first} to #{ports.last}"
       ports.each do |port|
-        sudo "start paddie PORT=#{port}; sleep 3"
+        sudo "start paddie PORT=#{port};"
       end
+
+      ## FIXME: should restart haproxy
+      logger.info "enabling paddie in haproxy"
+      sudo "#{current_release}/bin/haproxyctl enable"
     end
   end
 end

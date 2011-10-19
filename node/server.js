@@ -206,7 +206,7 @@ async.waterfall([
         db.db.db.wrappedDB.db.query('SELECT 1', function(error, result) {
           if(error)
           {
-            code = 404;
+            code = 500;
             response = error;
           }
           else
@@ -219,8 +219,8 @@ async.waterfall([
       catch(e)
       {
         // If we ever have problem with one of the DB objects being udefined
-        // we hit this code and send back a 404 with the trace.
-        code = 404;
+        // we hit this code and send back a 500 with the trace.
+        code = 500;
         response = "Exception performing DB query check: " + e.message;
       }
       runtimeLog.info(response);
@@ -588,7 +588,18 @@ async.waterfall([
     process.on('SIGHUP', rotateLogs);
     process.on('SIGTERM', gracefulShutdown);
 
-    process.on('uncaughtException', gracefulShutdown)
+    process.on('uncaughtException', function(err) {
+      try {
+        runtimeLog.error('Fatal: ', err.message || 'Unknown error');
+        if(err.stack) {
+          var stack = err.stack.split('\n');
+          for(var i = 0; i < stack.length; i++) {
+            runtimeLog.error(stack[i]);
+          }
+        }
+      } catch(e) {}
+      gracefulShutdown();
+    });
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
