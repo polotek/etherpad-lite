@@ -114,6 +114,20 @@ exports.getPad = function(id, text, networkId, groupId, isPrivate, callback)
   }
 }
 
+exports.evictFromCache = function(padId, callback) {
+  exports.unloadPad(padId);
+  async.parallel([
+    function(callback) {
+      db.expireKey('pad:'+padId, callback);
+    },
+    function(callback) {
+      db.expireKey('pad:'+padId+':revisions:*', callback);
+    }
+  ], function(err) {
+    callback(err);
+  });
+}
+
 //checks if a pad exists
 exports.doesPadExists = function(padId, callback)
 {
