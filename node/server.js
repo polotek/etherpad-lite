@@ -53,7 +53,7 @@ var argv = nopt({
 //set loglevel
 log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
-var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port + '%n');
+var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port);
 
 var logDirectory = '';
 var archiveDirectory = '';
@@ -91,14 +91,13 @@ var setupLogging = function()
   }
 
   log4js.clearAppenders();
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/api.log'), customPatternLayout), 'apiLog');
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
-  if(!settings.logDirectory)
+  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  if(settings.logDirectory)
   {
-    log4js.clearAppenders();
-    log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/api.log'), customPatternLayout), 'apiLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
   }
 }
 
