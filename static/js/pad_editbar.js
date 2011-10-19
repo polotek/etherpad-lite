@@ -356,9 +356,31 @@ var padeditbar = (function()
                          <div class="clear"></div>\
                        </div>\
                        <div class="yj-editor-submit-wrap">\
-                         <a class="yj-btn yj-linker-form-submit" href="javascript://">{{ buttonText }}</a>\
+                         <a class="yj-btn yj-linker-form-submit yj-btn-disabled" href="javascript://">{{ buttonText }}</a>\
                        </div>\
                      </div>'
+          , hasInput: function() {
+            var linker = this;
+            if(!linker.$content) { return false; }
+
+            var url = $.trim( linker.$urlInput.val() )
+              , text = $.trim( linker.$textInput.val() );
+
+            return (url && text) ? true : false;
+          }
+          , isDisabled: function() {
+            return linker.$submitBtn.hasClass('yj-btn-disabled');
+          }
+          , enable: function() {
+            linker.$submitBtn.removeClass('yj-btn-disabled');
+          }
+          , disable: function() {
+            linker.$submitBtn.addClass('yj-btn-disabled');
+          }
+          , check: function() {
+            if(linker.hasInput()) { linker.enable(); }
+            else { linker.disable(); }
+          }
         }
 
       $btn.click(function() {
@@ -367,8 +389,18 @@ var padeditbar = (function()
             , textLabel: yam.tr('Text to Display')
             , urlLabel: yam.tr('URL')
           }));
+        linker.$textInput = linker.$content.find('.yj-link-text');
+        linker.$urlInput = linker.$content.find('.yj-link-url');
         linker.$submitBtn = linker.$content.find('.yj-linker-form-submit')
             .click(jq.proxy(self._onLinkerSubmit, self));
+
+        var checker = jq.proxy(linker.check, linker);
+        linker.$content.find('input').bind('blur', checker);
+        linker.checkTimer = yam.setInterval(checker, 400);
+        linker.check();
+
+        var defaultText = yam.ui.pages.getSelectedText();
+        if(defaultText) { linker.$textInput.val(defaultText); }
 
         var lightboxOpts = { 
             title: title
@@ -378,6 +410,11 @@ var padeditbar = (function()
             , onClosed: function() {
               if(linker.$content) {
                 linker.$content.empty().remove();
+                linker.$content = null;
+                linker.$textInput = null;
+                linker.$urlInput = null;
+                linker.$submitBtn = null;
+                yam.clearInterval(linker.checkTimer);
               }
             }
           };
@@ -388,10 +425,32 @@ var padeditbar = (function()
     },
     _onLinkerSubmit: function(evt) {
       var linker = this.linker
-        , url = linker.$content.find('.yj-link-url').val()
-        , text = linker.$content.find('.yj-link-text').val();
+        , url = $.trim( linker.$urlInput.val() )
+        , text = linker.$textInput.val();
 
-      if(!url || !text) { return false; }
+      if (!linker.hasInput() || linker.isDisabled()) {
+        return false;
+      }
+
+      if(url) {
+        if(!yam.util.HREF_PATTERN.test(url)) {
+          if(yam.util.HREF_PATTERN.test('http://' + url)) {
+            url = 'http://' + url;
+          } else {
+            url = null;
+          }
+        }
+      }
+
+      if(!url) {
+        alert('Please enter a valid url.');
+        return false;
+      }
+
+      if(!text) {
+        alert('Please enter or select text to link.');
+        return false;
+      }
 
       this._insertTextLink(url, text);
       yam.publish('/ui/lightbox/close');
