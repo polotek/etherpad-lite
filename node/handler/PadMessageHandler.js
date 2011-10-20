@@ -148,7 +148,8 @@ exports.handleDisconnect = function(client)
 
   // if there are no more clients on this pad, flush data
   // and evict from cache
-  if(!pad2sessions[sessionPad].length) {
+  if(!pad2sessions[sessionPad] ||
+     !pad2sessions[sessionPad].length) {
     padManager.evictFromCache(sessionPad);
   }
 }
@@ -693,7 +694,6 @@ function handleClientReady(client, message)
     {
       securityManager.checkAccess (message.padId, message.sessionID, message.token, message.authtoken, message.password, message.user_id, function(err, statusObject)
       {
-        console.log("Status Object: ", statusObject)
         if(err) {callback(err); return}
 
         //access was granted
@@ -710,8 +710,17 @@ function handleClientReady(client, message)
         else
         {
           client.json.send({accessStatus: statusObject.accessStatus});
+          callback(statusObject);
         }
       });
+    },
+    function(callback) {
+      // If this is the first connection of a new editing session,
+      // clear any previous cache state
+      if(!pad2sessions[message.padId] ||
+         !pad2sessions[message.padId].length) {
+        padManager.evictFromCache(message.padId, callback);
+      }
     },
     //get all authordata of this new user
     function(callback)
@@ -945,6 +954,13 @@ function handleClientReady(client, message)
     }
   ],function(err)
   {
-    if(err) throw err;
+    if(err) {
+      if(err.accessStatus) {
+        // denied access, no problem here
+        // just dropping out of the series
+      } else {
+        throw err;
+      }
+    }
   });
 }
