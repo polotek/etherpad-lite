@@ -720,6 +720,8 @@ function handleClientReady(client, message)
       if(!pad2sessions[message.padId] ||
          !pad2sessions[message.padId].length) {
         padManager.evictFromCache(message.padId, callback);
+      } else {
+        callback();
       }
     },
     //get all authordata of this new user
