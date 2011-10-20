@@ -183,8 +183,6 @@ function handshake()
 
     padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
 
-    document.title = document.title + " | " + padId;
-
     //var token = readCookie("token");
     //if (token == null)
     //{
@@ -767,7 +765,7 @@ var pad = {
     pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
     var config = window.yam ? yam.config() : {}
       , url = '/ep/pad/connection-diagnostic-info';
-    
+
     if(config.paddieURL) { url = config.paddiURL + url; }
 
     window.setTimeout(function()
