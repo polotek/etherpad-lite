@@ -485,7 +485,7 @@ var padeditbar = (function()
         };
 
       $btn.click(function() {
-        self.attacher = yam.ui.general.LightboxManager.openComponent('yam.ui.attachments.Selector', componentOpts, lbOpts);
+        self.attacher = yam.ui.general.LightboxManager.openComponent('yam.ui.attachments.Selector', 'yj-attachment-selector-lightbox', componentOpts, lbOpts);
         self.attacher.on('select', jq.proxy(self._onAttach, self));
       });
     },
@@ -508,7 +508,7 @@ var padeditbar = (function()
         };
 
       $btn.click(function() {
-        self.attacher = yam.ui.general.LightboxManager.openComponent('yam.ui.attachments.Selector', componentOpts, lbOpts);
+        self.attacher = yam.ui.general.LightboxManager.openComponent('yam.ui.attachments.Selector', 'yj-attachment-selector-lightbox', componentOpts, lbOpts);
         self.attacher.on('select', jq.proxy(self._onAttach, self));
       });
     },
