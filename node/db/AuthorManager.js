@@ -88,7 +88,6 @@ exports.createAuthorIfNotExistsFor = function (authorMapper, name, callback)
  */
 function mapAuthorWithDBKey (mapperkey, mapper, userID, callback)
 {
-  console.log(mapperkey +":"+ mapper + "  ", userID)
   //try to map to an author
   db.get(mapperkey + ":" + mapper, function (err, author)
   {
