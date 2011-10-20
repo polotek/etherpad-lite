@@ -83,7 +83,8 @@ var padeditbar = (function()
 
       this._initMentionButton();
       this._initLinkerButton();
-      this._initAttachmentButton();
+      this._initFileButton();
+      this._initPageButton();
     },
     isEnabled: function()
     {
@@ -253,10 +254,10 @@ var padeditbar = (function()
       // FIXME: Why is the type wrong?
       linkData.type = linkData.type.replace(/s$/, '');
 
-      var model = yam.model.getModelByType(linkData.type);
-      if(model) {
-        var instance = model.save(linkData)
-          , displayText = instance.full_name || instance.name
+      yam.modelController.initReferences([linkData]);
+      var instance = yam.model.objectForReference(linkData);
+      if(instance) {
+        var displayText = instance.full_name || instance.name
           , mph = '[' + yam.camelize(linkData.type, true) + ':' + linkData.id + ']'
           , attrs = [
             ['yammer', mph]
@@ -296,6 +297,14 @@ var padeditbar = (function()
                      </div>'
         }
 
+      var typeAhead = yam.ui.shared.typeAhead;
+      if(yam.currentUser.treatments && 
+          'new_autocomplete' in yam.currentUser.treatments) {
+        typeAhead = yam.currentUser.treatments.new_autocomplete ?
+            yam.ui.shared.typeAhead :
+            yam.ui.shared.typeAheadOld;
+      }
+
       var typeAheadOpts = {
           maxResults: 1
           , onSelect: function(linkData, evt) {
@@ -310,7 +319,7 @@ var padeditbar = (function()
         mentioner.$content = jq(mentioner.template);
         mentioner.$mentionField = mentioner.$content.find('.yj-mention-field');
 
-        yam.ui.shared.typeAhead.registerField(mentioner.$mentionField, typeAheadOpts);
+        typeAhead.registerField(mentioner.$mentionField, typeAheadOpts);
 
         var lightboxOpts = { 
           title: title
@@ -319,7 +328,7 @@ var padeditbar = (function()
           , transition: 'none'
           , onClosed: function() {
             if(mentioner.$mentionField) {
-              yam.ui.shared.typeAhead.removeField(mentioner.$mentionField);
+              typeAhead.removeField(mentioner.$mentionField);
             }
             if(mentioner.$content) {
               mentioner.$content.empty().remove();
@@ -455,18 +464,45 @@ var padeditbar = (function()
       this._insertTextLink(url, text);
       yam.publish('/ui/lightbox/close');
     },
-    _initAttachmentButton: function() {
+    _initFileButton: function(selectorType) {
       var self = this
         , $btn = $('#menu_right').find('.file-icon-btn')
         , title = yam.tr( $btn.attr('title') )
         , componentOpts = {
           inLightbox: true
           , defaultActionText: yam.tr('Link')
+          , selectorType: selectorType
         }
         , lbOpts = {
           title: yam.tr('Select an File')
           , width: '810'
           , height: '480'
+          , onClose: function() {
+            self.attacher = null;
+          }
+        };
+
+      $btn.click(function() {
+        self.attacher = yam.ui.general.LightboxManager.openComponent('yam.ui.attachments.Selector', componentOpts, lbOpts);
+        self.attacher.on('select', jq.proxy(self._onAttach, self));
+      });
+    },
+    _initPageButton: function() {
+      var self = this
+        , $btn = $('#menu_right').find('.page-pen-icon-btn')
+        , title = yam.tr( $btn.attr('title') )
+        , componentOpts = {
+          inLightbox: true
+          , defaultActionText: yam.tr('Link')
+          , selectorType: 'pages'
+        }
+        , lbOpts = {
+          title: yam.tr('Select an Page')
+          , width: '810'
+          , height: '480'
+          , onClose: function() {
+            self.attacher = null;
+          }
         };
 
       $btn.click(function() {
@@ -480,9 +516,9 @@ var padeditbar = (function()
         , type;
       if(!comp) { return false; }
 
-      if((/file/i).test(comp.currentSelector)) {
+      if(comp.currentSelector == 'files') {
         type = 'uploaded_file';
-      } else if((/page/i).test(comp.currentSelector)) {
+      } else if(comp.currentSelector == 'pages') {
         type = 'page';
       }
       this._insertReferenceLink(type, linkData);
