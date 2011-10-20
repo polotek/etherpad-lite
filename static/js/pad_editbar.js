@@ -464,14 +464,14 @@ var padeditbar = (function()
       this._insertTextLink(url, text);
       yam.publish('/ui/lightbox/close');
     },
-    _initFileButton: function(selectorType) {
+    _initFileButton: function() {
       var self = this
         , $btn = $('#menu_right').find('.file-icon-btn')
         , title = yam.tr( $btn.attr('title') )
         , componentOpts = {
           inLightbox: true
           , defaultActionText: yam.tr('Link')
-          , selectorType: selectorType
+          , defaultSelector: 'files'
         }
         , lbOpts = {
           title: yam.tr('Select an File')
@@ -494,7 +494,7 @@ var padeditbar = (function()
         , componentOpts = {
           inLightbox: true
           , defaultActionText: yam.tr('Link')
-          , selectorType: 'pages'
+          , defaultSelector: 'pages'
         }
         , lbOpts = {
           title: yam.tr('Select an Page')
