@@ -302,7 +302,9 @@ var padeditbar = (function()
           'new_autocomplete' in yam.currentUser.treatments) {
         typeAhead = yam.currentUser.treatments.new_autocomplete ?
             yam.ui.shared.typeAhead :
-            yam.ui.shared.typeAheadOld;
+            yam.ui.shared.typeAheadOld ? 
+              yam.ui.shared.typeAheadOld : 
+              yam.ui.shared.typeAhead;
       }
 
       var typeAheadOpts = {
