@@ -80,7 +80,7 @@ namespace :deploy do
 
       ## FIXME: should restart haproxy
       logger.info "restarting haproxy"
-      sudo "#{current_release}bin/haproxy_reload.sh paddie"
+      sudo "#{current_release}/bin/haproxy_reload.sh -n paddie"
     end
   end
 end
