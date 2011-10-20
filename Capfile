@@ -79,8 +79,8 @@ namespace :deploy do
       end
 
       ## FIXME: should restart haproxy
-      logger.info "enabling paddie in haproxy"
-      sudo "#{current_release}/bin/haproxyctl enable"
+      logger.info "restarting haproxy"
+      sudo "#{current_release}/bin/haproxy_reload.sh -n paddie"
     end
   end
 end
