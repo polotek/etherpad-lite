@@ -14,7 +14,6 @@ set :scm,           :git
 set :scm_verbose,   true
 set :repository,    'git@github.com:yammer/etherpad-lite.git'
 
-
 ssh_options[:forward_agent] = true
 
 namespace :deploy do
@@ -31,6 +30,17 @@ namespace :deploy do
   end
   after "deploy:setup", "deploy:setup_fix_permissions"
 
+  task :update_application_configuration do
+    sudo "cp #{current_release}/settings-#{stage}.json #{current_release}/settings.json"
+  end
+  after "deploy:update_code", "deploy:update_application_configuration"
+
+  task :update_system_etc do
+    sudo "cp #{current_release}/bin/paddie.upstart /etc/init/paddie.conf"
+    sudo "cp #{current_release}/config/haproxy/#{stage}.cfg /etc/haproxy/paddie.cfg"
+  end
+  after "deploy:update_code", "deploy:update_system_etc"
+
   task :update_code_fix_permissions do
     sudo "chown -R #{owner}:#{owner_group} #{current_release}"
     sudo "chown -R #{owner}:#{owner_group} #{shared_path}"
@@ -38,10 +48,16 @@ namespace :deploy do
   end 
   after "deploy:update_code", "deploy:update_code_fix_permissions"
 
-  task :update_application_configuration do
-    run "cp #{current_release}/settings-#{stage}.json #{current_release}/settings.json"
+  task :npm_rebuild do
+    ## ugh, this sucks; also order matters, this has to happen after a build of perms have
+    ## been fixed by pdate_code_fix_permissions
+    commands  = [] 
+    commands << "cd #{current_release}"
+    commands << "sudo -u paddie npm rebuild"
+    run commands.join(' && ')
   end
-  after "deploy:update_code", "deploy:update_application_configuration"
+  after "deploy:update_code", "deploy:npm_rebuild"
+
 
   task :start do
     find_servers.sort.each do |server|
@@ -58,11 +74,6 @@ namespace :deploy do
     end
   end
 
-  task :update_system_etc do
-    sudo "cp #{current_release}/bin/paddie.upstart /etc/init/paddie.conf"
-    sudo "cp #{current_release}/config/haproxy/#{stage}.cfg /etc/haproxy/paddie.cfg"
-  end
-  before "deploy:restart", "deploy:update_system_etc"
 
   task :restart do
     find_servers.sort.each do |server|
