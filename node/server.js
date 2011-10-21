@@ -408,6 +408,38 @@ async.waterfall([
           importHandler.doImport(req, res, req.params.pad);
         });
       });
+
+      //serve index.html under /
+      app.get('/', function(req, res)
+      {
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/index.html");
+        res.sendfile(filePath, { maxAge: exports.maxAge });
+      });
+
+      //serve robots.txt
+      app.get('/robots.txt', function(req, res)
+      {
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/robots.txt");
+        res.sendfile(filePath, { maxAge: exports.maxAge });
+      });
+
+      //serve favicon.ico
+      app.get('/favicon.ico', function(req, res)
+      {
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/custom/favicon.ico");
+        res.sendfile(filePath, { maxAge: exports.maxAge }, function(err)
+        {
+          //there is no custom favicon, send the default favicon
+          if(err)
+          {
+            filePath = path.normalize(__dirname + "/../static/favicon.ico");
+            res.sendfile(filePath, { maxAge: exports.maxAge });
+          }
+        });
+      });
     }
 
     var apiLogger = log4js.getLogger("apiLog");
@@ -467,38 +499,6 @@ async.waterfall([
       {
         runtimeLog.error("CLIENT SIDE JAVASCRIPT ERROR: " + fields.errorInfo);
         res.end("OK");
-      });
-    });
-
-    //serve index.html under /
-    app.get('/', function(req, res)
-    {
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/index.html");
-      res.sendfile(filePath, { maxAge: exports.maxAge });
-    });
-
-    //serve robots.txt
-    app.get('/robots.txt', function(req, res)
-    {
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/robots.txt");
-      res.sendfile(filePath, { maxAge: exports.maxAge });
-    });
-
-    //serve favicon.ico
-    app.get('/favicon.ico', function(req, res)
-    {
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/custom/favicon.ico");
-      res.sendfile(filePath, { maxAge: exports.maxAge }, function(err)
-      {
-        //there is no custom favicon, send the default favicon
-        if(err)
-        {
-          filePath = path.normalize(__dirname + "/../static/favicon.ico");
-          res.sendfile(filePath, { maxAge: exports.maxAge });
-        }
       });
     });
 
