@@ -31,9 +31,9 @@
   /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
   "loglevel": "DEBUG",
 
-  "logDirectory": "logs",
+  "logDirectory": "/var/log/paddie",
 
-  "archiveDirectory": "logs/archives",
+  "archiveDirectory": "/var/log/paddie/archives",
 
   "tokie": {
         "host":"stagetokie-004.sjc1.yammer.com",

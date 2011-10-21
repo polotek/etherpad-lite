@@ -11,7 +11,7 @@ chdir /opt/paddie/current/node
 
 script
   # start a paddie instance on a given port as the paddie user
-  exec sudo -u paddie /usr/bin/node server.js -p $PORT 2>&1 >> /var/log/paddie/paddie-$PORT.log
+  exec sudo -u paddie /usr/bin/node server.js -p $PORT 2>&1 >> /var/log/paddie/console-$PORT.log
 end script
 
 post-start script
