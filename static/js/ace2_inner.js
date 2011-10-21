@@ -3575,8 +3575,9 @@ function OUTER(gscope)
       {        
         try
         {
-          var newWindow = window.open(n.href, '_blank');
-          newWindow.focus();
+          // DONT NAVIGATE TO LINKS
+          // var newWindow = window.open(n.href, '_blank');
+          // newWindow.focus();
         }
         catch (e)
         {
