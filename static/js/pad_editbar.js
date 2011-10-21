@@ -475,7 +475,7 @@ var padeditbar = (function()
           , defaultSelector: 'files'
         }
         , lbOpts = {
-          title: yam.tr('Select an File')
+          title: yam.tr('Create a Link')
           , width: '810'
           , height: '480'
           , overlayClose: false
@@ -499,7 +499,7 @@ var padeditbar = (function()
           , defaultSelector: 'pages'
         }
         , lbOpts = {
-          title: yam.tr('Select an Page')
+          title: yam.tr('Create a Link')
           , width: '810'
           , height: '480'
           , overlayClose: false
