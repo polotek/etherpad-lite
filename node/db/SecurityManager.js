@@ -110,7 +110,6 @@ exports.checkAccess = function (padID, sessionID, token, authToken, password, us
       //get author for this token
       authorManager.getAuthor4Token(token, userID, function(err, author)
       {
-        securityLogger.log("Author: ", author)
         // grant access, with author of token
         callback(err, {accessStatus: "grant", authorID: author});
       })

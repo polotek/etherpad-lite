@@ -19,7 +19,8 @@
  */
 
 require("../db/Pad");
-var db = require("./DB").db;
+var async = require('async')
+  , db = require("./DB").db;
 
 /**
  * A Array with all known Pads
@@ -112,6 +113,31 @@ exports.getPad = function(id, text, networkId, groupId, isPrivate, callback)
       }
     });
   }
+}
+
+exports.evictFromCache = function(padId, _callback) {
+  exports.unloadPad(padId);
+  var callback = function(err) {
+    if(err) {
+      db.logger.error('Failed to evict ' + padId + '. ', err.message);
+    } else {
+      db.logger.debug('Evicted ' + padId + ' from cache');
+    }
+    if(_callback) {
+      _callback.apply(null, arguments);
+    }
+  }
+
+  async.parallel([
+    function(callback) {
+      db.expireKey('pad:' + padId, callback);
+    },
+    function(callback) {
+      db.expireKeys('pad:' + padId + ':revs:*', callback);
+    }
+  ], function(err) {
+    callback(err);
+  });
 }
 
 //checks if a pad exists

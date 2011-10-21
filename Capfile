@@ -14,7 +14,6 @@ set :scm,           :git
 set :scm_verbose,   true
 set :repository,    'git@github.com:yammer/etherpad-lite.git'
 
-
 ssh_options[:forward_agent] = true
 
 namespace :deploy do
@@ -31,6 +30,17 @@ namespace :deploy do
   end
   after "deploy:setup", "deploy:setup_fix_permissions"
 
+  task :update_application_configuration do
+    sudo "cp #{current_release}/settings-#{stage}.json #{current_release}/settings.json"
+  end
+  after "deploy:update_code", "deploy:update_application_configuration"
+
+  task :update_system_etc do
+    sudo "cp #{current_release}/bin/paddie.upstart /etc/init/paddie.conf"
+    sudo "cp #{current_release}/config/haproxy/#{stage}.cfg /etc/haproxy/paddie.cfg"
+  end
+  after "deploy:update_code", "deploy:update_system_etc"
+
   task :update_code_fix_permissions do
     sudo "chown -R #{owner}:#{owner_group} #{current_release}"
     sudo "chown -R #{owner}:#{owner_group} #{shared_path}"
@@ -38,10 +48,16 @@ namespace :deploy do
   end 
   after "deploy:update_code", "deploy:update_code_fix_permissions"
 
-  task :update_application_configuration do
-    run "cp #{current_release}/settings-#{stage}.json #{current_release}/settings.json"
+  task :npm_rebuild do
+    ## ugh, this sucks; also order matters, this has to happen after a build of perms have
+    ## been fixed by pdate_code_fix_permissions
+    commands  = [] 
+    commands << "cd #{current_release}"
+    commands << "sudo -u paddie npm rebuild"
+    run commands.join(' && ')
   end
-  after "deploy:update_code", "deploy:update_application_configuration"
+  after "deploy:update_code", "deploy:npm_rebuild"
+
 
   task :start do
     find_servers.sort.each do |server|
@@ -53,25 +69,29 @@ namespace :deploy do
 
   task :stop do 
     find_servers.sort.each do |server|
-      ports.each do |port| 
-        sudo "stop paddie PORT=#{port} ENV=#{stage}", :hosts => [ server ]
-      end
+      logger.info "stopping all paddies on #{server}"
+      sudo "initctl emit stop-all-paddies"
     end
   end
 
-  task :update_system_etc do
-    sudo "cp #{current_release}/bin/paddie.upstart /etc/init/paddie.conf"
-    sudo "cp #{current_release}/config/haproxy/#{stage}.cfg /etc/haproxy/paddie.cfg"
-  end
-  before "deploy:restart", "deploy:update_system_etc"
 
   task :restart do
     find_servers.sort.each do |server|
-      sudo "#{current_release}/bin/haproxyctl disable; sleep 3"
-      sudo "initctl emit stop-all-paddies; sleep 3"
+      logger.info "disabling haproxy on #{server}"
+      sudo "#{current_release}/bin/haproxyctl disable"
+      sudo "initctl emit stop-all-paddies; sleep 1"
+
+      logger.info "resting for ten seconds"
+      sleep 10
+
+      logger.info "starting paddie on ports #{ports.first} to #{ports.last}"
       ports.each do |port|
-        sudo "start paddie PORT=#{port}; sleep 3"
+        sudo "start paddie PORT=#{port};"
       end
+
+      ## FIXME: should restart haproxy
+      logger.info "restarting haproxy"
+      sudo "#{current_release}/bin/haproxy_reload.sh -n paddie"
     end
   end
 end

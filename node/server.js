@@ -53,7 +53,8 @@ var argv = nopt({
 //set loglevel
 log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
-var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port + '%n');
+settings.env = argv.environment || settings.env;
+var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port);
 
 var logDirectory = '';
 var archiveDirectory = '';
@@ -91,14 +92,15 @@ var setupLogging = function()
   }
 
   log4js.clearAppenders();
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/api.log'), customPatternLayout), 'apiLog');
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
-  log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
-  if(!settings.logDirectory)
+  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  if(settings.logDirectory)
   {
-    log4js.clearAppenders();
-    log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'apiLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'message'); 
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'ueberDB');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'security');
   }
 }
 
@@ -114,6 +116,7 @@ catch (e)
 
 var runtimeLog = log4js.getLogger('runtimeLog');
 
+/*
 //try to get the git version
 var version = "";
 try
@@ -128,15 +131,12 @@ catch(e)
 {
   runtimeLog.warn("Can't get git version for server header\n" + e.message)
 }
+*/
 
-runtimeLog.info("Report bugs at https://github.com/Pita/etherpad-lite/issues")
-
-var serverName = "Etherpad-Lite " + version + " (http://j.mp/ep-lite)";
+var serverName = "Paddie";
 
 //cache 6 hours
 exports.maxAge = 1000*60*60*6;
-
-
 
 async.waterfall([
   //initalize the database
@@ -196,6 +196,53 @@ async.waterfall([
       }
     });
 
+    var code = ''
+    , response ='';
+    
+    if(settings.dbType !== 'dirty') {
+    function databaseCheck() {
+      try
+      {
+        // DB call.
+        db.db.db.wrappedDB.db.query('SELECT 1', function(error, result) {
+          if(error)
+          {
+            code = 500;
+            response = error;
+          }
+          else
+          {
+            code = 200;
+            response = 'Database health: OK'
+          }
+        });
+      }
+      catch(e)
+      {
+        // If we ever have problem with one of the DB objects being udefined
+        // we hit this code and send back a 500 with the trace.
+        code = 500;
+        response = "Exception performing DB query check: " + e.message;
+      }
+      runtimeLog.info(response);
+    }
+
+    databaseCheck();
+
+    // Ping database every 30 seconds and update code and response values.
+    setInterval( function() { 
+      databaseCheck();
+      }, 30000);
+    }
+
+    //api for database health check.
+    app.get('/int/healthcheck', function(req,res) {
+      res.header('Cache-Control', 'max_age=-1, must-revalidate, no-cache, no-store');
+      res.header('ETag', new Date().getTime().toString() + Math.random());
+      res.send( response, code);
+      return;
+    });
+
     //checks for padAccess
     function hasPadAccess(req, res, callback)
     {
@@ -217,150 +264,183 @@ async.waterfall([
     }
 
     //serve read only pad
-    app.get('/ro/:id', function(req, res)
-    {
-      res.header("Server", serverName);
+    if(settings.env === 'development') {
+      app.get('/ro/:id', function(req, res)
+      {
+        res.header("Server", serverName);
 
-      var html;
-      var padId;
-      var pad;
+        var html;
+        var padId;
+        var pad;
 
-      async.series([
-        //translate the read only pad to a padId
-        function(callback)
-        {
-          readOnlyManager.getPadId(req.params.id, function(err, _padId)
+        async.series([
+          //translate the read only pad to a padId
+          function(callback)
           {
-            padId = _padId;
-
-            //we need that to tell hasPadAcess about the pad
-            req.params.pad = padId;
-
-            callback(err);
-          });
-        },
-        //render the html document
-        function(callback)
-        {
-          //return if the there is no padId
-          if(padId == null)
-          {
-            callback("notfound");
-            return;
-          }
-
-          hasPadAccess(req, res, function()
-          {
-            //render the html document
-            exporthtml.getPadHTMLDocument(padId, null, false, function(err, _html)
+            readOnlyManager.getPadId(req.params.id, function(err, _padId)
             {
-              html = _html;
+              padId = _padId;
+
+              //we need that to tell hasPadAcess about the pad
+              req.params.pad = padId;
+
               callback(err);
             });
-          });
+          },
+          //render the html document
+          function(callback)
+          {
+            //return if the there is no padId
+            if(padId == null)
+            {
+              callback("notfound");
+              return;
+            }
+
+            hasPadAccess(req, res, function()
+            {
+              //render the html document
+              exporthtml.getPadHTMLDocument(padId, null, false, function(err, _html)
+              {
+                html = _html;
+                callback(err);
+              });
+            });
+          }
+        ], function(err)
+        {
+          //throw any unexpected error
+          if(err && err != "notfound")
+            throw err;
+
+          if(err == "notfound")
+            res.send('404 - Not Found', 404);
+          else
+            res.send(html);
+        });
+      });
+
+      //serve pad.html under /p
+      app.get('/p/:pad', function(req, res, next)
+      {
+        //ensure the padname is valid and the url doesn't end with a /
+        if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
+        {
+          res.send('Such a padname is forbidden', 404);
+          return;
         }
-      ], function(err)
-      {
-        //throw any unexpected error
-        if(err && err != "notfound")
-          throw err;
 
-        if(err == "notfound")
-          res.send('404 - Not Found', 404);
-        else
-          res.send(html);
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/pad.html");
+        res.sendfile(filePath, { maxAge: exports.maxAge });
       });
-    });
 
-    //serve pad.html under /p
-    app.get('/p/:pad', function(req, res, next)
-    {
-      //ensure the padname is valid and the url doesn't end with a /
-      if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
+      //serve timeslider.html under /p/$padname/timeslider
+      app.get('/p/:pad/timeslider', function(req, res, next)
       {
-        res.send('Such a padname is forbidden', 404);
-        return;
-      }
+        //ensure the padname is valid and the url doesn't end with a /
+        if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
+        {
+          res.send('Such a padname is forbidden', 404);
+          return;
+        }
 
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/pad.html");
-      res.sendfile(filePath, { maxAge: exports.maxAge });
-    });
-
-    //serve timeslider.html under /p/$padname/timeslider
-    app.get('/p/:pad/timeslider', function(req, res, next)
-    {
-      //ensure the padname is valid and the url doesn't end with a /
-      if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
-      {
-        res.send('Such a padname is forbidden', 404);
-        return;
-      }
-
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/timeslider.html");
-      res.sendfile(filePath, { maxAge: exports.maxAge });
-    });
-
-    //serve timeslider.html under /p/$padname/timeslider
-    app.get('/p/:pad/export/:type', function(req, res, next)
-    {
-      //ensure the padname is valid and the url doesn't end with a /
-      if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
-      {
-        res.send('Such a padname is forbidden', 404);
-        return;
-      }
-
-      var types = ["pdf", "doc", "txt", "html", "odt"];
-      //send a 404 if we don't support this filetype
-      if(types.indexOf(req.params.type) == -1)
-      {
-        next();
-        return;
-      }
-
-      //if abiword is disabled, and this is a format we only support with abiword, output a message
-      if(settings.abiword == null && req.params.type != "html" && req.params.type != "txt" )
-      {
-        res.send("Abiword is not enabled at this Etherpad Lite instance. Set the path to Abiword in settings.json to enable this feature");
-        return;
-      }
-
-      res.header("Access-Control-Allow-Origin", "*");
-      res.header("Server", serverName);
-
-      hasPadAccess(req, res, function()
-      {
-        exportHandler.doExport(req, res, req.params.pad, req.params.type);
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/timeslider.html");
+        res.sendfile(filePath, { maxAge: exports.maxAge });
       });
-    });
 
-    //handle import requests
-    app.post('/p/:pad/import', function(req, res, next)
-    {
-      //ensure the padname is valid and the url doesn't end with a /
-      if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
+      //serve timeslider.html under /p/$padname/timeslider
+      app.get('/p/:pad/export/:type', function(req, res, next)
       {
-        res.send('Such a padname is forbidden', 404);
-        return;
-      }
+        //ensure the padname is valid and the url doesn't end with a /
+        if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
+        {
+          res.send('Such a padname is forbidden', 404);
+          return;
+        }
 
-      //if abiword is disabled, skip handling this request
-      if(settings.abiword == null)
-      {
-        next();
-        return;
-      }
+        var types = ["pdf", "doc", "txt", "html", "odt"];
+        //send a 404 if we don't support this filetype
+        if(types.indexOf(req.params.type) == -1)
+        {
+          next();
+          return;
+        }
 
-      res.header("Server", serverName);
+        //if abiword is disabled, and this is a format we only support with abiword, output a message
+        if(settings.abiword == null && req.params.type != "html" && req.params.type != "txt" )
+        {
+          res.send("Abiword is not enabled at this Etherpad Lite instance. Set the path to Abiword in settings.json to enable this feature");
+          return;
+        }
 
-      hasPadAccess(req, res, function()
-      {
-        importHandler.doImport(req, res, req.params.pad);
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Server", serverName);
+
+        hasPadAccess(req, res, function()
+        {
+          exportHandler.doExport(req, res, req.params.pad, req.params.type);
+        });
       });
-    });
 
+      //handle import requests
+      app.post('/p/:pad/import', function(req, res, next)
+      {
+        //ensure the padname is valid and the url doesn't end with a /
+        if(!padManager.isValidPadId(req.params.pad) || /\/$/.test(req.url))
+        {
+          res.send('Such a padname is forbidden', 404);
+          return;
+        }
+
+        //if abiword is disabled, skip handling this request
+        if(settings.abiword == null)
+        {
+          next();
+          return;
+        }
+
+        res.header("Server", serverName);
+
+        hasPadAccess(req, res, function()
+        {
+          importHandler.doImport(req, res, req.params.pad);
+        });
+      });
+
+      //serve index.html under /
+      app.get('/', function(req, res)
+      {
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/index.html");
+        res.sendfile(filePath, { maxAge: exports.maxAge });
+      });
+
+      //serve robots.txt
+      app.get('/robots.txt', function(req, res)
+      {
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/robots.txt");
+        res.sendfile(filePath, { maxAge: exports.maxAge });
+      });
+
+      //serve favicon.ico
+      app.get('/favicon.ico', function(req, res)
+      {
+        res.header("Server", serverName);
+        var filePath = path.normalize(__dirname + "/../static/custom/favicon.ico");
+        res.sendfile(filePath, { maxAge: exports.maxAge }, function(err)
+        {
+          //there is no custom favicon, send the default favicon
+          if(err)
+          {
+            filePath = path.normalize(__dirname + "/../static/favicon.ico");
+            res.sendfile(filePath, { maxAge: exports.maxAge });
+          }
+        });
+      });
+    }
 
     var apiLogger = log4js.getLogger("apiLog");
 
@@ -407,7 +487,7 @@ async.waterfall([
     {
       new formidable.IncomingForm().parse(req, function(err, fields, files)
       {
-        runtimeLog.info("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
+        runtimeLog.debug("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
         res.end("OK");
       });
     });
@@ -419,38 +499,6 @@ async.waterfall([
       {
         runtimeLog.error("CLIENT SIDE JAVASCRIPT ERROR: " + fields.errorInfo);
         res.end("OK");
-      });
-    });
-
-    //serve index.html under /
-    app.get('/', function(req, res)
-    {
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/index.html");
-      res.sendfile(filePath, { maxAge: exports.maxAge });
-    });
-
-    //serve robots.txt
-    app.get('/robots.txt', function(req, res)
-    {
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/robots.txt");
-      res.sendfile(filePath, { maxAge: exports.maxAge });
-    });
-
-    //serve favicon.ico
-    app.get('/favicon.ico', function(req, res)
-    {
-      res.header("Server", serverName);
-      var filePath = path.normalize(__dirname + "/../static/custom/favicon.ico");
-      res.sendfile(filePath, { maxAge: exports.maxAge }, function(err)
-      {
-        //there is no custom favicon, send the default favicon
-        if(err)
-        {
-          filePath = path.normalize(__dirname + "/../static/favicon.ico");
-          res.sendfile(filePath, { maxAge: exports.maxAge });
-        }
       });
     });
 
@@ -542,7 +590,18 @@ async.waterfall([
     process.on('SIGHUP', rotateLogs);
     process.on('SIGTERM', gracefulShutdown);
 
-    process.on('uncaughtException', gracefulShutdown)
+    process.on('uncaughtException', function(err) {
+      try {
+        runtimeLog.error('Fatal: ', err.message || 'Unknown error');
+        if(err.stack) {
+          var stack = err.stack.split('\n');
+          for(var i = 0; i < stack.length; i++) {
+            runtimeLog.error(stack[i]);
+          }
+        }
+      } catch(e) {}
+      gracefulShutdown();
+    });
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);

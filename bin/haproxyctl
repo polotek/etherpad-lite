@@ -5,11 +5,20 @@ require 'socket'
 module Haproxy
   class Command
     def self.run(command)
-      sock = UNIXSocket.open('/var/run/haproxy/paddie.sock')
-      sock.puts command
-      ret  = sock.map
-      sock.close
-      ret
+      tries = 0
+      begin
+        sock = UNIXSocket.open('/var/run/haproxy/paddie.sock')
+        sock.puts command
+        ret  = sock.map
+      rescue Errno::EPIPE => e
+        tries += 1
+        retry unless tries >= 5
+        puts "Tried #{tries} times. :("
+        raise e
+      ensure 
+        sock.close
+        ret
+      end
     end
   end
 

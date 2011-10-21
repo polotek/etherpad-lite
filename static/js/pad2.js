@@ -183,8 +183,6 @@ function handshake()
 
     padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
 
-    document.title = document.title + " | " + padId;
-
     //var token = readCookie("token");
     //if (token == null)
     //{
@@ -424,7 +422,7 @@ var pad = {
 
     padeditor.init(postAceInit, pad.padOptions.view || {});
 
-    paduserlist.init(pad.myUserInfo);
+    //paduserlist.init(pad.myUserInfo);
     //    padchat.init(clientVars.chatHistory, pad.myUserInfo);
     padconnectionstatus.init();
     padmodals.init();
@@ -574,6 +572,8 @@ var pad = {
   },
   handleUserLeave: function(userInfo)
   {
+    // delete old cookies
+    if(userInfo.userId.indexOf('.') !== -1) { createCookie('token', '', 0); }
     yam.publish('/ui/pages/removeUser', [userInfo]);
     paduserlist.userLeave(userInfo);
     //padchat.handleUserLeave(userInfo);
@@ -765,12 +765,17 @@ var pad = {
   asyncSendDiagnosticInfo: function()
   {
     pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
+    var config = window.yam ? yam.config() : {}
+      , url = '/ep/pad/connection-diagnostic-info';
+
+    if(config.paddieURL) { url = config.paddiURL + url; }
+
     window.setTimeout(function()
     {
       $.ajax(
       {
         type: 'post',
-        url: '/ep/pad/connection-diagnostic-info',
+        url: url,
         data: {
           padId: pad.getPadId(),
           diagnosticInfo: JSON.stringify(pad.diagnosticInfo)
