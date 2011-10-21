@@ -423,6 +423,10 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
         callbacks.onUserJoin(userInfo);
         dmesgUsers();
       }
+      // somewhere between here and setting id, userInfo.userId
+      // is being overwritten as a number, so we are setting it
+      // back to its original string id #huge_hack_what_is_this_i_dont_even
+      userInfo.userId = id;
       tellAceActiveAuthorInfo(userInfo);
     }
     else if (msg.type == "USER_LEAVE")
