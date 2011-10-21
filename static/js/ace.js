@@ -281,7 +281,7 @@ function Ace2Editor()
       var outerHTML = [doctype, '<html><head>', $$INCLUDE_CSS("static/css/iframe_editor.css"), $$INCLUDE_CSS("static/css/pad.css"), $$INCLUDE_CSS("static/custom/pad.css"),
       // bizarrely, in FF2, a file with no "external" dependencies won't finish loading properly
       // (throbs busy while typing)
-      '<link rel="stylesheet" type="text/css" href="data:text/css,"/>', '\x3cscript>\n', outerScript, '\n\x3c/script>', '</head><body id="outerdocbody"><div id="sidediv"><!-- --></div><div id="linemetricsdiv">x</div><div id="overlaysdiv"><!-- --></div></body></html>'];
+      '<link rel="stylesheet" type="text/css" href=""/>', '\x3cscript>\n', outerScript, '\n\x3c/script>', '</head><body id="outerdocbody"><div id="sidediv"><!-- --></div><div id="linemetricsdiv">x</div><div id="overlaysdiv"><!-- --></div></body></html>'];
       
       if (!Array.prototype.map) Array.prototype.map = function(fun)
       { //needed for IE
