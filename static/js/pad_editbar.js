@@ -478,6 +478,7 @@ var padeditbar = (function()
           title: yam.tr('Select an File')
           , width: '810'
           , height: '480'
+          , overlayClose: false
           , onClose: function() {
             self.attacher = null;
           }
@@ -501,6 +502,7 @@ var padeditbar = (function()
           title: yam.tr('Select an Page')
           , width: '810'
           , height: '480'
+          , overlayClose: false
           , onClose: function() {
             self.attacher = null;
           }
