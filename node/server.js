@@ -199,6 +199,7 @@ async.waterfall([
     var code = ''
     , response ='';
     
+    if(settings.dbType !== 'dirty') {
     function databaseCheck() {
       try
       {
@@ -232,6 +233,7 @@ async.waterfall([
     setInterval( function() { 
       databaseCheck();
       }, 30000);
+    }
 
     //api for database health check.
     app.get('/int/healthcheck', function(req,res) {
