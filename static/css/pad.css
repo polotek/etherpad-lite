@@ -481,16 +481,18 @@ table#otheruserstable { display: none; }
 }
 .modaldialog.cboxconnecting,
 .modaldialog.cboxdisconnected {
-  background: #fff;
+  background-color: #fff;
+  background-image: -moz-linear-gradient(100% 100% 90deg, #fff, #fcfbfb);
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#fcfbfb));
 }
 .cboxdisconnected #connectionboxinner div { display: none; }
-.cboxdisconnected_userdup #connectionboxinner #disconnected_userdup { display: block; }
-.cboxdisconnected_deleted #connectionboxinner #disconnected_deleted { display: block; }
-.cboxdisconnected_initsocketfail #connectionboxinner #disconnected_initsocketfail { display: block; }
-.cboxdisconnected_looping #connectionboxinner #disconnected_looping { display: block; }
-.cboxdisconnected_slowcommit #connectionboxinner #disconnected_slowcommit { display: block; }
-.cboxdisconnected_unauth #connectionboxinner #disconnected_unauth { display: block; }
-.cboxdisconnected_unknown #connectionboxinner #disconnected_unknown { display: block; }
+.cboxdisconnected_userdup #connectionboxinner #disconnected_userdup { display: block; margin:0 20px; }
+.cboxdisconnected_deleted #connectionboxinner #disconnected_deleted { display: block; margin:0 20px; }
+.cboxdisconnected_initsocketfail #connectionboxinner #disconnected_initsocketfail { display: block; margin:0 20px; }
+.cboxdisconnected_looping #connectionboxinner #disconnected_looping { display: block; margin:0 20px; }
+.cboxdisconnected_slowcommit #connectionboxinner #disconnected_slowcommit { display: block; margin:0 20px; }
+.cboxdisconnected_unauth #connectionboxinner #disconnected_unauth { display: block; margin:0 20px; }
+.cboxdisconnected_unknown #connectionboxinner #disconnected_unknown { display: block; margin:0 20px; }
 .cboxdisconnected_initsocketfail #connectionboxinner #reconnect_advise,
 .cboxdisconnected_looping #connectionboxinner #reconnect_advise,
 .cboxdisconnected_slowcommit #connectionboxinner #reconnect_advise,
@@ -523,10 +525,17 @@ table#otheruserstable { display: none; }
 }
 #connectionboxinner .disconnected p {
   margin: 90px 10px 20px 10px;
-  font-size: 1.2em;
+  font-size: 2.2em;
   line-height: 1.1;
-  color: #333;
-  text-align: center;
+  color: #666;
+  font-family: helvetica;
+  text-align: left;
+}
+#connectionboxinner .disconnected b {
+  font-weight:normal;
+}
+#connectionboxinner .disconnected .page-error-icon {
+  float:left;
 }
 #connectionboxinner .disconnected { display: none; }
 .cboxdisconnected #connectionboxinner .disconnected { display: block; }
@@ -542,6 +551,15 @@ table#otheruserstable { display: none; }
   font-size: 12pt;
   padding: 5px;
   text-align: center;
+  border:1px solid #dedede;
+  border-radius:2px;
+  -webkit-border-radius:2px;
+  -moz-border-radius:2px;
+  color:#666;
+  cursor: pointer;
+  background-color:#ededed;
+  background-image: -moz-linear-gradient(100% 100% 90deg, #fff, #ededed);
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#ededed));
 }
 
 /* We give docbar a higher z-index than its descendant impexp-wrapper in
@@ -614,10 +632,10 @@ table#otheruserstable { display: none; }
 
 .modaldialog {
   position: absolute;
-  top: 103px;
+  top: 45px;
   left:50%;
-  margin-left:-243px;
-  width: 485px;
+  margin-left:-238px;
+  width: 475px;
   display: none;
   z-index: 501;
   zoom: 1;
@@ -625,7 +643,7 @@ table#otheruserstable { display: none; }
   background: white;
   border: 1px solid #eaa;
 }
-.modaldialog .modaldialog-inner { padding: 10pt; min-height: 262px;}
+.modaldialog .modaldialog-inner { padding: 10pt; min-height: 252px;}
 .modaldialog .modaldialog-hide {
   float: right;
   background-repeat: no-repeat;

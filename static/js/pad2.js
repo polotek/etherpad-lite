@@ -422,7 +422,7 @@ var pad = {
 
     padeditor.init(postAceInit, pad.padOptions.view || {});
 
-    paduserlist.init(pad.myUserInfo);
+    //paduserlist.init(pad.myUserInfo);
     //    padchat.init(clientVars.chatHistory, pad.myUserInfo);
     padconnectionstatus.init();
     padmodals.init();
@@ -572,6 +572,8 @@ var pad = {
   },
   handleUserLeave: function(userInfo)
   {
+    // delete old cookies
+    if(userInfo.userId.indexOf('.') !== -1) { createCookie('token', '', 0); }
     yam.publish('/ui/pages/removeUser', [userInfo]);
     paduserlist.userLeave(userInfo);
     //padchat.handleUserLeave(userInfo);
