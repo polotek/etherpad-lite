@@ -94,11 +94,12 @@ linestylefilter.getLineStyleFilter = function(lineLength, aline, textAndClassFun
             }
             else
             {
-              classes += plugins_.callHookStr("aceAttribsToClasses", {
+              var pluginClasses = plugins_.callHookStr("aceAttribsToClasses", {
                 linestylefilter: linestylefilter,
                 key: key,
                 value: value
               }, " ", " ", "");
+              classes += pluginClasses;
             }
           }
         }

@@ -1984,7 +1984,6 @@ function OUTER(gscope)
     {
       return false;
     });
-    // window.console.log('infoStructs', infoStructs)
     var lastEntry;
     var lineStartOffset;
     if (infoStructs.length < 1) return;
@@ -2020,8 +2019,6 @@ function OUTER(gscope)
       else p2.literal(0, "nonopt");
       lastEntry = entry;
       p2.mark("spans");
-      // window.console.log('insertDomLines', entry, 'key', key)
-      // window.console.log('the rep', rep)
       getSpansForLine(entry, function(tokenText, tokenClass)
       {
         info.appendSpan(tokenText, tokenClass);
@@ -2676,7 +2673,6 @@ function OUTER(gscope)
         break;
       }
     }
-
     if (selectionAllHasIt)
     {
       performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [
@@ -3831,7 +3827,6 @@ function OUTER(gscope)
     if (!isEditable) return;
     var handled;
     handled =  (execCustomEventHooks('handleKeyEvent', evt) === false);
-    //window.console.log('handleKeyEvent', handled)
     if (handled) {
       evt.preventDefault();
       return;
@@ -4433,7 +4428,6 @@ function OUTER(gscope)
 
   function setSelection(selection)
   {
-    // window.console.log('setSelection', selection)
     function copyPoint(pt)
     {
       return {
@@ -4691,7 +4685,6 @@ function OUTER(gscope)
         }
       }
     }
-    // window.console.log('setSelection end', rep.selStart[1])
   }
 
   function childIndex(n)

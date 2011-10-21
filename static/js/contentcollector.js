@@ -481,6 +481,10 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
           {
             oldListTypeOrNull = (_enterList(state, type) || 'none');
           }
+          if (cls.match(/yammer:/)) {
+            var mphIndex = cls.search(/yammer:/);
+            cc.doAttrib(state, cls.substring(mphIndex)); //'yj-page-link '
+          }
           if (className2Author && cls)
           {
             var classes = cls.match(/\S+/g);
@@ -521,10 +525,12 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
         if (isPre) cc.decrementFlag(state, 'preMode');
         if (state.localAttribs)
         {
+          // console.log('state localAttribs 0', state.localAttribs)
           for (var i = 0; i < state.localAttribs.length; i++)
           {
             cc.decrementAttrib(state, state.localAttribs[i]);
           }
+          // console.log('state localAttribs 1', state.localAttribs)
         }
         if (oldListTypeOrNull)
         {

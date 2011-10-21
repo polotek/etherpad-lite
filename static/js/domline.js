@@ -142,7 +142,6 @@ domline.createDomLine = function(nonEmpty, doesWrap, optBrowser, optDocument)
     {
       plugins_ = parent.parent.plugins;
     }
-
     plugins_.callHook("aceCreateDomLine", {
       domline: domline,
       cls: cls
