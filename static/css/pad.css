@@ -536,6 +536,7 @@ table#otheruserstable { display: none; }
 }
 #connectionboxinner .disconnected .page-error-icon {
   float:left;
+  margin-top:4px;
 }
 #connectionboxinner .disconnected { display: none; }
 .cboxdisconnected #connectionboxinner .disconnected { display: block; }
@@ -551,7 +552,7 @@ table#otheruserstable { display: none; }
   font-size: 12pt;
   padding: 5px;
   text-align: center;
-  border:1px solid #dedede;
+  border:1px solid #dcdcdc;
   border-radius:2px;
   -webkit-border-radius:2px;
   -moz-border-radius:2px;
@@ -560,6 +561,9 @@ table#otheruserstable { display: none; }
   background-color:#ededed;
   background-image: -moz-linear-gradient(100% 100% 90deg, #fff, #ededed);
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#ededed));
+}
+#reconnect_form button:hover {
+  border-color: #ccc;
 }
 
 /* We give docbar a higher z-index than its descendant impexp-wrapper in
