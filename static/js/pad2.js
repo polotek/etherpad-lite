@@ -768,7 +768,7 @@ var pad = {
     var config = window.yam ? yam.config() : {}
       , url = '/ep/pad/connection-diagnostic-info';
 
-    if(config.paddieURL) { url = config.paddiURL + url; }
+    if(config.paddieURL) { url = config.paddieURL + url; }
 
     window.setTimeout(function()
     {
