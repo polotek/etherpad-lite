@@ -308,8 +308,7 @@ var padeditbar = (function()
       }
 
       var typeAheadOpts = {
-          maxResults: 1
-          , onSelect: function(linkData, evt) {
+          onSelect: function(linkData, evt) {
             return self._onMentionSubmit(linkData);
           }
           , minSize: 200
