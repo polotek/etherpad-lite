@@ -17,7 +17,12 @@
 var padutils = {
   escapeHtml: function(x)
   {
-    return String(x).replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
+    return String(x)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        ;
   },
   uniqueId: function()
   {
