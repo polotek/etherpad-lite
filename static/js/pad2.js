@@ -219,7 +219,8 @@ function handshake()
   socket.on('message', function(obj)
   {
     if (denied) {
-      console.log(obj);
+      // You should be disconnected, but maybe a few messages sneak through
+      return;
     }
     //the access was not granted, give the user a message
     else if(!receivedClientVars && obj.accessStatus)
@@ -771,9 +772,10 @@ var pad = {
   {
     pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
     var config = window.yam ? yam.config() : {}
-      , url = '/ep/pad/connection-diagnostic-info';
+      , url = 'ep/pad/connection-diagnostic-info';
 
     if(config.paddieURL) { url = config.paddieURL + url; }
+    else { return; }
 
     window.setTimeout(function()
     {

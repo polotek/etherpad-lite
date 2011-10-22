@@ -92,7 +92,7 @@ var setupLogging = function()
   }
 
   log4js.clearAppenders();
-  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  //log4js.addAppender(log4js.consoleAppender(customPatternLayout));
   if(settings.logDirectory)
   {
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
