@@ -136,15 +136,15 @@ function mapAuthorWithDBKey (mapperkey, mapper, userID, callback)
 exports.createAuthor = function(name, callback)
 {
   //create the new author name
-  var author = "a." + randomString(16);
+  //var author = "a." + randomString(16);
 
   //create the globalAuthors db entry
   var authorObj = {"colorId" : Math.floor(Math.random()*32), "name": name, "timestamp": new Date().getTime()};
 
   //set the global author db entry
-  db.set("globalAuthor:" + author, authorObj);
+  db.set("globalAuthor:" + name, authorObj);
 
-  callback(null, {authorID: author});
+  callback(null, {authorID: name});
 }
 
 /**

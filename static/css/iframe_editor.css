@@ -36,12 +36,13 @@ ul.list-bullet8 { list-style-type: circle; }
 body {
   margin: 0;
   white-space: nowrap;
+  display:block;
 }				 
 
 #outerdocbody {
   background-color: #fff;
 }
-body.grayedout { background-color: #eee !important }
+body.grayedout { background-color: #eee !important; overflow:hidden; display:none; }
 
 #innerdocbody {
   font-size: 12px; /* overridden by body.style */

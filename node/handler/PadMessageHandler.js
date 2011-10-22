@@ -426,7 +426,7 @@ function handleUserChanges(client, message)
       //there is an error in this changeset, so just refuse it
       catch(e)
       {
-        console.warn("Can't apply USER_CHANGES "+changeset+", cause it faild checkRep");
+        messageLogger.error("Can't apply USER_CHANGES "+changeset+", cause it faild checkRep");
         client.json.send({disconnect:"badChangeset"});
         return;
       }
@@ -472,7 +472,7 @@ function handleUserChanges(client, message)
 
       if (Changeset.oldLen(changeset) != prevText.length)
       {
-        console.warn("Can't apply USER_CHANGES "+changeset+" with oldLen " + Changeset.oldLen(changeset) + " to document of length " + prevText.length);
+        messageLogger.error("Can't apply USER_CHANGES "+changeset+" with oldLen " + Changeset.oldLen(changeset) + " to document of length " + prevText.length);
         client.json.send({disconnect:"badChangeset"});
         callback();
         return;
