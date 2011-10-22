@@ -2,6 +2,8 @@ set :stages,        %w(staging production)
 set :default_stage, 'staging'
 require 'capistrano/ext/multistage'
 require 'pp'
+require 'curl'
+require 'yajl'
 require 'fileutils'
 require 'railsless-deploy' 
 
@@ -13,6 +15,10 @@ set :deploy_via,    :remote_cache
 set :scm,           :git
 set :scm_verbose,   true
 set :repository,    'git@github.com:yammer/etherpad-lite.git'
+
+## state to notify yammer of deploys
+set :yn_step,          0
+set :yn_reply_to_id,   nil
 
 ssh_options[:forward_agent] = true
 
@@ -94,4 +100,53 @@ namespace :deploy do
       sudo "#{current_release}/bin/haproxy_reload.sh -n paddie", :hosts => server
     end
   end
+
+  
+  task :notify_yammer_about_deploy do 
+    begin
+      permalink = `git config yammer.permalink`.chomp
+      user      = $? == 0 ? "@#{permalink}" : `whoami`.chomp.downcase
+      
+      body = case yn_step.to_i
+        when 0: "#{user} is deploying Paddie branch=#{branch} to #{stage}"
+        when 1: "Finished deploying!"
+        else     "Expect the unexpected!"
+      end
+      
+      groupid = case stage.to_s
+        when /thunderdome/: 1380
+        when /prod/       : 323
+        when /stage/      : 849
+        else                849
+      end
+      
+      params    = []
+      params   << Curl::PostField.content('replied_to_id', yn_reply_to_id) if yn_reply_to_id
+      params   << Curl::PostField.content('group_id', groupid.to_s)
+      params   << Curl::PostField.content('body', body)
+      response  = Curl::Easy.http_post("https://www.staging.yammer.com/api/v1/messages.json?access_token=YtseU6j94nALx6qXq4wqUQ", params)
+
+      if response.response_code == 201
+        message    = Yajl::Parser.parse(response.body_str)['messages'].first
+        message_id = message['id']
+        set :yn_reply_to_id, message_id
+        logger.info "success! posted message to yammer and got message_id=#{yn_reply_to_id}"
+      end
+
+    rescue => e
+      logger.info "Posting to Yammer: #{e}"
+      logger.info "Moving On!"
+    ensure
+      set :yn_step, yn_step + 1
+    end
+  end
+  before "deploy", "deploy:notify_yammer_about_deploy"
+  after  "deploy", "deploy:notify_yammer_about_deploy"
+
+  task :test_notify_yammer_about_deploy do
+    logger.info "sleeping for 5"
+  end  
+  before "deploy:test_notify_yammer_about_deploy", "deploy:notify_yammer_about_deploy"
+  after  "deploy:test_notify_yammer_about_deploy", "deploy:notify_yammer_about_deploy"
+
 end
