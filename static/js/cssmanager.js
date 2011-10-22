@@ -52,19 +52,28 @@ function makeCSSManager(emptyStylesheetTitle, top)
 
   function browserRules()
   {
-    return (browserSheet.cssRules || browserSheet.rules);
+    try {
+      return (browserSheet.cssRules || browserSheet.rules);
+    } catch(e) {
+      return [];
+    }
+
   }
 
   function browserDeleteRule(i)
   {
-    if (browserSheet.deleteRule) browserSheet.deleteRule(i);
-    else browserSheet.removeRule(i);
+    try {
+      if (browserSheet.deleteRule) browserSheet.deleteRule(i);
+      else browserSheet.removeRule(i);
+    } catch(e) {}
   }
 
   function browserInsertRule(i, selector)
   {
-    if (browserSheet.insertRule) browserSheet.insertRule(selector + ' {}', i);
-    else browserSheet.addRule(selector, null, i);
+    try {
+      if (browserSheet.insertRule) browserSheet.insertRule(selector + ' {}', i);
+      else browserSheet.addRule(selector, null, i);
+    } catch(e) {}
   }
   var selectorList = [];
 
@@ -82,6 +91,7 @@ function makeCSSManager(emptyStylesheetTitle, top)
 
   function selectorStyle(selector)
   {
+    if(!browserSheet) return '';
     var i = indexOfSelector(selector);
     if (i < 0)
     {
@@ -95,6 +105,7 @@ function makeCSSManager(emptyStylesheetTitle, top)
 
   function removeSelectorStyle(selector)
   {
+    if(!browserSheet) { return; }
     var i = indexOfSelector(selector);
     if (i >= 0)
     {
