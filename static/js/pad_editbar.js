@@ -355,6 +355,7 @@ var padeditbar = (function()
       var linker = self.linker = {
         buttonText: yam.tr('OK')
         , template: '<div class="yj-lightbox-content yj-editor-lightbox yj-linker-lightbox">\
+                      <form class="yj-linker-form">\
                        <div class="yj-editor-lightbox-field-wrap">\
                          <label class="yj-editor-lightbox-label" name="link_text">{{textLabel}}</label>\
                          <input type="text" name="link_text" class="yj-link-text yj-editor-lightbox-field" tabindex="1" wrap="off" />\
@@ -368,6 +369,7 @@ var padeditbar = (function()
                        <div class="yj-editor-submit-wrap">\
                          <a class="yj-btn yj-linker-form-submit yj-btn-disabled" href="javascript://">{{ buttonText }}</a>\
                        </div>\
+                      </form>\
                      </div>'
           , hasInput: function() {
             var linker = this;
@@ -403,6 +405,13 @@ var padeditbar = (function()
         linker.$urlInput = linker.$content.find('.yj-link-url');
         linker.$submitBtn = linker.$content.find('.yj-linker-form-submit')
             .click(jq.proxy(self._onLinkerSubmit, self));
+        linker.$form = linker.$content.find('.yj-linker-form')
+            .submit(jq.proxy(self._onLinkerSubmit, self))
+            .keydown(function (evt) {
+              if (evt.which == 13) {
+                jq.proxy(self._onLinkerSubmit, self)(evt);
+              }
+            });
 
         var checker = jq.proxy(linker.check, linker);
         linker.$content.find('input').bind('blur', checker);
