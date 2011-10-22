@@ -126,7 +126,7 @@ exports.handleDisconnect = function(client)
         }
       };
 
-      messageLogger.error('USER_LEAVE ' + isDuplicate ? '(Dupe): ' : ': ', JSON.stringify(messageToTheOtherUsers));
+      messageLogger.error('USER_LEAVE ' + (isDuplicate ? '(Dupe): ' : ': '), JSON.stringify(messageToTheOtherUsers));
 
       //Go trough all user that are still on the pad, and send them the USER_LEAVE message
       for(i in pad2sessions[sessionPad])
