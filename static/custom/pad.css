@@ -76,10 +76,10 @@
 }
 
 .yj-page-link {
-  border: solid 1px #666;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
+  border: dotted 1px #888;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
 }
 
 .yj-editor-submit-wrap {

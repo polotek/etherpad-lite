@@ -301,10 +301,11 @@ function OUTER(gscope)
 
   function doAlert(str)
   {
-    scheduler.setTimeout(function()
-    {
-      alert(str);
-    }, 0);
+    // TODO: get yam.log working here but dont do actual alert
+    // scheduler.setTimeout(function()
+    // {
+    //   alert(str);
+    // }, 0);
   }
 
   editorInfo.ace_getRep = function()
@@ -3575,7 +3576,7 @@ function OUTER(gscope)
       {        
         try
         {
-          // DONT NAVIGATE TO LINKS
+          // DONT NAVIGATE TO
           // var newWindow = window.open(n.href, '_blank');
           // newWindow.focus();
         }
