@@ -174,7 +174,6 @@ function handshake()
 
   socket.once('connect', function()
   {
-    alert(socket.transport.name);
     var config = window.yam && yam.config() || {};
 
     var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
