@@ -17,7 +17,12 @@
 var padutils = {
   escapeHtml: function(x)
   {
-    return String(x).replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
+    return String(x)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        ;
   },
   uniqueId: function()
   {
@@ -174,7 +179,7 @@ var padutils = {
         var startIndex = urls[j][0];
         var href = urls[j][1];
         advanceTo(startIndex);
-        pieces.push('<a ', (target ? 'target="' + target + '" ' : ''), 'href="', href.replace(/\"/g, '&quot;'), '">');
+        pieces.push('<a ', (target ? 'target="' + padutils.escapeHtml(target) + '" ' : ''), 'href="', padutils.escapeHtml(href), '">');
         advanceTo(startIndex + href.length);
         pieces.push('</a>');
       }
