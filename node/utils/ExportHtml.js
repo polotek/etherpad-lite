@@ -269,7 +269,7 @@ function getHTMLFromAtext(pad, atext)
         }
         var s = taker.take(chars);
 
-        if(url) { emitOpenURL(url); }
+        if(url && _urlIsSafe(url)) { emitOpenURL(url); }
         if(yammerRef) { assem.append('<span class="yj-page-model-placeholder">'); }
 
         if(yammerRef) {
@@ -279,7 +279,7 @@ function getHTMLFromAtext(pad, atext)
         }
 
         if(yammerRef) { assem.append('</span>'); }
-        if(url) { emitCloseURL(); }
+        if(url && _urlIsSafe(url)) { emitCloseURL(); }
 
         // reset url for next iteration
         url = null;
@@ -463,6 +463,10 @@ exports.getPadHTMLDocument = function (padId, revNum, opts, callback)
   });
 }
 
+var _urlIsSafe = function (url) {
+  // Whitelist http, https #security
+  return typeof url == 'string' && url.match(/^(?:https?:\/\/$)/i);
+};
 function _escapeHTML(s)
 {
   var re = /[&<>"]/g;
