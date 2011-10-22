@@ -436,7 +436,6 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
       if (userSet[id])
       {
         delete userSet[userInfo.userId];
-        fadeAceAuthorInfo(userInfo);
         callbacks.onUserLeave(userInfo);
         dmesgUsers();
       }
