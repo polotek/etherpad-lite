@@ -134,7 +134,7 @@ function getHTMLFromAtext(pad, atext)
     }
 
     function emitOpenURL(url) {
-      assem.append('<a href="' + url + '" target="_blank">');
+      assem.append('<a href="' + _escapeHTML(url) + '" target="_blank">');
     }
 
     function emitCloseURL() {
