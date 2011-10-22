@@ -28,7 +28,9 @@ $(document).ready(function()
   //start the costum js
   if(typeof customStart == "function") customStart();
   getParams();
-  handshake();
+  // The handshake call is in pad.connect(). That's how you should
+  // start the pad.
+  // handshake();
 });
 $(window).bind('beforeunload', function(){leavingPage = true;})
 $(window).unload(function()
@@ -316,6 +318,9 @@ var pad = {
   preloadedImages: false,
   padOptions: {},
 
+  connect: function() {
+    handshake();
+  },
   // these don't require init; clientVars should all go through here
   getPadId: function()
   {
