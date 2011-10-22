@@ -78,20 +78,20 @@ namespace :deploy do
   task :restart do
     find_servers.sort.each do |server|
       logger.info "disabling haproxy on #{server}"
-      sudo "#{current_release}/bin/haproxyctl disable"
-      sudo "initctl emit stop-all-paddies; sleep 1"
+      sudo "#{current_release}/bin/haproxyctl disable", :hosts => server
+      sudo "initctl emit stop-all-paddies; sleep 1",    :hosts => server
 
       logger.info "resting for ten seconds"
       sleep 10
 
       logger.info "starting paddie on ports #{ports.first} to #{ports.last}"
       ports.each do |port|
-        sudo "start paddie PORT=#{port};"
+        sudo "start paddie PORT=#{port};", :hosts => server
       end
 
       ## FIXME: should restart haproxy
       logger.info "restarting haproxy"
-      sudo "#{current_release}/bin/haproxy_reload.sh -n paddie"
+      sudo "#{current_release}/bin/haproxy_reload.sh -n paddie", :hosts => server
     end
   end
 end
