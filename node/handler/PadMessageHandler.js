@@ -722,7 +722,9 @@ function handleClientReady(client, message)
       // clear any previous cache state
       if(!pad2sessions[message.padId] ||
          !pad2sessions[message.padId].length) {
-        padManager.evictFromCache(message.padId, callback);
+        // Evicting cache here breaks initialization sometimes. Removing.
+        // padManager.evictFromCache(message.padId, callback);
+        callback();
       } else {
         callback();
       }
