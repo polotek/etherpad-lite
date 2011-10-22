@@ -171,7 +171,6 @@ function handshake()
   //connect
   socket = io.connect(url, {
     resource: resource
-    , 'flash policy port': 9101
   });
 
   socket.once('connect', function()

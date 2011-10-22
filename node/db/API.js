@@ -313,11 +313,6 @@ exports.getRevisionsCount = function(padID, callback)
   });
 }
 
-exports.getPad = function(padID, callback) {
-  getPadSafe(padID, true, function(err, pad) {
-    callback(err, pad ? pad.toJsonable() : null);
-  });
-}
 /**
 createPad(padName [, text]) creates a new pad in this group
 

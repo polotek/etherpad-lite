@@ -170,21 +170,10 @@ async.waterfall([
       app.use(express.cookieParser());
     });
 
-    function bustCache(res) {
-      var headers = {};
-      headers['Cache-Control'] = 'max-age=-1, must-revalidate, no-cache, no-store';
-      headers['Expires'] = new Date(0).toString();
-      headers['Last-Modified'] = new Date().toString();
-      headers['ETag'] = new Date().getTime().toString() + Math.random();
-      for(var h in headers) { res.setHeader(h, headers[h]); }
-    }
-
     //serve static files
     app.get('/static/*', function(req, res)
     {
       res.header("Server", serverName);
-      bustCache(res);
-
       var filePath = path.normalize(__dirname + "/.." +
                                     req.url.replace(/\.\./g, '').split("?")[0]);
       res.sendfile(filePath, { maxAge: exports.maxAge });
@@ -194,7 +183,6 @@ async.waterfall([
     app.get('/minified/:id', function(req, res, next)
     {
       res.header("Server", serverName);
-      bustCache(res);
 
       var id = req.params.id;
 
@@ -617,8 +605,7 @@ async.waterfall([
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
-    io.set('transports', ['xhr-polling', 'flashsocket', 'htmlfile', 'jsonp-polling']);
-    io.set('flash policy port', parseInt(port,10) + 100);
+    io.set('transports', ['xhr-polling', 'jsonp-polling']);
 
     var socketIOLogger = log4js.getLogger("socketioLog");
     io.set('logger', {
@@ -653,7 +640,6 @@ async.waterfall([
     socketIORouter.addComponent("pad", padMessageHandler);
     socketIORouter.addComponent("timeslider", timesliderMessageHandler);
 
-    console.log('pid: ',process.pid);
     callback(null);
   }
 ]);

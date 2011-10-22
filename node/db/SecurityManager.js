@@ -34,7 +34,6 @@ var securityLogger = require('log4js').getLogger("security");
  * @param callback - will be called with (err) if auth fails, and () if it's all good.
  */
 var tokieAuth = function(token, padID, callback) {
-  return callback();
   // if we don't have tokie in the settings, then assume we're all good
   if (settings.tokie) {
     var body = '';

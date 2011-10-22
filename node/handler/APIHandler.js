@@ -42,7 +42,6 @@ var functions = {
     "getSessionInfo"            : ["sessionID"],
     "listSessionsOfGroup"       : ["groupID"],
     "listSessionsOfAuthor"      : ["authorID"],
-    "getPad"                    : ["padID"],
     "getText"                   : ["padID", "rev"],
     "getHTML"                   : ["padID", "rev"],
     "setText"                   : ["padID", "text"],
@@ -117,8 +116,8 @@ exports.handle = function(functionName, fields, req, res)
   if(fields["apikey"] != apikey)
   {
     // TODO: DO NOT COMMIT THIS COMMENTED OUT
-    //res.send({code: 4, message: "no or wrong API Key", data: null});
-    //return;
+    res.send({code: 4, message: "no or wrong API Key", data: null});
+    return;
   }
 
   var apiParams = functions[req.method] ? functions[req.method][functionName] : null;
