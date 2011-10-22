@@ -465,7 +465,7 @@ exports.getPadHTMLDocument = function (padId, revNum, opts, callback)
 
 var _urlIsSafe = function (url) {
   // Whitelist http, https #security
-  return typeof url == 'string' && url.match(/^(?:https?:\/\/$)/i);
+  return typeof url == 'string' && url.match(/^(?:https?:\/\/)/i);
 };
 function _escapeHTML(s)
 {
