@@ -169,10 +169,12 @@ function handshake()
   //connect
   socket = io.connect(url, {
     resource: resource
+    , 'flash policy port': 9101
   });
 
   socket.once('connect', function()
   {
+    alert(socket.transport.name);
     var config = window.yam && yam.config() || {};
 
     var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);

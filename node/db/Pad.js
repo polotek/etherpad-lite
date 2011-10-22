@@ -121,6 +121,31 @@ Class('Pad', {
                             });
     }, //appendRevision
 
+    save: function() {
+            db.set("pad:"+this.id, {atext: this.atext,
+                              pool: this.pool.toJsonable(),
+                              head: this.head,
+                              chatHead: this.chatHead,
+                              publicStatus: this.publicStatus,
+                              passwordHash: this.passwordHash,
+                              networkId: this.networkId,
+                              groupId: this.groupId,
+                              isPrivate: this.isPrivate
+                            });
+    },
+    toJsonable: function() {
+      return { id: this.id,
+        atext: this.atext,
+        pool: this.pool.toJsonable(),
+        head: this.head,
+        chatHead: this.chatHead,
+        publicStatus: this.publicStatus,
+        passwordHash: this.passwordHash,
+        networkId: this.networkId,
+        groupId: this.groupId,
+        isPrivate: this.isPrivate
+      }
+    },
     getRevision: function(revNum, callback) {
       db.get("pad:" + this.id + ":revs:" + revNum, callback);
     }, // getRevision
@@ -568,7 +593,7 @@ Class('Pad', {
       padMessageHandler.kickSessionsFromPad(padID);
 
       // don't remove pads... ever
-      return callback();
+      //return callback();
 
       async.series([
         //delete all relations
