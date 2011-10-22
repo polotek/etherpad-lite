@@ -524,7 +524,7 @@ table#otheruserstable { display: none; }
   margin-bottom: 10px;
 }
 #connectionboxinner .disconnected p {
-  margin: 90px 10px 20px 10px;
+  margin: 130px 10px 20px 10px;
   font-size: 2.2em;
   line-height: 1.1;
   color: #666;
@@ -636,7 +636,7 @@ table#otheruserstable { display: none; }
 
 .modaldialog {
   position: absolute;
-  top: 45px;
+  top: 46px;
   left:50%;
   margin-left:-238px;
   width: 475px;
@@ -647,7 +647,7 @@ table#otheruserstable { display: none; }
   background: white;
   border: 1px solid #eaa;
 }
-.modaldialog .modaldialog-inner { padding: 10pt; min-height: 252px;}
+.modaldialog .modaldialog-inner { padding: 10pt; min-height: 350px;}
 .modaldialog .modaldialog-hide {
   float: right;
   background-repeat: no-repeat;
