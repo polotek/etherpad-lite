@@ -6,13 +6,13 @@
   //Ip and port which etherpad should bind at
   "ip": "0.0.0.0",
   "port" : 9001,
-  "env"  : "staging",
+  "env"  : "production",
 
   //The Type of the database. You can choose between sqlite and mysql
   "dbType" : "pgsql",
   "dbSettings" : {
                     "user"    : "paddie",
-                    "host"    : "stagepdb-001",
+                    "host"    : "pdb-001.sjc1.yammer.com",
                     "password": "pa44i3",
                     "database": "yam_pages"
                   },
@@ -31,13 +31,13 @@
   /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
   "loglevel": "DEBUG",
 
-  "logDirectory": "logs",
+  "logDirectory": "/var/log/paddie",
 
-  "archiveDirectory": "logs/archives",
+  "archiveDirectory": "/var/log/paddie/archives",
 
   "tokie": {
-        "host":"stagetokie-004.sjc1.yammer.com",
-        "port":7080
+        "host":"tokie.sjc1.yammer.com",
+        "port":80
   }
 }
 
