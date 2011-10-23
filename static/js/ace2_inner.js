@@ -5074,7 +5074,6 @@ function OUTER(gscope)
   {
     window.focus();
   }
-
   function handleBlur(evt)
   {
     if (browser.msie)
