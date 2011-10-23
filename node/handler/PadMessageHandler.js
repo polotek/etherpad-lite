@@ -102,6 +102,7 @@ exports.handleDisconnect = function(client)
   //if this connection was already etablished with a handshake, send a disconnect message to the others
   if(sessioninfos[client.id] && sessioninfos[client.id].author)
   {
+    var isDuplicate = sessioninfos[client.id].isDuplicate || false;
     var author = sessioninfos[client.id].author;
 
     //get the author color out of the db
@@ -119,10 +120,13 @@ exports.handleDisconnect = function(client)
             "colorId": authorObj.colorId,
             "userAgent": "Anonymous",
             "userId": author,
-            "name": authorObj.name
+            "name": authorObj.name,
+            "isDuplicate": isDuplicate
           }
         }
       };
+
+      messageLogger.error('USER_LEAVE ' + (isDuplicate ? '(Dupe): ' : ': '), JSON.stringify(messageToTheOtherUsers));
 
       //Go trough all user that are still on the pad, and send them the USER_LEAVE message
       for(i in pad2sessions[sessionPad])
@@ -719,7 +723,9 @@ function handleClientReady(client, message)
       // clear any previous cache state
       if(!pad2sessions[message.padId] ||
          !pad2sessions[message.padId].length) {
-        padManager.evictFromCache(message.padId, callback);
+        // Evicting cache here breaks initialization sometimes. Removing.
+        // padManager.evictFromCache(message.padId, callback);
+        callback();
       } else {
         callback();
       }
@@ -805,6 +811,11 @@ function handleClientReady(client, message)
           if(sessioninfos[pad2sessions[message.padId][i]].author == author)
           {
             socketio.sockets.sockets[pad2sessions[message.padId][i]].json.send({disconnect:"userdup"});
+            // Mark this guy as a duplicate in case we get any disconnects from him later
+            var oldClient = pad2sessions[message.padId][i];
+            if(sessioninfos[oldClient]) {
+              sessioninfos[oldClient].isDuplicate = true;
+            }
           }
         }
       }

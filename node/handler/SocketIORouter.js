@@ -54,6 +54,10 @@ exports.setSocketIO = function(_socket)
 
   socket.sockets.on('connection', function(client)
   {
+    if(socket.transports && socket.transports[client.id]) {
+      messageLogger.error('socket.io transport type ', socket.transports[client.id].name);
+    }
+
     var clientAuthorized = false;
 
     //wrap the original send function to log the messages

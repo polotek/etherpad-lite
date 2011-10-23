@@ -28,7 +28,9 @@ $(document).ready(function()
   //start the costum js
   if(typeof customStart == "function") customStart();
   getParams();
-  handshake();
+  // The handshake call is in pad.connect(). That's how you should
+  // start the pad.
+  // handshake();
 });
 $(window).bind('beforeunload', function(){leavingPage = true;})
 $(window).unload(function()
@@ -217,7 +219,8 @@ function handshake()
   socket.on('message', function(obj)
   {
     if (denied) {
-      console.log(obj);
+      // You should be disconnected, but maybe a few messages sneak through
+      return;
     }
     //the access was not granted, give the user a message
     else if(!receivedClientVars && obj.accessStatus)
@@ -315,6 +318,9 @@ var pad = {
   preloadedImages: false,
   padOptions: {},
 
+  connect: function() {
+    handshake();
+  },
   // these don't require init; clientVars should all go through here
   getPadId: function()
   {
@@ -766,9 +772,10 @@ var pad = {
   {
     pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
     var config = window.yam ? yam.config() : {}
-      , url = '/ep/pad/connection-diagnostic-info';
+      , url = 'ep/pad/connection-diagnostic-info';
 
     if(config.paddieURL) { url = config.paddieURL + url; }
+    else { return; }
 
     window.setTimeout(function()
     {

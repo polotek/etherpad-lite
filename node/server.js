@@ -92,7 +92,10 @@ var setupLogging = function()
   }
 
   log4js.clearAppenders();
-  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  if(settings.env == 'development') {
+    log4js.addAppender(log4js.consoleAppender(customPatternLayout));
+  }
+  
   if(settings.logDirectory)
   {
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
@@ -487,7 +490,7 @@ async.waterfall([
     {
       new formidable.IncomingForm().parse(req, function(err, fields, files)
       {
-        runtimeLog.debug("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
+        runtimeLog.error("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
         res.end("OK");
       });
     });
@@ -605,7 +608,11 @@ async.waterfall([
 
     //init socket.io and redirect all requests to the MessageHandler
     var io = socketio.listen(app);
-    io.set('transports', ['xhr-polling', 'jsonp-polling']);
+    io.set('transports', ['xhr-polling'
+                          //, 'flashsocket'
+                          //, 'htmlfile'
+                          , 'jsonp-polling'
+                          ]);
 
     var socketIOLogger = log4js.getLogger("socketioLog");
     io.set('logger', {

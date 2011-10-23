@@ -134,7 +134,7 @@ function getHTMLFromAtext(pad, atext)
     }
 
     function emitOpenURL(url) {
-      assem.append('<a href="' + url + '" target="_blank">');
+      assem.append('<a href="' + _escapeHTML(url) + '" target="_blank">');
     }
 
     function emitCloseURL() {
@@ -192,6 +192,15 @@ function getHTMLFromAtext(pad, atext)
             }
           }
           var attr = apool.numToAttrib[a];
+
+          // FIXME: Small hack for the case where yammer attribute
+          // value gets combined into the key
+          var match = attr[0].match(/(yammer):(\[[a-zA-Z]+:\d+\])/);
+          if(match) {
+            attr = [ match[1], match[2] ];
+          }
+
+
           if(attr && attr[1]) {
             switch(attr[0]) {
               case 'url':
@@ -199,6 +208,8 @@ function getHTMLFromAtext(pad, atext)
                 break;
               case 'yammer':
                 yammerRef = attr[1];
+                break;
+              default:
                 break;
             }
           }
@@ -269,7 +280,7 @@ function getHTMLFromAtext(pad, atext)
         }
         var s = taker.take(chars);
 
-        if(url) { emitOpenURL(url); }
+        if(url && _urlIsSafe(url)) { emitOpenURL(url); }
         if(yammerRef) { assem.append('<span class="yj-page-model-placeholder">'); }
 
         if(yammerRef) {
@@ -279,7 +290,7 @@ function getHTMLFromAtext(pad, atext)
         }
 
         if(yammerRef) { assem.append('</span>'); }
-        if(url) { emitCloseURL(); }
+        if(url && _urlIsSafe(url)) { emitCloseURL(); }
 
         // reset url for next iteration
         url = null;
@@ -463,9 +474,13 @@ exports.getPadHTMLDocument = function (padId, revNum, opts, callback)
   });
 }
 
+var _urlIsSafe = function (url) {
+  // Whitelist http, https #security
+  return typeof url == 'string' && url.match(/^(?:https?:\/\/)/i);
+};
 function _escapeHTML(s)
 {
-  var re = /[&<>]/g;
+  var re = /[&<>"]/g;
   if (!re.MAP)
   {
     // persisted across function calls!
@@ -473,6 +488,7 @@ function _escapeHTML(s)
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
+      '"': '&quot;'
     };
   }
   
@@ -583,7 +599,7 @@ var _findURLs = _regexFinder(_REGEX_URL, 'url', function(urlData, assem, curIdx,
   var url = urlData[1];
   var urlLength = url.length;
   processNextChars(startIndex - curIdx);
-  assem.append('<a href="' + url.replace(/\"/g, '&quot;') + '">');
+  assem.append('<a href="' + _escapeHTML(url) + '">');
   processNextChars(urlLength);
   assem.append('</a>');
 });
