@@ -244,11 +244,7 @@ var padeditbar = (function()
         ['url', url]
       ];
 
-      padeditor.ace.callWithAce(function(ace) {
-        ace.ace_insertText(text, attrs);
-        ace.ace_insertText(' ');
-      }, 'setText', true);
-      padeditor.ace.focus();
+      this._insertTextAtCursor(text, attrs);
     },
     _insertReferenceLink: function(linkType, linkData) {
       // FIXME: Why is the type wrong?
@@ -264,7 +260,8 @@ var padeditbar = (function()
           ]
           , text = displayText;
 
-        // pad the insert text so it's 
+        // pad the insert text so it's
+
         /*
         if(text.length < displayText.length) {
           for(var i = text.length; i <= displayText.length; i++) {
@@ -272,15 +269,37 @@ var padeditbar = (function()
           }
         }
         */
-
-        padeditor.ace.callWithAce(function(ace) {
-          ace.ace_insertText(text, attrs);
-          ace.ace_insertText(' ');
-        }, 'setText', true);
+        this._insertTextAtCursor(text, attrs);
       } else {
         yam.log('pages', '[Error] attachment failed ', linkData);        
       }
-      padeditor.ace.focus();
+      // padeditor.ace.focus();
+    },
+    // inserts text into a pad and does a bunch of timing hokey pokey mumbo jumbo to 
+    // make sure the text gets inserted in the right place and the cursor gets set in the right
+    // place afterwards.
+    // TODO: probably move to yam.ui.pages
+    _insertTextAtCursor: function (text, attrs) {
+        // console.log('lostSelection?', yam.ui.pages.isSelectionLost());
+        // at least in FF caret point gets lost on pad blur so it may need to be set back
+        var caret = yam.ui.pages.fixSelection();
+        // if the selection was moved need to wait a moment for it to be placed again
+        setTimeout(function () {
+          padeditor.ace.callWithAce(function(ace) {
+            ace.ace_insertText(text, attrs);
+            ace.ace_insertText(' ');
+            // at least in FF pad loses focus
+            setTimeout(function () {
+              padeditor.ace.focus()
+              // at least in FF selection does not get properly updated after an insert text
+              setTimeout(function () {
+                // console.log('new caret should be ', caret[0], caret[1] + text.length + 1)
+                yam.ui.pages.setCaret(caret[0], caret[1] + text.length + 1);
+              }, 333); // this timeout has to be suffeciently long in FF for all the repainting after the lightbox closes to occur
+              // console.log('current selection', yam.ui.pages.rep.selStart[0], yam.ui.pages.rep.selStart[1]);
+            }, 30);
+          }, 'setText', true);
+        }, 30);
     },
     _initMentionButton: function()
     {
