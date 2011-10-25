@@ -280,6 +280,13 @@ var padeditbar = (function()
     // place afterwards.
     // TODO: probably move to yam.ui.pages
     _insertTextAtCursor: function (text, attrs) {
+      if (!yam.ui.pages.isSelectionLost() || $.browser.webkit) {
+        padeditor.ace.callWithAce(function(ace) {
+          ace.ace_insertText(text, attrs);
+          ace.ace_insertText(' ');
+        }, 'setText', true);
+        padeditor.ace.focus();
+      } else {
         // console.log('lostSelection?', yam.ui.pages.isSelectionLost());
         // at least in FF caret point gets lost on pad blur so it may need to be set back
         var caret = yam.ui.pages.fixSelection();
@@ -290,7 +297,7 @@ var padeditbar = (function()
             ace.ace_insertText(' ');
             // at least in FF pad loses focus
             setTimeout(function () {
-              padeditor.ace.focus()
+              padeditor.ace.focus();
               // at least in FF selection does not get properly updated after an insert text
               setTimeout(function () {
                 // console.log('new caret should be ', caret[0], caret[1] + text.length + 1)
@@ -300,6 +307,7 @@ var padeditbar = (function()
             }, 30);
           }, 'setText', true);
         }, 30);
+      }
     },
     _initMentionButton: function()
     {
