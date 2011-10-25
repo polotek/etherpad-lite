@@ -28,7 +28,7 @@
   */
 
   //the default text of a pad
-  "defaultPadText" : "Yammer Pages allow you to easily create and share content. Use Pages to share ideas, notes, policies, documentation and other information with this group.\n\nGetting Started Tips\n\n* Multiple users can edit this Page at the same time\n* Changes are automatically saved in real-time\n* Click Follow (above) to receive notifications when changes are made\n* Click Link (above) to link to related Pages and Files\n",
+  "defaultPadText" : "",
 
   /* if true, all css & js will be minified before sending to the client. This will improve the loading performance massivly,
      but makes it impossible to debug the javascript/css */
