@@ -316,14 +316,21 @@ var padeditbar = (function()
                      </div>'
         }
 
-      var typeAhead = yam.ui.shared.typeAhead;
+      var typeAhead = yam.ui.shared.typeAhead
+        , maxCount = 10
+        , userModel = 'users'
+        , domainModel = 'domains';
       if(yam.currentUser.treatments && 
           'new_autocomplete' in yam.currentUser.treatments) {
-        typeAhead = yam.currentUser.treatments.new_autocomplete ?
-            yam.ui.shared.typeAhead :
-            yam.ui.shared.typeAheadOld ? 
-              yam.ui.shared.typeAheadOld : 
-              yam.ui.shared.typeAhead;
+        if(yam.currentUser.treatments.new_autocomplete) {
+          maxCount = 6;
+          userModel = typeAhead.MODEL_USER;
+          domainModel = typeAhead.MODEL_DOMAIN;
+        } else {
+          typeAhead = yam.ui.shared.typeAheadOld ? 
+            yam.ui.shared.typeAheadOld : 
+            yam.ui.shared.typeAhead;
+        }
       }
 
       var typeAheadOpts = {
@@ -331,9 +338,17 @@ var padeditbar = (function()
             return self._onMentionSubmit(linkData);
           }
           , minSize: 200
-          , completableModels : ['users']
+          , width: 220
+          , allowWide: false
+          , maxResults: maxCount
+          , completableModels : this.includeEmails ? [userModel, domainModel] : [userModel]
           , includeEmails : this.includeEmails
         };
+      if (this.includeEmails) {
+        typeAheadOpts.earlyModelResults = {};
+        typeAheadOpts.earlyModelResults[userModel] = 4;
+        typeAheadOpts.earlyModelResults[domainModel] = 2;
+      }
 
       $btn.click(function() {
         mentioner.$content = jq(mentioner.template);
