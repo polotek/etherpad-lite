@@ -599,7 +599,7 @@ var _findURLs = _regexFinder(_REGEX_URL, 'url', function(urlData, assem, curIdx,
   var url = urlData[1];
   var urlLength = url.length;
   processNextChars(startIndex - curIdx);
-  assem.append('<a href="' + _escapeHTML(url) + '">');
+  assem.append('<a href="' + _escapeHTML(url) + '" target="_blank">');
   processNextChars(urlLength);
   assem.append('</a>');
 });
