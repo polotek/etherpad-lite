@@ -487,20 +487,30 @@ var padeditbar = (function()
     _onLinkerSubmit: function(evt) {
       var linker = this.linker
         , url = $.trim( linker.$urlInput.val() )
-        , text = linker.$textInput.val();
+        , text = linker.$textInput.val()
+        , parsed;
 
       if (!linker.hasInput() || linker.isDisabled()) {
         return false;
       }
 
       if(url) {
-        if(!yam.util.HREF_PATTERN.test(url)) {
-          if(yam.util.HREF_PATTERN.test('http://' + url)) {
-            url = 'http://' + url;
-          } else {
-            url = null;
-          }
+        parsed = yam.uri.parse(url || '');
+
+        // If there's no protocol, add 1
+        if(parsed.protocol != 'http' && parsed.protocol != 'https') {
+          parsed.protocol = 'http';
         }
+
+        // No host usually means invalid url
+        if(!parsed.host) {
+          parsed = null;
+          url = null;
+        }
+      }
+
+      if(parsed) {
+        url = yam.uri.stringify(parsed);
       }
 
       if(!url) {
