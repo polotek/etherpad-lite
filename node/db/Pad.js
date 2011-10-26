@@ -83,8 +83,10 @@ Class('Pad', {
         }
     },
 
-    appendRevision : function(aChangeset, author)
+    appendRevision : function(aChangeset, author, callback)
     {
+      var self = this;
+
       if(!author)
         author = '';
 
@@ -108,19 +110,43 @@ Class('Pad', {
         newRevData.meta.atext = this.atext;
       }
 
-      db.set("pad:"+this.id+":revs:"+newRev, newRevData);
-      db.set("pad:"+this.id, {atext: this.atext,
-                              pool: this.pool.toJsonable(),
-                              head: this.head,
-                              chatHead: this.chatHead,
-                              publicStatus: this.publicStatus,
-                              passwordHash: this.passwordHash,
-                              networkId: this.networkId,
-                              groupId: this.groupId,
-                              isPrivate: this.isPrivate
-                            });
+      // If there is a callback it is the writeCallback, not simply the buffer callback
+      async.series([
+        function(callback) {
+          db.set("pad:"+self.id+":revs:"+newRev, newRevData, null, callback);
+        },
+        function(callback) {
+          self.save(callback, true);
+        }
+      ], callback);
     }, //appendRevision
 
+    /**
+     * Save the pad info to the datastore
+     * boolean waitForWrite - If true, the callback won't be called until
+     *   the pad has been persisted. Basically write through the cache.
+     */
+    save: function(callback, waitForWrite) {
+      if(waitForWrite) {
+        db.set("pad:"+this.id, this.toJsonable(), null, callback);
+      } else {
+        db.set("pad:"+this.id, this.toJsonable(), callback);        
+      }
+    },
+
+    toJsonable: function() {
+      return { id: this.id,
+        atext: this.atext,
+        pool: this.pool.toJsonable(),
+        head: this.head,
+        chatHead: this.chatHead,
+        publicStatus: this.publicStatus,
+        passwordHash: this.passwordHash,
+        networkId: this.networkId,
+        groupId: this.groupId,
+        isPrivate: this.isPrivate
+      }
+    },
     getRevision: function(revNum, callback) {
       db.get("pad:" + this.id + ":revs:" + revNum, callback);
     }, // getRevision
@@ -543,16 +569,17 @@ Class('Pad', {
             _this.passwordHash = value.passwordHash;
           else
             _this.passwordHash = null;
+
+
+          callback(null);
         }
         //this pad doesn't exist, so create it
         else
         {
           var firstChangeset = Changeset.makeSplice("\n", 0, 0, exports.cleanText(options.text));
 
-          _this.appendRevision(firstChangeset, '');
+          _this.appendRevision(firstChangeset, '', callback);
         }
-
-        callback(null);
       });
     },
     // Not implemented yet
