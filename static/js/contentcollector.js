@@ -287,7 +287,11 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
     {
       if (state.attribs[a])
       {
-        lst.push([a, 'true']);
+        // window.console.log('contentcollector._recalcAttribString', state.attribs[a]);
+        // what happens when I kill yammer attrs here? // constrained attribute!
+        // if (a.lastIndexOf('yammer') < 0 || true) { 
+          lst.push([a, 'true']);
+        // }
       }
     }
     if (state.authorLevel > 0)
@@ -485,6 +489,9 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
           if (cls.match(/yammer:/)) {
             var mphIndex = cls.search(/yammer:/);
             cc.doAttrib(state, cls.substring(mphIndex)); //'yj-page-link '
+          }
+          if (tname == 'a' && node.parentNode && node.parentNode.className.indexOf('url') >= 0) {
+            cc.doAttrib(state, 'url:' + node.href);
           }
           if (className2Author && cls)
           {
