@@ -84,6 +84,17 @@ var error = function (){
 }
 
 /**
+ * Called when message processing is finished
+ */
+var handleMessageProcessed = function (err, message){
+  if (err){
+    // do something
+  } else {
+    metrics.tocMessage(message);
+  }
+}
+
+/**
  * This Method is called by server.js to tell the message handler on which socket it should send
  * @param socket_io The Socket
  */
@@ -202,7 +213,7 @@ exports.handleDisconnect = function(client)
 //hasmetrics
 exports.handleMessage = function(client, message)
 {
-  //var m = client.metrics = metrics.begin();
+  metrics.ticMessage(message);
 
   if(message == null)
   {
@@ -286,13 +297,10 @@ function handleChatMessage(client, message)
   var pad;
   var userName;
 
-  //debugger;
-
   async.series([
     //get the pad
     function(callback)
     {
-      //debugger;
       padManager.getPad(padId, function(err, _pad)
       {
         pad = _pad;
@@ -301,7 +309,6 @@ function handleChatMessage(client, message)
     },
     function(callback)
     {
-      //debugger;
       authorManager.getAuthorName(userId, function(err, _userName)
       {
         userName = _userName;
@@ -311,7 +318,6 @@ function handleChatMessage(client, message)
     //save the chat message and broadcast it
     function(callback)
     {
-      //debugger
       //save the chat message
       pad.appendChatMessage(text, userId, time);
 
@@ -331,7 +337,7 @@ function handleChatMessage(client, message)
       {
         socketio.sockets.sockets[pad2sessions[padId][i]].json.send(msg);
       }
-      //client.timer.update((new Date()) - client.starttime);
+      handleMessageProcessed(null, message);
       callback();
     }
   ], function(err)
@@ -373,7 +379,7 @@ function handleSuggestUserName(client, message)
       break;
     }
   }
-  //client.timer.update((new Date()) - client.starttime);
+  handleMessageProcessed(null, message);
 }
 
 /**
@@ -416,7 +422,7 @@ function handleUserInfoUpdate(client, message)
       socketio.sockets.sockets[pad2sessions[padId][i]].json.send(message);
     }
   }
-  //client.timer.update((new Date()) - client.starttime);
+  handleMessageProcessed(null, message);
 }
 
 
@@ -552,6 +558,7 @@ function handleUserChanges(client, message)
       }
 
       exports.updatePadClients(pad, references, callback);
+      handleMessageProcessed(null, message);
     }
   ], function(err)
   {
@@ -1020,12 +1027,12 @@ function handleClientReady(client, message)
               };
               client.json.send(messageToNotifyTheClientAboutTheOthers);
             }
-            //timers['NOTIFY_CLIENT_READY'].update((new Date()) - starttime);
+            handleMessageProcessed(null, message);
           }
         ], callback);
       }, function (callback){
         callback();
-        //timers['NOTIFY_CLIENT_READY'].update((new Date()) - starttime);
+        handleMessageProcessed(null, message);
       });
     }
   ],function(err)
