@@ -32,11 +32,6 @@ var metrics = require('../metrics');
 var messageLogger = log4js.getLogger("message");
 
 /**
- * Set the metrics logger
- */
-metrics.setLogger(messageLogger);
-
-/**
  * A associative array that translates a session to a pad
  */
 var session2pad = {};
@@ -60,14 +55,31 @@ var sessioninfos = {};
 var socketio;
 
 /**
+ * Log warning and increase meter
+ */
+var warn = function warn(name, msg){
+  var args = Array.prototype.slice.call(arguments, 0);
+  var name = args.shift();
+  try {
+    if (messageLogger){ messageLogger.warn.apply(messageLogger, args); }
+    metrics.warn(name);
+  } catch (ignore){
+    // errors in logging are ignored... wah wah waaaaaah
+  }
+}
+
+/**
  * Log error and increase meter
  * Calls a callback if it is supplied
  */
-var error = function error(name, err, callback, msg){
-  if (err){
-    mertrics.meter('ERROR_' + name + '_RATE');
-    messageLogger.error(msg || err);
-    if (callback){ callback(err); }
+var error = function (){
+  var args = Array.prototype.slice.call(arguments, 0);
+  var name = args.shift();
+  try {
+    if (messageLogger){ messageLogger.error.apply(messageLogger, args); }
+    metrics.error(name);
+  } catch (ignore){
+    // errors in logging are ignored... wah wah waaaaaah
   }
 }
 
@@ -127,7 +139,10 @@ exports.handleDisconnect = function(client)
     //get the author color out of the db
     authorManager.getAuthor(author, function(err, authorObj)
     {
-      if(err) throw err;
+      if (err){
+        error('GET_AUTHOR', 'Get author request failed');
+        throw err;
+      }
 
       //prepare the notification for the other users on the pad, that this user left
       var messageToTheOtherUsers = {
@@ -145,7 +160,8 @@ exports.handleDisconnect = function(client)
         }
       };
 
-      messageLogger.error('USER_LEAVE ' + (isDuplicate ? '(Dupe): ' : ': '), JSON.stringify(messageToTheOtherUsers));
+      error('USER_LEAVE', 'USER_LEAVE ' + (isDuplicate ? '(Dupe): ' : ': ')
+        , JSON.stringify(messageToTheOtherUsers));
 
       //Go trough all user that are still on the pad, and send them the USER_LEAVE message
       for(i in pad2sessions[sessionPad])
@@ -190,11 +206,11 @@ exports.handleMessage = function(client, message)
 
   if(message == null)
   {
-    return metrics.warn('NULL_MESSAGE', 'Message is null!');
+    return warn('NULL_MESSAGE', 'Message is null!');
   }
   if(!message.type)
   {
-    return metrics.warn('NO_MESSAGE_TYPE', 'Message has no type attribute!');
+    return warn('NO_MESSAGE_TYPE', 'Message has no type attribute!');
   }
 
   //Check what type of message we get and delegate to the other methodes
@@ -238,7 +254,7 @@ exports.handleMessage = function(client, message)
   //if the message type is unkown, throw an exception
   else
   {
-    metrics.warn('UNKNOWN_MESSAGE', 'Dropped message, unkown Message Type ' + message.type);
+    warn('UNKNOWN_MESSAGE', 'Dropped message, unkown Message Type ' + message.type);
   }
 }
 
@@ -320,8 +336,10 @@ function handleChatMessage(client, message)
     }
   ], function(err)
   {
-    //debugger;
-    if(err) throw err;
+    if (err){
+      error('HANDLE_CHAT_MESSAGE', 'Problem in HANDLE_CHAT_MESSAGE', err);
+      throw err;
+    }
   });
 }
 
@@ -337,11 +355,11 @@ function handleSuggestUserName(client, message)
   //check if all ok
   if(message.data.payload.newName == null)
   {
-    return metrics.warn('SUGGEST_USER_NAME_NO_NEWNAME', 'Dropped message, suggestUserName Message has no newName!');
+    return warn('SUGGEST_USER_NAME_NO_NEWNAME', 'Dropped message, suggestUserName Message has no newName!');
   }
   if(message.data.payload.unnamedId == null)
   {
-    return metrics.warn('SUGGEST_USER_NAME_NO_UNNAMED_ID', 'Dropped message, suggestUserName Message has no unnamedId!');
+    return warn('SUGGEST_USER_NAME_NO_UNNAMED_ID', 'Dropped message, suggestUserName Message has no unnamedId!');
   }
 
   var padId = session2pad[client.id];
@@ -369,7 +387,7 @@ function handleUserInfoUpdate(client, message)
   //check if all ok
   if(message.data.userInfo.colorId == null)
   {
-    return metrics.warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Droped message, USERINFO_UPDATE Message has no colorId!');
+    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Droped message, USERINFO_UPDATE Message has no colorId!');
   }
 
   //Find out the author name of this session
@@ -415,15 +433,15 @@ function handleUserChanges(client, message)
   //check if all ok
   if(message.data.baseRev == null)
   {
-    return metrics.warn('USER_CHANGES_BASE_REV', 'Dropped message, USER_CHANGES Message has no baseRev!');
+    return warn('USER_CHANGES_BASE_REV', 'Dropped message, USER_CHANGES Message has no baseRev!');
   }
   if(message.data.apool == null)
   {
-    return metrics.warn('USER_CHANGES_NO_APOOL', 'Dropped message, USER_CHANGES Message has no apool!');
+    return warn('USER_CHANGES_NO_APOOL', 'Dropped message, USER_CHANGES Message has no apool!');
   }
   if(message.data.changeset == null)
   {
-    return metrics.warn('USER_CHANGES_NO_CHANGESET', 'Dropped message, USER_CHANGES Message has no changeset!');
+    return warn('USER_CHANGES_NO_CHANGESET', 'Dropped message, USER_CHANGES Message has no changeset!');
   }
 
   //get all Vars we need
@@ -464,7 +482,7 @@ function handleUserChanges(client, message)
       //there is an error in this changeset, so just refuse it
       catch(e)
       {
-        metrics.warn('CHECKREP', "Can't apply USER_CHANGES " + changeset + ", because it failed checkRep");
+        warn('CHECKREP', "Can't apply USER_CHANGES " + changeset + ", because it failed checkRep");
         client.json.send({disconnect:"badChangeset"});
         return;
       }
@@ -510,7 +528,10 @@ function handleUserChanges(client, message)
 
       if (Changeset.oldLen(changeset) != prevText.length)
       {
-        messageLogger.error("Can't apply USER_CHANGES "+changeset+" with oldLen " + Changeset.oldLen(changeset) + " to document of length " + prevText.length);
+        error('BAD_CHANGESET_DISCONNECT', "Can't apply USER_CHANGES " + changeset + 
+          ' with oldLen ' + Changeset.oldLen(changeset) + ' to document of length ' +
+          prevText.length);
+
         client.json.send({disconnect:"badChangeset"});
         callback();
         return;
@@ -534,7 +555,10 @@ function handleUserChanges(client, message)
     }
   ], function(err)
   {
-    if(err) throw err;
+    if (err){
+      error('HANDLE_USER_CHANGES', 'Problem in handle user changes');
+      throw err;
+    }
   });
 }
 
@@ -700,19 +724,19 @@ function handleClientReady(client, message)
   //check if all ok
   if(!message.token)
   {
-    return metrics.warn('CLIENT_READY_NO_TOKEN', 'Dropped message, CLIENT_READY Message has no token!');
+    return warn('CLIENT_READY_NO_TOKEN', 'Dropped message, CLIENT_READY Message has no token!');
   }
   if(!message.padId)
   {
-    return metrics.warn('CLIENT_READY_NO_PAD_ID', 'Dropped message, CLIENT_READY Message has no padId!');
+    return warn('CLIENT_READY_NO_PAD_ID', 'Dropped message, CLIENT_READY Message has no padId!');
   }
   if(!message.protocolVersion)
   {
-    return metrics.warn('CLIENT_READY_NO_PROTOCOL_VERSION', 'Dropped message, CLIENT_READY Message has no protocolVersion!');
+    return warn('CLIENT_READY_NO_PROTOCOL_VERSION', 'Dropped message, CLIENT_READY Message has no protocolVersion!');
   }
   if(message.protocolVersion != 2)
   {
-    return metrics.warn('CLIENT_READY_UNKNOWN_PROTOCOL_VERSION', 'Dropped message, CLIENT_READY Message has ' +
+    return warn('CLIENT_READY_UNKNOWN_PROTOCOL_VERSION', 'Dropped message, CLIENT_READY Message has ' +
       'a unkown protocolVersion ' +
       message.protocolVersion + '!');
   }
@@ -1008,6 +1032,7 @@ function handleClientReady(client, message)
   {
     if(err) {
       if(err.accessStatus) {
+        error('ACCESS_DENIED', 'Access denied in client ready handler');
         // denied access, no problem here
         // just dropping out of the series
       } else {

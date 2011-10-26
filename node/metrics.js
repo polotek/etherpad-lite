@@ -20,14 +20,16 @@ var _warningMeters = [
 , 'CLIENT_READY_UNKNOWN_PROTOCOL_VERSION'
 ];
 
+var _errorKey = function (name){
+  return 'error.' + name + '_METER';
+}
+
 var _warnKey = function (name){
   return 'warn.' + name + '_METER';
 }
 
-var _meter = function (ns){
-  var key = _warnKey(ns)
-    , m = _report.getMetric(key);
-
+var _meter = function (key){
+  var m = _report.getMetric(key);
   if (!m){
     m = new metrics.Meter();
     _report.addMetric(key, m);
@@ -35,17 +37,12 @@ var _meter = function (ns){
   return m;
 }
 
-exports.setLogger = function (logger){
-  _logger = logger;
-};
-
 exports.warn = function (name, message){
-  try {
-    if (_logger){ _logger.warn(message); }
-    metrics.meter(name).mark();
-  } catch (ignore){
-    // errors in logging are ignored... wah wah waaaaaah
-  }
+  _meter(_warnKey(name)).mark();
+}
+
+exports.error = function (name, message){
+  _meter(_errorKey(name)).mark();
 }
 
 exports.timer = function (ns) {
@@ -67,6 +64,6 @@ exports.summary = function (){
 // Seed all metrics
 var _seed = (function (){
   _warningMeters.forEach(function (item){
-    _meter(item);
+    _meter(_warnKey(item));
   });
 })();
