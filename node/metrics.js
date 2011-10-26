@@ -92,14 +92,12 @@ exports.tocMessage = function (message){
     , ns = _messageKey(message);
 
   // if this timer was never started then something weird happened
-  if (start != null){
-    _report.getMetric(ns).update((new Date().getTime()) - start);
-  }
+  _report.getMetric(ns).update((new Date().getTime()) - start);
 }
 
 // Seed all metrics
-var _seed = (function (){
-  _warningMeters.forEach(function (item){
-    _meter(_warnKey(item));
-  });
-})();
+//var _seed = (function (){
+//  _warningMeters.forEach(function (item){
+//    _meter(_warnKey(item));
+//  });
+//})();
