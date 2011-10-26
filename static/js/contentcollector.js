@@ -281,6 +281,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
 
   function _recalcAttribString(state)
   {
+    // window.console.log('contentcollector._recalcAttribString', state);
     var lst = [];
     for (var a in state.attribs)
     {
