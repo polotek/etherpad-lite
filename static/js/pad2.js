@@ -32,7 +32,13 @@ $(document).ready(function()
   // start the pad.
   // handshake();
 });
-$(window).bind('beforeunload', function(){leavingPage = true;})
+$(window).bind('beforeunload', function(){
+  leavingPage = true;
+  if (clientVars.numConnectedUsers == 1 &&
+  pad.collabClient.getCurrentRevisionNumber() != yam.config().lastPublishedRevision) {
+    return "You're the last editor on this page, and there are unpublished changes."
+  }
+});
 $(window).unload(function()
 {
   pad.dispose();
