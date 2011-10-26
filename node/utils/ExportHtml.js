@@ -196,7 +196,7 @@ function getHTMLFromAtext(pad, atext)
           // FIXME: Small hack for the case where yammer attribute
           // value gets combined into the key
           var match;
-          match = attr[0].match(/(yammer):(\[[a-zA-Z]+:\d+\])/);
+          match = attr[0].match(/(yammer):(\[[a-zA-Z_-]+:\d+\])/);
           if(match && attr[1]) {
             attr = [ match[1], match[2] ];
           }
@@ -289,7 +289,7 @@ function getHTMLFromAtext(pad, atext)
         if(yammerRef) { assem.append('<span class="yj-page-model-placeholder">'); }
 
         if(yammerRef) {
-          assem.append(_escapeHTML(yammerRef));
+          assem.append(yammerRef);
         } else {
           assem.append(_escapeHTML(s));
         }
