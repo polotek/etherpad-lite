@@ -135,7 +135,6 @@ exports.kickSessionsFromPad = function(padID)
  * Handles the disconnection of a user
  * @param client the client that leaves
  */
-//nometrics
 exports.handleDisconnect = function(client)
 {
   //save the padname of this session
@@ -210,7 +209,6 @@ exports.handleDisconnect = function(client)
  * @param client the client that send this message
  * @param message the message from the client
  */
-//hasmetrics
 exports.handleMessage = function(client, message)
 {
   metrics.ticMessage(message);
@@ -286,7 +284,6 @@ function handlePadTitle(client, message) {
  * @param client the client that send this message
  * @param message the message from the client
  */
-//nometrics
 function handleChatMessage(client, message)
 {
   var time = new Date().getTime();
@@ -355,7 +352,6 @@ function handleChatMessage(client, message)
  * @param client the client that send this message
  * @param message the message from the client
  */
-//hasmetrics
 function handleSuggestUserName(client, message)
 {
   //check if all ok
@@ -387,7 +383,6 @@ function handleSuggestUserName(client, message)
  * @param client the client that send this message
  * @param message the message from the client
  */
-//hasmetrics
 function handleUserInfoUpdate(client, message)
 {
   //check if all ok
@@ -433,7 +428,6 @@ function handleUserInfoUpdate(client, message)
  * @param client the client that send this message
  * @param message the message from the client
  */
-//hasmetrics
 function handleUserChanges(client, message)
 {
   //check if all ok
@@ -725,7 +719,6 @@ function _correctMarkersInPad(atext, apool) {
  * @param client the client that send this message
  * @param message the message from the client
  */
-//hasmetrics
 function handleClientReady(client, message)
 {
   //check if all ok
