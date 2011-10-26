@@ -195,11 +195,16 @@ function getHTMLFromAtext(pad, atext)
 
           // FIXME: Small hack for the case where yammer attribute
           // value gets combined into the key
-          var match = attr[0].match(/(yammer):(\[[a-zA-Z]+:\d+\])/);
-          if(match) {
+          var match;
+          match = attr[0].match(/(yammer):(\[[a-zA-Z]+:\d+\])/);
+          if(match && attr[1]) {
             attr = [ match[1], match[2] ];
           }
 
+          match = attr[0].match(/(url):(\S+)/);
+          if(match && attr[1]) {
+            attr = [ match[1], match[2] ];
+          }
 
           if(attr && attr[1]) {
             switch(attr[0]) {
