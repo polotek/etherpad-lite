@@ -20,6 +20,7 @@
  * limitations under the License.
  */
 
+var metrics = require('./metrics');
 var nopt = require('nopt');
 var log4js = require('log4js');
 var os = require("os");
@@ -145,7 +146,53 @@ async.waterfall([
   //initalize the database
   function (callback)
   {
-    db.init(callback);
+    //db.init(callback);
+    db.init(function (){
+      var db2 = db.db.db.wrappedDB;
+      if (db2.emit) {
+        var initTimer = metrics.timer('db.init')
+          , getTimer = metrics.timer('db.get')
+          , setTimer = metrics.timer('db.set')
+          , removeTimer = metrics.timer('db.remove')
+          , bulkTimer = metrics.timer('db.bulk')
+          , initHist = metrics.histogram('db.ops.init')
+          , getHist = metrics.histogram('db.ops.get')
+          , setHist = metrics.histogram('db.ops.set')
+          , removeHist = metrics.histogram('db.ops.remove')
+          , bulkHist = metrics.histogram('db.ops.bulk')
+          , bulkCountHist = metrics.histogram('db.ops.bulk.count');
+
+        db2.on('metric.init', function (duration) {
+          initTimer.update(duration)
+          initHist.update(1, (new Date()).getTime())
+        });
+
+        db2.on('metric.get', function (duration) {
+          getTimer.update(duration)
+          getHist.update(1, (new Date()).getTime())
+        });
+
+        db2.on('metric.set', function (duration) {
+          setTimer.update(duration)
+          setHist.update(1, (new Date()).getTime())
+        });
+
+        db2.on('metric.remove', function (duration) {
+          removeTimer.update(duration)
+          removeHist.update(1, (new Date()).getTime())
+        });
+
+        db2.on('metric.bulk', function (duration) {
+          bulkTimer.update(duration)
+          bulkHist.update(1, (new Date()).getTime())
+        });
+
+        db2.on('metric.bulk.count', function (num) {
+          bulkCountHist.update(num, (new Date()).getTime())
+        });
+      }
+      callback.apply(this, arguments)
+    });
   },
   //initalize the http server
   function (callback)
@@ -244,6 +291,11 @@ async.waterfall([
       res.header('ETag', new Date().getTime().toString() + Math.random());
       res.send( response, code);
       return;
+    });
+
+    // serve /metrics and report a summary to be grabbed by cephalapod
+    app.get('/metrics', function (req, res, next){
+      res.send(metrics.summary());
     });
 
     //checks for padAccess
@@ -449,7 +501,10 @@ async.waterfall([
 
     //api middleware validates http verbs and api endpoints
     function apiMiddleware(req, res, next){
-      var func = req.params.func;
+
+      var func = req.params.func
+        , timer = metrics.timer('api.' + func)
+        , start = new Date();
 
       res.header("Server", serverName);
       res.header("Content-Type", "application/json; charset=utf-8");
@@ -462,14 +517,17 @@ async.waterfall([
         apiLogger.info("RESPONSE, " + req.params.func + ", " + response);
 
         //is this a jsonp call, if yes, add the function call
-        if(req.query.jsonp)
+        if(req.query.jsonp){
           response = req.query.jsonp + "(" + response + ")";
+        }
 
         res._send.apply(res, arguments);
+        timer.update(new Date() - start);
       }
 
       if(!apiHandler.isValidRequest(req, func)) {
         // this api method doesn't respond to this verb
+        metrics.error('INVALID_API_REQUEST');
         return res.send({code: 1, message: "Function does not respond to " + req.method, data: null});
       } else {
         next();
@@ -596,6 +654,7 @@ async.waterfall([
     process.on('uncaughtException', function(err) {
       try {
         runtimeLog.error('Fatal: ', err.message || 'Unknown error');
+        metrics.error('UNCAUGHT_EXCEPTION');
         if(err.stack) {
           var stack = err.stack.split('\n');
           for(var i = 0; i < stack.length; i++) {
