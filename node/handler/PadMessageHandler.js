@@ -28,7 +28,13 @@ var settings = require('../utils/Settings');
 var securityManager = require("../db/SecurityManager");
 var log4js = require('log4js');
 var os = require("os");
+var metrics = require('../metrics');
 var messageLogger = log4js.getLogger("message");
+
+/**
+ * Set the metrics logger
+ */
+metrics.setLogger(messageLogger);
 
 /**
  * A associative array that translates a session to a pad
@@ -52,6 +58,18 @@ var sessioninfos = {};
  * Saves the Socket class we need to send and recieve data from the client
  */
 var socketio;
+
+/**
+ * Log error and increase meter
+ * Calls a callback if it is supplied
+ */
+var error = function error(name, err, callback, msg){
+  if (err){
+    mertrics.meter('ERROR_' + name + '_RATE');
+    messageLogger.error(msg || err);
+    if (callback){ callback(err); }
+  }
+}
 
 /**
  * This Method is called by server.js to tell the message handler on which socket it should send
@@ -94,6 +112,7 @@ exports.kickSessionsFromPad = function(padID)
  * Handles the disconnection of a user
  * @param client the client that leaves
  */
+//nometrics
 exports.handleDisconnect = function(client)
 {
   //save the padname of this session
@@ -158,25 +177,33 @@ exports.handleDisconnect = function(client)
   }
 }
 
+
 /**
  * Handles a message from a user
  * @param client the client that send this message
  * @param message the message from the client
  */
+//hasmetrics
 exports.handleMessage = function(client, message)
 {
+  //var m = client.metrics = metrics.begin();
+
   if(message == null)
   {
-    messageLogger.warn("Message is null!");
-    return;
+    return metrics.warn('NULL_MESSAGE', 'Message is null!');
   }
   if(!message.type)
   {
-    messageLogger.warn("Message has no type attribute!");
-    return;
+    return metrics.warn('NO_MESSAGE_TYPE', 'Message has no type attribute!');
   }
 
   //Check what type of message we get and delegate to the other methodes
+  //if (message.type === 'CLIENT_READY') {
+  //  m.tic('CLIENT_READY');
+  //} else if (message.data && message.data.type && timers[message.data.type]){
+  //  m.tic(message.data.type);
+  //}
+
   if(message.type == "CLIENT_READY")
   {
     handleClientReady(client, message);
@@ -211,7 +238,7 @@ exports.handleMessage = function(client, message)
   //if the message type is unkown, throw an exception
   else
   {
-    messageLogger.warn("Droped message, unkown Message Type " + message.type);
+    metrics.warn('UNKNOWN_MESSAGE', 'Dropped message, unkown Message Type ' + message.type);
   }
 }
 
@@ -232,6 +259,7 @@ function handlePadTitle(client, message) {
  * @param client the client that send this message
  * @param message the message from the client
  */
+//nometrics
 function handleChatMessage(client, message)
 {
   var time = new Date().getTime();
@@ -242,10 +270,13 @@ function handleChatMessage(client, message)
   var pad;
   var userName;
 
+  //debugger;
+
   async.series([
     //get the pad
     function(callback)
     {
+      //debugger;
       padManager.getPad(padId, function(err, _pad)
       {
         pad = _pad;
@@ -254,6 +285,7 @@ function handleChatMessage(client, message)
     },
     function(callback)
     {
+      //debugger;
       authorManager.getAuthorName(userId, function(err, _userName)
       {
         userName = _userName;
@@ -263,6 +295,7 @@ function handleChatMessage(client, message)
     //save the chat message and broadcast it
     function(callback)
     {
+      //debugger
       //save the chat message
       pad.appendChatMessage(text, userId, time);
 
@@ -282,11 +315,12 @@ function handleChatMessage(client, message)
       {
         socketio.sockets.sockets[pad2sessions[padId][i]].json.send(msg);
       }
-
+      //client.timer.update((new Date()) - client.starttime);
       callback();
     }
   ], function(err)
   {
+    //debugger;
     if(err) throw err;
   });
 }
@@ -297,18 +331,17 @@ function handleChatMessage(client, message)
  * @param client the client that send this message
  * @param message the message from the client
  */
+//hasmetrics
 function handleSuggestUserName(client, message)
 {
   //check if all ok
   if(message.data.payload.newName == null)
   {
-    messageLogger.warn("Droped message, suggestUserName Message has no newName!");
-    return;
+    return metrics.warn('SUGGEST_USER_NAME_NO_NEWNAME', 'Dropped message, suggestUserName Message has no newName!');
   }
   if(message.data.payload.unnamedId == null)
   {
-    messageLogger.warn("Droped message, suggestUserName Message has no unnamedId!");
-    return;
+    return metrics.warn('SUGGEST_USER_NAME_NO_UNNAMED_ID', 'Dropped message, suggestUserName Message has no unnamedId!');
   }
 
   var padId = session2pad[client.id];
@@ -322,6 +355,7 @@ function handleSuggestUserName(client, message)
       break;
     }
   }
+  //client.timer.update((new Date()) - client.starttime);
 }
 
 /**
@@ -329,13 +363,13 @@ function handleSuggestUserName(client, message)
  * @param client the client that send this message
  * @param message the message from the client
  */
+//hasmetrics
 function handleUserInfoUpdate(client, message)
 {
   //check if all ok
   if(message.data.userInfo.colorId == null)
   {
-    messageLogger.warn("Droped message, USERINFO_UPDATE Message has no colorId!");
-    return;
+    return metrics.warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Droped message, USERINFO_UPDATE Message has no colorId!');
   }
 
   //Find out the author name of this session
@@ -364,7 +398,9 @@ function handleUserInfoUpdate(client, message)
       socketio.sockets.sockets[pad2sessions[padId][i]].json.send(message);
     }
   }
+  //client.timer.update((new Date()) - client.starttime);
 }
+
 
 /**
  * Handles a USERINFO_UPDATE, that means that a user have changed his color or name. Anyway, we get both informations
@@ -373,23 +409,21 @@ function handleUserInfoUpdate(client, message)
  * @param client the client that send this message
  * @param message the message from the client
  */
+//hasmetrics
 function handleUserChanges(client, message)
 {
   //check if all ok
   if(message.data.baseRev == null)
   {
-    messageLogger.warn("Droped message, USER_CHANGES Message has no baseRev!");
-    return;
+    return metrics.warn('USER_CHANGES_BASE_REV', 'Dropped message, USER_CHANGES Message has no baseRev!');
   }
   if(message.data.apool == null)
   {
-    messageLogger.warn("Droped message, USER_CHANGES Message has no apool!");
-    return;
+    return metrics.warn('USER_CHANGES_NO_APOOL', 'Dropped message, USER_CHANGES Message has no apool!');
   }
   if(message.data.changeset == null)
   {
-    messageLogger.warn("Droped message, USER_CHANGES Message has no changeset!");
-    return;
+    return metrics.warn('USER_CHANGES_NO_CHANGESET', 'Dropped message, USER_CHANGES Message has no changeset!');
   }
 
   //get all Vars we need
@@ -430,7 +464,7 @@ function handleUserChanges(client, message)
       //there is an error in this changeset, so just refuse it
       catch(e)
       {
-        messageLogger.error("Can't apply USER_CHANGES "+changeset+", cause it faild checkRep");
+        metrics.warn('CHECKREP', "Can't apply USER_CHANGES " + changeset + ", because it failed checkRep");
         client.json.send({disconnect:"badChangeset"});
         return;
       }
@@ -660,28 +694,27 @@ function _correctMarkersInPad(atext, apool) {
  * @param client the client that send this message
  * @param message the message from the client
  */
+//hasmetrics
 function handleClientReady(client, message)
 {
   //check if all ok
   if(!message.token)
   {
-    messageLogger.warn("Droped message, CLIENT_READY Message has no token!");
-    return;
+    return metrics.warn('CLIENT_READY_NO_TOKEN', 'Dropped message, CLIENT_READY Message has no token!');
   }
   if(!message.padId)
   {
-    messageLogger.warn("Droped message, CLIENT_READY Message has no padId!");
-    return;
+    return metrics.warn('CLIENT_READY_NO_PAD_ID', 'Dropped message, CLIENT_READY Message has no padId!');
   }
   if(!message.protocolVersion)
   {
-    messageLogger.warn("Droped message, CLIENT_READY Message has no protocolVersion!");
-    return;
+    return metrics.warn('CLIENT_READY_NO_PROTOCOL_VERSION', 'Dropped message, CLIENT_READY Message has no protocolVersion!');
   }
   if(message.protocolVersion != 2)
   {
-    messageLogger.warn("Droped message, CLIENT_READY Message has a unkown protocolVersion '" + message.protocolVersion + "'!");
-    return;
+    return metrics.warn('CLIENT_READY_UNKNOWN_PROTOCOL_VERSION', 'Dropped message, CLIENT_READY Message has ' +
+      'a unkown protocolVersion ' +
+      message.protocolVersion + '!');
   }
 
   var author;
@@ -909,6 +942,8 @@ function handleClientReady(client, message)
         }
       };
 
+      var starttime = new Date();
+
       //Run trough all sessions of this pad
       async.forEach(pad2sessions[message.padId], function(sessionID, callback)
       {
@@ -961,9 +996,13 @@ function handleClientReady(client, message)
               };
               client.json.send(messageToNotifyTheClientAboutTheOthers);
             }
+            //timers['NOTIFY_CLIENT_READY'].update((new Date()) - starttime);
           }
         ], callback);
-      }, callback);
+      }, function (callback){
+        callback();
+        //timers['NOTIFY_CLIENT_READY'].update((new Date()) - starttime);
+      });
     }
   ],function(err)
   {
