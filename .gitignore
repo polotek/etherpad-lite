@@ -5,3 +5,6 @@ bin/node.exe
 etherpad-lite-win.zip
 var/dirty.db
 bin/convertSettings.json
+*.swp
+*.swo
+node/logs
