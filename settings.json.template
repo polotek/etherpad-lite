@@ -43,8 +43,6 @@
 
   "logDirectory": "logs",
 
-  "archiveDirectory": "logs/archives",
-
   /* Tokie details */
   "tokie" : {
     "host" : "localhost",
