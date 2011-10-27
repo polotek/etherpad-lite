@@ -21,7 +21,8 @@
                       "gzip"       : "0.1.0",
                       "formidable" : "1.0.2",
                       "log4js"     : "0.3.8",
-                      "node-fs"    : "0.1.0"
+                      "node-fs"    : "0.1.0",
+                      "metrics"    : "0.1.5"
                     },
   "version"       : "1.0.0"
 }
