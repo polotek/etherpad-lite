@@ -25,4 +25,5 @@ fi
 #Move to the node folder and start
 echo "start..."
 cd "node"
+#node --debug-brk server.js
 node server.js
