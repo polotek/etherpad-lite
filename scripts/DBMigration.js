@@ -16,15 +16,17 @@ function updateDatabase()
       return;
     }
     console.log(result.rows.length);
-
+    console.log(result.rows);
+    return;
     for( var i = 0; i < result.rows.length; i++ )
     {
       (function(e) {
         var myKey = result.rows[e].key;
         db.get(myKey, function(error, res){ 
           
-          //console.log(JSON.parse(res));
-          if(error){
+          if(error)
+          {
+            console.log("Error getting values for key: " + myKey);
             return;
           }
           if(! res instanceof Object)
@@ -34,7 +36,7 @@ function updateDatabase()
           db.set(myKey, res, function(err1, result1){
             if(err1)
             {
-              console.log("Error fetching rows from database: " + err1);
+              console.log("Error updating database for key: " + myKey + " : " + err1);
               return;
             }
             console.log("Successfully updated: " + myKey)
