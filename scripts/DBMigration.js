@@ -9,37 +9,38 @@ db.init(updateDatabase);
 
 function updateDatabase()
 {
-  db.db.wrappedDB.db.query('SELECT "key", "value" FROM "store" WHERE "key" like \'pad%\' and "pad_id" IS NULL', function(err, result) {
+  db.db.wrappedDB.db.query('SELECT "key" FROM "store" WHERE "key" like \'pad%\' and "pad_id" IS NULL', function(err, result) {
     if(err)
     {
       console.log("Error fetching rows from database: " + err);
       return;
     }
-    console.log(result.rows.length);
-    console.log(result.rows);
-    return;
+    console.log("Found " + result.rows.length + " matching rows.");
+
     for( var i = 0; i < result.rows.length; i++ )
     {
       (function(e) {
-        var myKey = result.rows[e].key;
-        db.get(myKey, function(error, res){ 
+        var key = result.rows[e].key;
+
+        db.get(key, function(error, value){ 
           
           if(error)
           {
-            console.log("Error getting values for key: " + myKey);
+            console.log("Error getting values for key: " + key);
             return;
           }
-          if(! res instanceof Object)
+          if(! value instanceof Object)
           {
-            res = JSON.parse(res); 
+            value = JSON.parse(value); 
           }
-          db.set(myKey, res, function(err1, result1){
-            if(err1)
+          
+          db.set(key, value, function(error, setResult){
+            if(error)
             {
-              console.log("Error updating database for key: " + myKey + " : " + err1);
+              console.log("Error updating database for key: " + key + " : " + error);
               return;
             }
-            console.log("Successfully updated: " + myKey)
+            console.log("Successfully updated: " + key);
           });
         });
       })(i);
