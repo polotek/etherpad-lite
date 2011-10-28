@@ -85,6 +85,7 @@ var padeditbar = (function()
       this._initLinkerButton();
       this._initFileButton();
       this._initPageButton();
+      this._initFormatSelect();
       this._watchSelection();
       yam.subscribe('/ui/pages/selectionAttributesChanged', yam.bind(this, '_watchSelection'));
     },
@@ -96,25 +97,6 @@ var padeditbar = (function()
     disable: function()
     {
       $("#editbar").addClass('disabledtoolbar').removeClass("enabledtoolbar");
-    },
-    formatChange: function(selection) {
-      if(!self.isEnabled()) { return; }
-
-      selection = selection.split(':');
-      var attr = selection.shift();
-      var val = selection.join('');
-
-      padeditor.ace.callWithAce(function(ace) {
-        var attrTable = ace.ace_getAttributeLookup();
-        if(!attrTable[attr]) { return; }
-
-        if(val) {
-          ace.ace_setAttributeOnSelection(attr, val);
-        } else {
-          ace.ace_setAttributeOnSelection(attr, '');
-        }
-      }, attr, true);
-      padeditor.ace.focus();
     },
     toolbarClick: function(cmd)
     {  
@@ -310,6 +292,38 @@ var padeditbar = (function()
           }, 'setText', true);
         }, 30);
       }
+    },
+    _initFormatSelect: function() {
+      this.$select = $('#menu_left').find('.heading-select');
+      this.$select.change(yam.bind(this, this._onFormatChange));
+    },
+    _onFormatChange: function(e) {
+      var self = this;
+      if(!this.isEnabled()) { return; }
+
+      var $select = jq(e.target)
+        , selection = $select.find('option:selected').val();
+
+      if(!selection) { return; }
+
+      selection = selection.split(':');
+      var attr = selection.shift();
+      var val = selection.join('');
+
+      this._changeTextFormat(attr, val);
+    },
+    _changeTextFormat: function(attr, val) {
+      padeditor.ace.callWithAce(function(ace) {
+        var attrTable = ace.ace_getAttributeLookup();
+        if(!attrTable[attr]) { return; }
+
+        if(val) {
+          ace.ace_setAttributeOnSelection(attr, val);
+        } else {
+          ace.ace_setAttributeOnSelection(attr, '');
+        }
+      }, attr, true);
+      padeditor.ace.focus();
     },
     _initMentionButton: function()
     {
@@ -590,13 +604,16 @@ var padeditbar = (function()
       yam.publish('/ui/lightbox/close');
     },
     _watchSelection: function () {
+      var sel, option;
       var currHeadingAttr = _(arguments).detect(function (attr) {
         return attr.key == 'heading';
       });
       if (currHeadingAttr) {
-        console.log('select header', currHeadingAttr.val)
+        sel = parseInt(currHeadingAttr.val, 10);
+        option = this.$select.children()[sel];
+        if(option) { jq(option).attr('selected', true); }
       } else {
-        console.log('normal text yo')
+        this.$select.children().first().attr('selected', true);
       }
     }
   };
