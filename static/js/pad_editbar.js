@@ -85,6 +85,8 @@ var padeditbar = (function()
       this._initLinkerButton();
       this._initFileButton();
       this._initPageButton();
+      this._watchSelection();
+      yam.subscribe('/ui/pages/selectionAttributesChanged', yam.bind(this, '_watchSelection'));
     },
     isEnabled: function()
     {
@@ -586,6 +588,16 @@ var padeditbar = (function()
       }
       this._insertReferenceLink(type, linkData);
       yam.publish('/ui/lightbox/close');
+    },
+    _watchSelection: function () {
+      var currHeadingAttr = _(arguments).detect(function (attr) {
+        return attr.key == 'heading';
+      });
+      if (currHeadingAttr) {
+        console.log('select header', currHeadingAttr.val)
+      } else {
+        console.log('normal text yo')
+      }
     }
   };
   return self;
