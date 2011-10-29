@@ -294,7 +294,7 @@ async.waterfall([
     });
 
     // serve /metrics and report a summary to be grabbed by cephalapod
-    app.get('/metrics', function (req, res, next){
+    app.get('/int/metrics', function (req, res, next){
       res.send(metrics.summary());
     });
 
