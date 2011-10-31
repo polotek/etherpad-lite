@@ -616,7 +616,7 @@ table#otheruserstable { display: none; }
 #options-close { display: block; position: absolute; right: 7px; bottom: 8px;
   width: auto; height: auto; font-size: 85%; color: #444; }
 
-#mainmodals { z-index: 600; /* higher than the modals themselves
+#mainmodals { z-index: 11; /* higher than the modals themselves
                               so that modals are on top in IE */ }
 .modalfield { font-size: 1.2em; padding: 1px; border: 1px solid #bbb;}
 #mainmodals .editempty { color: #aaa; }
@@ -641,7 +641,7 @@ table#otheruserstable { display: none; }
   margin-left:-238px;
   width: 475px;
   display: none;
-  z-index: 501;
+  z-index: 10;
   zoom: 1;
   overflow: hidden;
   background: white;
@@ -729,7 +729,7 @@ table#otheruserstable { display: none; }
 }
 
 #modaloverlay {
-  z-index: 500; display: none;
+  z-index: 10; display: none;
   background-repeat: repeat-both;
   width: 100%; position: absolute;
   height: 100%; left: 0; top: 0;

@@ -195,11 +195,16 @@ function getHTMLFromAtext(pad, atext)
 
           // FIXME: Small hack for the case where yammer attribute
           // value gets combined into the key
-          var match = attr[0].match(/(yammer):(\[[a-zA-Z]+:\d+\])/);
-          if(match) {
+          var match;
+          match = attr[0].match(/(yammer):(\[[a-zA-Z_-]+:\d+\])/);
+          if(match && attr[1]) {
             attr = [ match[1], match[2] ];
           }
 
+          match = attr[0].match(/(url):(\S+)/);
+          if(match && attr[1]) {
+            attr = [ match[1], match[2] ];
+          }
 
           if(attr && attr[1]) {
             switch(attr[0]) {
@@ -284,7 +289,7 @@ function getHTMLFromAtext(pad, atext)
         if(yammerRef) { assem.append('<span class="yj-page-model-placeholder">'); }
 
         if(yammerRef) {
-          assem.append(_escapeHTML(yammerRef));
+          assem.append(yammerRef);
         } else {
           assem.append(_escapeHTML(s));
         }
@@ -599,7 +604,7 @@ var _findURLs = _regexFinder(_REGEX_URL, 'url', function(urlData, assem, curIdx,
   var url = urlData[1];
   var urlLength = url.length;
   processNextChars(startIndex - curIdx);
-  assem.append('<a href="' + _escapeHTML(url) + '">');
+  assem.append('<a href="' + _escapeHTML(url) + '" target="_blank">');
   processNextChars(urlLength);
   assem.append('</a>');
 });

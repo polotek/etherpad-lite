@@ -2540,7 +2540,6 @@ function OUTER(gscope)
     }
     builder.insert(newText, attrs, rep.apool);
     var cs = builder.toString();
-
     performDocumentApplyChangeset(cs);
   }
 

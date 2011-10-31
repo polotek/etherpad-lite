@@ -85,6 +85,9 @@ var padeditbar = (function()
       this._initLinkerButton();
       this._initFileButton();
       this._initPageButton();
+      this._initFormatSelect();
+      this._watchSelection();
+      yam.subscribe('/ui/pages/selectionAttributesChanged', yam.bind(this, '_watchSelection'));
     },
     isEnabled: function()
     {
@@ -94,25 +97,6 @@ var padeditbar = (function()
     disable: function()
     {
       $("#editbar").addClass('disabledtoolbar').removeClass("enabledtoolbar");
-    },
-    formatChange: function(selection) {
-      if(!self.isEnabled()) { return; }
-
-      selection = selection.split(':');
-      var attr = selection.shift();
-      var val = selection.join('');
-
-      padeditor.ace.callWithAce(function(ace) {
-        var attrTable = ace.ace_getAttributeLookup();
-        if(!attrTable[attr]) { return; }
-
-        if(val) {
-          ace.ace_setAttributeOnSelection(attr, val);
-        } else {
-          ace.ace_setAttributeOnSelection(attr, '');
-        }
-      }, attr, true);
-      padeditor.ace.focus();
     },
     toolbarClick: function(cmd)
     {  
@@ -280,6 +264,13 @@ var padeditbar = (function()
     // place afterwards.
     // TODO: probably move to yam.ui.pages
     _insertTextAtCursor: function (text, attrs) {
+      if (!yam.ui.pages.isSelectionLost() || $.browser.webkit) {
+        padeditor.ace.callWithAce(function(ace) {
+          ace.ace_insertText(text, attrs);
+          ace.ace_insertText(' ');
+        }, 'setText', true);
+        padeditor.ace.focus();
+      } else {
         // console.log('lostSelection?', yam.ui.pages.isSelectionLost());
         // at least in FF caret point gets lost on pad blur so it may need to be set back
         var caret = yam.ui.pages.fixSelection();
@@ -290,7 +281,7 @@ var padeditbar = (function()
             ace.ace_insertText(' ');
             // at least in FF pad loses focus
             setTimeout(function () {
-              padeditor.ace.focus()
+              padeditor.ace.focus();
               // at least in FF selection does not get properly updated after an insert text
               setTimeout(function () {
                 // console.log('new caret should be ', caret[0], caret[1] + text.length + 1)
@@ -300,6 +291,39 @@ var padeditbar = (function()
             }, 30);
           }, 'setText', true);
         }, 30);
+      }
+    },
+    _initFormatSelect: function() {
+      this.$select = $('#menu_left').find('.heading-select');
+      this.$select.change(yam.bind(this, this._onFormatChange));
+    },
+    _onFormatChange: function(e) {
+      var self = this;
+      if(!this.isEnabled()) { return; }
+
+      var $select = jq(e.target)
+        , selection = $select.find('option:selected').val();
+
+      if(!selection) { return; }
+
+      selection = selection.split(':');
+      var attr = selection.shift();
+      var val = selection.join('');
+
+      this._changeTextFormat(attr, val);
+    },
+    _changeTextFormat: function(attr, val) {
+      padeditor.ace.callWithAce(function(ace) {
+        var attrTable = ace.ace_getAttributeLookup();
+        if(!attrTable[attr]) { return; }
+
+        if(val) {
+          ace.ace_setAttributeOnSelection(attr, val);
+        } else {
+          ace.ace_setAttributeOnSelection(attr, '');
+        }
+      }, attr, true);
+      padeditor.ace.focus();
     },
     _initMentionButton: function()
     {
@@ -321,16 +345,15 @@ var padeditbar = (function()
         , userModel = 'users'
         , domainModel = 'domains';
       if(yam.currentUser.treatments && 
-          'new_autocomplete' in yam.currentUser.treatments) {
-        if(yam.currentUser.treatments.new_autocomplete) {
-          maxCount = 6;
-          userModel = typeAhead.MODEL_USER;
-          domainModel = typeAhead.MODEL_DOMAIN;
-        } else {
-          typeAhead = yam.ui.shared.typeAheadOld ? 
-            yam.ui.shared.typeAheadOld : 
-            yam.ui.shared.typeAhead;
-        }
+          'new_autocomplete' in yam.currentUser.treatments &&
+          yam.currentUser.treatments.new_autocomplete) {
+        maxCount = 6;
+        userModel = typeAhead.MODEL_USER;
+        domainModel = typeAhead.MODEL_DOMAIN;
+      } else {
+        typeAhead = yam.ui.shared.typeAheadOld ? 
+          yam.ui.shared.typeAheadOld : 
+          yam.ui.shared.typeAhead;
       }
 
       var typeAheadOpts = {
@@ -479,20 +502,30 @@ var padeditbar = (function()
     _onLinkerSubmit: function(evt) {
       var linker = this.linker
         , url = $.trim( linker.$urlInput.val() )
-        , text = linker.$textInput.val();
+        , text = linker.$textInput.val()
+        , parsed;
 
       if (!linker.hasInput() || linker.isDisabled()) {
         return false;
       }
 
       if(url) {
-        if(!yam.util.HREF_PATTERN.test(url)) {
-          if(yam.util.HREF_PATTERN.test('http://' + url)) {
-            url = 'http://' + url;
-          } else {
-            url = null;
-          }
+        parsed = yam.uri.parse(url || '');
+
+        // If there's no protocol, add 1
+        if(parsed.protocol != 'http' && parsed.protocol != 'https') {
+          parsed.protocol = 'http';
         }
+
+        // No host usually means invalid url
+        if(!parsed.host) {
+          parsed = null;
+          url = null;
+        }
+      }
+
+      if(parsed) {
+        url = yam.uri.stringify(parsed);
       }
 
       if(!url) {
@@ -569,6 +602,19 @@ var padeditbar = (function()
       }
       this._insertReferenceLink(type, linkData);
       yam.publish('/ui/lightbox/close');
+    },
+    _watchSelection: function () {
+      var sel, option;
+      var currHeadingAttr = _(arguments).detect(function (attr) {
+        return attr.key == 'heading';
+      });
+      if (currHeadingAttr) {
+        sel = parseInt(currHeadingAttr.val, 10);
+        option = this.$select.children()[sel];
+        if(option) { jq(option).attr('selected', true); }
+      } else {
+        this.$select.children().first().attr('selected', true);
+      }
     }
   };
   return self;
