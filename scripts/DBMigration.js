@@ -17,6 +17,17 @@ function updateDatabase()
     }
     console.log("Found " + result.rows.length + " matching rows.");
 
+    var num = result.rows.length;
+
+    function done() {
+      console.log('shutting down in 3 secs');
+      setTimeout(function() {
+        db.doShutdown(function() {
+          process.exit();
+        });
+      }, 3000);
+    }
+
     for( var i = 0; i < result.rows.length; i++ )
     {
       (function(e) {
@@ -24,8 +35,11 @@ function updateDatabase()
 
         db.get(key, function(error, value){ 
           
+          num--;
+
           if(error)
           {
+            if(!num) { done(); }
             console.log("Error getting values for key: " + key);
             return;
           }
@@ -35,6 +49,8 @@ function updateDatabase()
           }
           
           db.set(key, value, function(error, setResult){
+            if(!num) { done(); }
+
             if(error)
             {
               console.log("Error updating database for key: " + key + " : " + error);
