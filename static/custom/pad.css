@@ -75,6 +75,10 @@
   line-height: 19px;
 }
 
+#innerdocbody a {
+  color: #01317E;
+}
+
 .yj-page-link {
   border: dotted 1px #777;
   -webkit-border-radius: 3px;
