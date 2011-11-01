@@ -490,7 +490,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
             var mphIndex = cls.search(/yammer:/);
             cc.doAttrib(state, cls.substring(mphIndex)); //'yj-page-link '
           }
-          if (tname == 'a' && node.parentNode && node.parentNode.className.indexOf('url') >= 0) {
+          if (tname == 'a' && node.parentNode && node.parentNode.className && node.parentNode.className.indexOf('url') >= 0) {
             cc.doAttrib(state, 'url:' + node.href);
           }
           if (className2Author && cls)
