@@ -264,6 +264,7 @@ var padeditbar = (function()
     // place afterwards.
     // TODO: probably move to yam.ui.pages
     _insertTextAtCursor: function (text, attrs) {
+      console.log('insertTextAtCursor.isSelectionLost', yam.ui.pages.isSelectionLost());
       if (!yam.ui.pages.isSelectionLost() || $.browser.webkit) {
         padeditor.ace.callWithAce(function(ace) {
           ace.ace_insertText(text, attrs);
@@ -453,6 +454,13 @@ var padeditbar = (function()
         }
 
       $btn.click(function() {
+        var didSubmit = false // flag to prevent double form submits
+          , doSubmit = function () {
+            if (!didSubmit) {
+              this._onLinkerSubmit();
+              didSubmit = true;
+            }
+          }; 
         linker.$content = jq(Mustache.to_html(linker.template, { 
             buttonText: linker.buttonText
             , textLabel: yam.tr('Text to Display')
@@ -461,12 +469,12 @@ var padeditbar = (function()
         linker.$textInput = linker.$content.find('.yj-link-text');
         linker.$urlInput = linker.$content.find('.yj-link-url');
         linker.$submitBtn = linker.$content.find('.yj-linker-form-submit')
-            .click(jq.proxy(self._onLinkerSubmit, self));
+            .click(jq.proxy(doSubmit, self));
         linker.$form = linker.$content.find('.yj-linker-form')
-            .submit(jq.proxy(self._onLinkerSubmit, self))
+            .submit(jq.proxy(doSubmit, self))
             .keydown(function (evt) {
               if (evt.which == 13) {
-                jq.proxy(self._onLinkerSubmit, self)(evt);
+                jq.proxy(doSubmit, self)(evt);
               }
             });
 
