@@ -107,7 +107,7 @@ exports.setSocketIO = function(socket_io)
  * Handles the connection of a new user
  * @param client the new client
  */
-exports.handleConnect = function(client)
+exports.handleConnect = function(client, statusObject)
 {
   //Initalize session2pad and sessioninfos for this new session
   session2pad[client.id]=null;
@@ -209,8 +209,13 @@ exports.handleDisconnect = function(client)
  * @param client the client that send this message
  * @param message the message from the client
  */
-exports.handleMessage = function(client, message)
+exports.handleMessage = function(client, message, statusObject)
 {
+  if(statusObject && statusObject.accessStatus != 'grant') {
+    warn('ACCESS_DENIED', 'Message received after authorization revoked');    
+    return;
+  }
+
   metrics.ticMessage(message);
 
   if(message == null)
@@ -222,16 +227,9 @@ exports.handleMessage = function(client, message)
     return warn('NO_MESSAGE_TYPE', 'Message has no type attribute!');
   }
 
-  //Check what type of message we get and delegate to the other methodes
-  //if (message.type === 'CLIENT_READY') {
-  //  m.tic('CLIENT_READY');
-  //} else if (message.data && message.data.type && timers[message.data.type]){
-  //  m.tic(message.data.type);
-  //}
-
   if(message.type == "CLIENT_READY")
   {
-    handleClientReady(client, message);
+    handleClientReady(client, message, statusObject);
   }
   else if(message.type == "COLLABROOM" &&
           message.data.type == "USER_CHANGES")
@@ -719,7 +717,7 @@ function _correctMarkersInPad(atext, apool) {
  * @param client the client that send this message
  * @param message the message from the client
  */
-function handleClientReady(client, message)
+function handleClientReady(client, message, statusObject)
 {
   //check if all ok
   if(!message.token)
@@ -753,27 +751,13 @@ function handleClientReady(client, message)
     //check permissions
     function(callback)
     {
-      securityManager.checkAccess (message.padId, message.sessionID, message.token, message.authtoken, message.password, message.user_id, function(err, statusObject)
-      {
-        if(err) {callback(err); return}
-
-        //access was granted
-        if(statusObject.accessStatus == "grant")
-        {
-          if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 10) {
-            client.json.send({accessStatus: "padFull"});
-            return; // don't send any more messages
-          }
-          author = statusObject.authorID;
-          callback();
-        }
-        //no access, send the client a message that tell him why
-        else
-        {
-          client.json.send({accessStatus: statusObject.accessStatus});
-          callback(statusObject);
-        }
-      });
+      if(pad2sessions[message.padId] && pad2sessions[message.padId].length > 10) {
+        statusObject.accessStatus = "padFull";
+        client.json.send(statusObject);
+        return callback(statusObject); // don't send any more messages
+      }
+      author = statusObject.authorID;
+      return callback();
     },
     function(callback) {
       // If this is the first connection of a new editing session,
