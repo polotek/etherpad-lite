@@ -216,6 +216,7 @@ function handshake()
   socket = io.connect(url, {
     resource: resource
     , query: getHandshakeData()
+    , 'defer connection': false
   });
 
   var receivedClientVars = false;
