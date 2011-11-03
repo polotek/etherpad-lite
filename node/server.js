@@ -33,6 +33,7 @@ var express = require('express');
 var path = require('path');
 var minify = require('./utils/Minify');
 var formidable = require('formidable');
+
 var apiHandler;
 var exportHandler;
 var importHandler;
@@ -55,17 +56,15 @@ var argv = nopt({
 log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
 settings.env = argv.environment || settings.env;
-var customPatternLayout = log4js.layouts.patternLayout('%r %p %c - %m port:' + port);
+var customPatternLayout = log4js.layouts.patternLayout('%p [%d] %c - %m [pid:' + process.pid + ' port:' + port + ']');
 
 var logDirectory = '';
-var archiveDirectory = '';
 
 var updateLogDirectories = function()
 {
   try
   {
     logDirectory = settings.logDirectory.trim().length == 0 ? 'logs' : settings.logDirectory;
-    archiveDirectory = settings.archiveDirectory.trim().length == 0 ? 'logs/archives' : settings.archiveDirectory;
   }
   catch(e)
   {
@@ -73,7 +72,6 @@ var updateLogDirectories = function()
     log4js.addAppender(log4js.consoleAppender());
     console.log('Error updating log directory from settings.json. Pushing logs to console');
     logDirectory = 'logs';
-    archiveDirectory = 'logs/archives';
   }
 }
 
@@ -86,10 +84,6 @@ var setupLogging = function()
   if(!path.existsSync(logDirectory))
   {
     fs.mkdirSync(logDirectory, 0755, true);
-  }
-  if(!path.existsSync(archiveDirectory))
-  {
-    fs.mkdirSync(archiveDirectory, 0755, true);
   }
 
   log4js.clearAppenders();
@@ -625,30 +619,8 @@ async.waterfall([
       process.on('SIGINT', gracefulShutdown);
     }
 
-    /**
-      * This function rotates logs by moving the current logs to the "archives/".
-      * When moving to archives, it renames the log file by appending timestamp to it.
-      * Eg: http.log_9_14_2011-23_17_3_763
-      * It then reloads log4j's appenders by forcing them to create new log files.  
-      */
-    function rotateLogs()
-    {
-      var date = new Date()
-      , newFileTimeStamp = date.getMonth()+'_'+date.getDate()+'_'+date.getFullYear()+'-'+date.getUTCHours()+
-        '_'+date.getUTCMinutes()+'_'+date.getUTCSeconds()+'_'+date.getUTCMilliseconds();
-      
-      fs.readdirSync(logDirectory).forEach(function(fileName) {
-        var filePath = path.normalize(logDirectory + '/' + fileName);
-        if( !fs.statSync(filePath).isDirectory())
-        {
-          fs.renameSync(filePath, path.normalize(archiveDirectory + '/' + fileName + '_' + newFileTimeStamp));
-        }
-      });
-      setupLogging();
-    }
-
     // On SIGHUP, we will rotate logs.
-    process.on('SIGHUP', rotateLogs);
+    process.on('SIGHUP', setupLogging);
     process.on('SIGTERM', gracefulShutdown);
 
     process.on('uncaughtException', function(err) {
