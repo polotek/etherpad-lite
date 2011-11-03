@@ -4933,9 +4933,18 @@ function OUTER(gscope)
     // extra yammer event handlers
     var $ = parent.parent.yam.$;
     $(document).mousedown(function (evt) {
-      execCustomEventHooks('aceMouseDown', evt)
+      execCustomEventHooks('aceHandleMouseDown', evt);
     }).mouseup(function (evt) {
-      execCustomEventHooks('aceMouseUp', evt)
+      execCustomEventHooks('aceHandleMouseUp', evt);
+    }).blur(function (evt) {
+      execCustomEventHooks('aceHandleBlur', evt);
+    }).focus(function (evt) {
+      execCustomEventHooks('aceHandleFocus', evt);
+    });
+    $(window).blur(function (evt) {
+      execCustomEventHooks('aceHandleBlur', evt);
+    }).focus(function (evt) {
+      execCustomEventHooks('aceHandleFocus', evt);
     });
   }
 
