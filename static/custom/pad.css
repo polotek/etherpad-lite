@@ -54,6 +54,7 @@
 #editorcontainerbox {
   position: relative;
   height: 400px;
+  overflow: hidden;
 }
 
 #editorcontainer {
