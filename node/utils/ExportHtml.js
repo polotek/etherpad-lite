@@ -361,9 +361,15 @@ function getHTMLFromAtext(pad, atext)
         if (line.text)
         {
           // non-blank line, end all lists
-          pieces.push(new Array(lists.length + 1).join('</li></ul\n>'));
+          pieces.push(new Array(lists.length + 1).join('</li></ul>'));
           lists.length = 0;
-          pieces.push(lineContent, '<br>');
+
+          // See if we need to start another block
+          if(line.headerType) {
+            pieces.push('<h' + line.headerType + '>' + lineContent + '</h' + line.headerType + '>');
+          } else {
+            pieces.push(lineContent, '<br>');
+          }
         }
         else
         {

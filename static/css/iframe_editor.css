@@ -61,7 +61,7 @@ body.doesWrap {
   padding-left: 1px /* prevents characters from looking chopped off in FF3 */;
   overflow: hidden;
   /* blank 1x1 gif, so that IE8 doesn't consider the body transparent */
-  background-image: url('../img/blank.gif')
+  //background-image: url('../img/blank.gif')
 }
 
 #sidediv {
