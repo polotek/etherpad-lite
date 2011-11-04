@@ -4946,6 +4946,12 @@ function OUTER(gscope)
     }).focus(function (evt) {
       execCustomEventHooks('aceHandleFocus', evt);
     });
+    bindEventHandler(root, "paste", handlePaste)
+  }
+
+  function handlePaste(evt)
+  {
+    execCustomEventHooks('aceHandlePaste', evt);
   }
 
   function handleIEOuterClick(evt)
