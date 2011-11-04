@@ -264,35 +264,59 @@ var padeditbar = (function()
     // place afterwards.
     // TODO: probably move to yam.ui.pages
     _insertTextAtCursor: function (text, attrs) {
-      console.log('insertTextAtCursor.isSelectionLost', yam.ui.pages.isSelectionLost());
-      if (!yam.ui.pages.isSelectionLost() || $.browser.webkit) {
-        padeditor.ace.callWithAce(function(ace) {
-          ace.ace_insertText(text, attrs);
-          ace.ace_insertText(' ');
-        }, 'setText', true);
+      // poll until the pad has focus again
+      var focusPoller = setInterval(function () {
+        // try to give focus until it sticks
         padeditor.ace.focus();
-      } else {
-        // console.log('lostSelection?', yam.ui.pages.isSelectionLost());
-        // at least in FF caret point gets lost on pad blur so it may need to be set back
-        var caret = yam.ui.pages.fixSelection();
-        // if the selection was moved need to wait a moment for it to be placed again
-        setTimeout(function () {
-          padeditor.ace.callWithAce(function(ace) {
-            ace.ace_insertText(text, attrs);
-            ace.ace_insertText(' ');
-            // at least in FF pad loses focus
-            setTimeout(function () {
-              padeditor.ace.focus();
-              // at least in FF selection does not get properly updated after an insert text
-              setTimeout(function () {
-                // console.log('new caret should be ', caret[0], caret[1] + text.length + 1)
-                yam.ui.pages.setCaret(caret[0], caret[1] + text.length + 1);
-              }, 333); // this timeout has to be suffeciently long in FF for all the repainting after the lightbox closes to occur
-              // console.log('current selection', yam.ui.pages.rep.selStart[0], yam.ui.pages.rep.selStart[1]);
-            }, 30);
-          }, 'setText', true);
-        }, 30);
-      }
+        if (yam.ui.pages.hasFocus()) {
+          // once the pad has focus kill initial poller
+          clearInterval(focusPoller);
+          // store the initial location of the caret for future reference
+          var initialCaret = yam.ui.pages.lastSelStart;
+          // poll until the cursor is in the right place
+          var setCaretPoller = setInterval(function () {
+            // start trying to move the cursor back to its initial position
+            yam.ui.pages.setCaret(initialCaret[0], initialCaret[1]);
+            // once the cursor is back at its initial position proceed with the text insert
+            if (yam._.isEqual(yam.ui.pages.rep.selStart, initialCaret)) {
+              // kill the poller for setting the cursor position pre inserting the text
+              clearInterval(setCaretPoller);
+              // do insert
+              padeditor.ace.callWithAce(function(ace) {
+                ace.ace_insertText(text, attrs);
+                ace.ace_insertText(' ');
+              }, 'setText', true);
+              // some browsers lose the selection after a text insert
+              // if this happens need to do more polling and cursor manipulation
+              if (yam.ui.pages.isSelectionLost()) {
+                var correctPosTicks = 0 // at least in FF cursor can be reset to 0 0 after it was correct. count how many ticks it was correct before proceeding
+                  , newCol = initialCaret[1] + text.length + 1; // new cursor column in line
+                // poll for focus
+                var secondFocusPoller = setInterval(function () {
+                  if (yam.ui.pages.hasFocus()) {
+                    // try to move the cursor to the correct location
+                    yam.ui.pages.setCaret(initialCaret[0], newCol);
+                    // once there begin counting ticks its correct
+                    if (yam._.isEqual(yam.ui.pages.rep.selStart, [initialCaret[0], newCol])) {
+                      correctPosTicks++;
+                      // if the cursor is in the correct location for N consecutive ticks consider complete
+                      if (correctPosTicks == 5) {
+                        clearInterval(secondFocusPoller);
+                      }
+                    } else {
+                      // cursor reset. start count over
+                      correctPosTicks = 0;
+                    }
+                  } else {
+                    // give foucus in case it was lost
+                    padeditor.ace.focus();
+                  }
+                }, 20);
+              };
+            }
+          }, 20);
+        }
+      }, 20);
     },
     _initFormatSelect: function() {
       this.$select = $('#menu_left').find('.heading-select');
