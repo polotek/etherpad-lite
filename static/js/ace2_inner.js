@@ -4946,6 +4946,12 @@ function OUTER(gscope)
     }).focus(function (evt) {
       execCustomEventHooks('aceHandleFocus', evt);
     });
+    bindEventHandler(root, "paste", handlePaste)
+  }
+
+  function handlePaste(evt)
+  {
+    execCustomEventHooks('aceHandlePaste', evt);
   }
 
   function handleIEOuterClick(evt)
@@ -5084,13 +5090,14 @@ function OUTER(gscope)
   }
   function handleBlur(evt)
   {
-    if (browser.msie)
-    {
+    // if (browser.msie)
+    // {
       // a fix: in IE, clicking on a control like a button outside the
       // iframe can "blur" the editor, causing it to stop getting
       // events, though typing still affects it(!).
-      setSelection(null);
-    }
+      // kauffman nov 11 - killed this hack
+      // setSelection(null);
+    // }
   }
 
   function bindEventHandler(target, type, func)
