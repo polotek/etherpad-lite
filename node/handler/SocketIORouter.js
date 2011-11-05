@@ -52,26 +52,61 @@ exports.setSocketIO = function(_socket)
   //save this socket internaly
   socket = _socket;
 
+  socket.set('authorization', function (handshakeData, callback) {
+    var message = handshakeData.query;
+    securityManager.checkAccess (message.padId, message.sessionID, message.token, message.authtoken, message.password, message.user_id, function(err, statusObject)
+    {
+      if(err) return callback(err);
+
+      // set the auth status for later retrieval
+      handshakeData.auth = statusObject
+
+      //access was granted, mark the client as authorized and handle the message
+      if(statusObject.accessStatus == "grant")
+      {
+        return callback(null, true);
+      }
+      //no access, send the client a message that tell him why
+      else
+      {
+        messageLogger.warn("Authentication try failed:" + stringifyWithoutPassword(message));
+      }
+
+      return callback(null, false);
+    });
+  });
+
   socket.sockets.on('connection', function(client)
   {
-    if(socket.transports && socket.transports[client.id]) {
-      messageLogger.error('socket.io transport type ', socket.transports[client.id].name);
+    var clientReadyMsg = client.handshake.query
+      , clientAuthorized = false
+      , authStatus;
+
+    if(client.handshake && client.handshake.auth) {
+      authStatus = client.handshake.auth;
+      clientAuthorized = true;
+    } else {
+      messageLogger.error('Received connection with no auth status. handshake data: ', client.handshake);
+      return;
     }
 
-    var clientAuthorized = false;
+    if(client.transport) {
+      messageLogger.error('socket.io transport type ', client.transport);
+      // send metrics for transport type
+    }
 
     //wrap the original send function to log the messages
     client._send = client.send;
     client.send = function(message)
     {
-      messageLogger.info("to " + client.id + ": " + stringifyWithoutPassword(message));
+      messageLogger.debug("to " + client.id + ": " + stringifyWithoutPassword(message));
       client._send(message);
     }
 
     //tell all components about this connect
     for(var i in components)
     {
-      components[i].handleConnect(client);
+      components[i].handleConnect(client, authStatus);
     }
 
     //try to handle the message of this client
@@ -82,8 +117,8 @@ exports.setSocketIO = function(_socket)
         //check if component is registered in the components array
         if(components[message.component])
         {
-          messageLogger.info("from " + client.id + ": " + stringifyWithoutPassword(message));
-          components[message.component].handleMessage(client, message);
+          messageLogger.debug("from " + client.id + ": " + stringifyWithoutPassword(message));
+          components[message.component].handleMessage(client, message, authStatus);
         }
       }
       else
@@ -96,7 +131,7 @@ exports.setSocketIO = function(_socket)
     {
       if(message.protocolVersion && message.protocolVersion != 2)
       {
-        messageLogger.warn("Protocolversion header is not correct:" + stringifyWithoutPassword(message));
+        messageLogger.error("Protocolversion header is not correct:" + stringifyWithoutPassword(message));
         return;
       }
 
@@ -105,36 +140,10 @@ exports.setSocketIO = function(_socket)
       {
         handleMessage(message);
       }
-      //try to authorize the client
       else
       {
-        //this message has everything to try an authorization
-        if(message.padId !== undefined && message.sessionID !== undefined && message.token !== undefined && message.password !== undefined)
-        {
-          console.log("============ ", message);
-          securityManager.checkAccess (message.padId, message.sessionID, message.token, message.authtoken, message.password, message.user_id, function(err, statusObject)
-          {
-            if(err) throw err;
-
-            //access was granted, mark the client as authorized and handle the message
-            if(statusObject.accessStatus == "grant")
-            {
-              clientAuthorized = true;
-              handleMessage(message);
-            }
-            //no access, send the client a message that tell him why
-            else
-            {
-              messageLogger.warn("Authentication try failed:" + stringifyWithoutPassword(message));
-              client.json.send({accessStatus: statusObject.accessStatus});
-            }
-          });
-        }
         //drop message
-        else
-        {
-          messageLogger.warn("Droped message cause of bad permissions:" + stringifyWithoutPassword(message));
-        }
+        messageLogger.warn("Dropped message due to bad permissions:" + stringifyWithoutPassword(message));
       }
     });
 
@@ -146,6 +155,9 @@ exports.setSocketIO = function(_socket)
         components[i].handleDisconnect(client);
       }
     });
+
+    // After all the setup, we treat this as "CLIENT_READY"
+    handleMessage(clientReadyMsg);
   });
 }
 

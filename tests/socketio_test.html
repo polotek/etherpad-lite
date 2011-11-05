@@ -2,36 +2,60 @@
 <html>
 	<head>
 		<title>Testing socket.io</title>
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
-			<script src="http://marogers.com:9001/socket.io/socket.io.js"></script>
-			<script>
-				if(!window.console) {
-					console = {
-						log: function() {
-							var out = '';
-							for(var i=0; i<arguments.length; i++) {
-								out += String(arguments[i]);
-							}
-							jQuery('#out').prepend('<p>' + out + '</p>');
-						}
-					}
-				}
-				var socket = io.connect('http://marogers.com:9001');
-    			socket.on('connect', function () {
-    				alert('connected');
-    				socket.on('message', function(msg) {
-    					console.log('from server ', msg);
-    				});
-  				});
-
-  				function send() {
-  					socket.send('foo');
-  				}
-			</script>
-		</script>
 	</head>
 	<body>
-	  <p><a href="#" onclick="send(); return false;">send</a></p>
+		<p><a href="#" id="link">send</a></p>
+	  <p><img src="https://img.skitch.com/20111101-1869m6wif8a31647r5athpht4m.jpg" alt="Yammer : TP IE7 in Test Group" /></p>
 	  <div id="out"></div>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+		<script src="https://marogers.local:9002/socket.io/socket.io.js"></script>
+		<script>
+
+		if(!window.console) {
+			console = {
+				log: function() {
+					var out = '';
+					for(var i=0; i<arguments.length; i++) {
+						out += String(arguments[i]);
+					}
+					jQuery('#out').prepend('<p>' + out + '</p>');
+				}
+			}
+		}
+		var s = new Date(), t = 0;
+		var profile = function() {
+			var args = Array.prototype.slice.call(arguments);
+			var d = new Date();
+			var total = d - s;
+			e = t ? d - t : 0;
+			console.log(e + ' ' + total + ' ' + args.join(' '));
+			t = d;
+		}
+
+		var socket;
+		jQuery(function() {
+			socket = io.connect('https://marogers.local:9002');
+			profile('connecting')
+			socket.on('connect', function () {
+				profile('connected');
+				socket.on('message', function(msg) {
+					profile('from server ', msg);
+				});
+				send('foo');
+			});
+		});
+
+
+			function send() {
+				socket.send('foo');
+			}
+
+			jQuery('#link').click(function(e) {
+				send('foo');
+				e.preventDefault();
+			});
+			jQuery(window).load(function() { profile('window loaded'); })
+		</script>
 	</body>
 </html>

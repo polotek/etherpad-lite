@@ -90,11 +90,12 @@ function randomString()
 
 function getParams()
 {
-  var showControls = getUrlVars()["showControls"];
+  var urlVars = getUrlVars();
+  var showControls = urlVars["showControls"];
   var showChat = 'false'; //getUrlVars()["showChat"];
-  var userName = getUrlVars()["userName"];
-  var showLineNumbers = 'false'; //getUrlVars()["showLineNumbers"];
-  var useMonospaceFont = 'false'; //getUrlVars()["useMonospaceFont"];
+  var userName = urlVars["userName"];
+  var showLineNumbers = 'false'; //urlVars["showLineNumbers"];
+  var useMonospaceFont = 'false'; //urlVars["useMonospaceFont"];
   if(showControls)
   {
     if(showControls == "false")
@@ -157,6 +158,41 @@ function savePassword()
   document.location=document.location;
 }
 
+function getHandshakeData() {
+  var config = window.yam && yam.config() || {};
+
+  var padId = config.padId;
+
+  padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
+
+  //var token = readCookie("token");
+  //if (token == null)
+  //{
+    var token = window.yam ? (yam.currentUser.id+'') : undefined;//randomString();
+    //createCookie("token", token, 60);
+  //}
+
+  var sessionID = readCookie("sessionID");
+  var password = readCookie("password");
+  var userId = window.yam ? (yam.currentUser.id+'') : undefined;
+  var authToken = window.yam ? (yam.currentUser.web_oauth_access_token+'') : undefined;
+
+  var msg = {
+    "component": "pad",
+    "type": "CLIENT_READY",
+    "padId": padId,
+    "last_published_rev": yam.config().lastPublishedRevision,
+    "sessionID": sessionID,
+    "password": password,
+    "token": token,
+    "user_id": userId,
+    "authtoken": authToken,
+    "protocolVersion": 2
+  };
+
+  return jq.param(msg);
+}
+
 function handshake()
 {
   var config = window.yam && yam.config() || {};
@@ -179,50 +215,25 @@ function handshake()
   //connect
   socket = io.connect(url, {
     resource: resource
-  });
-
-  socket.once('connect', function()
-  {
-    var config = window.yam && yam.config() || {};
-
-    var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
-
-    if(config.padId) {
-      padId = config.padId;
-    }
-
-    padId = unescape(padId); // unescape neccesary due to Safari and Opera interpretation of spaces
-
-    //var token = readCookie("token");
-    //if (token == null)
-    //{
-      token = window.yam ? (yam.currentUser.id+'') : undefined;//randomString();
-      //createCookie("token", token, 60);
-    //}
-
-    var sessionID = readCookie("sessionID");
-    var password = readCookie("password");
-    var userId = window.yam ? (yam.currentUser.id+'') : undefined;
-    var authToken = window.yam ? (yam.currentUser.web_oauth_access_token+'') : undefined;
-
-    var msg = {
-      "component": "pad",
-      "type": "CLIENT_READY",
-      "padId": padId,
-      "last_published_rev": yam.config().lastPublishedRevision,
-      "sessionID": sessionID,
-      "password": password,
-      "token": token,
-      "user_id": userId,
-      "authtoken": authToken,
-      "protocolVersion": 2
-    };
-    socket.json.send(msg);
+    , query: getHandshakeData()
+    , 'defer connection': false
   });
 
   var receivedClientVars = false;
   var initalized = false;
-  var denied = false;
+  var denied = true;
+
+  socket.once('connect', function()
+  {
+    denied = false;
+  });
+
+  socket.socket.on('error', function() {
+    denied = true;
+    $("#editorloadingbox").html("<b>You do not have permission to access this pad.</b>");
+    $(".yj-current-collaborators .yj-spinner").hide();
+  });
+
 
   socket.on('message', function(obj)
   {
