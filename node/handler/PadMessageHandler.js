@@ -775,18 +775,6 @@ function handleClientReady(client, message)
         }
       });
     },
-    function(callback) {
-      // If this is the first connection of a new editing session,
-      // clear any previous cache state
-      if(!pad2sessions[message.padId] ||
-         !pad2sessions[message.padId].length) {
-        // Evicting cache here breaks initialization sometimes. Removing.
-        // padManager.evictFromCache(message.padId, callback);
-        callback();
-      } else {
-        callback();
-      }
-    },
     //get all authordata of this new user
     function(callback)
     {

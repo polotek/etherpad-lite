@@ -179,6 +179,7 @@ function handshake()
   //connect
   socket = io.connect(url, {
     resource: resource
+    , 'defer connection': false
   });
 
   socket.once('connect', function()
