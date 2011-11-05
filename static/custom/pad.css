@@ -135,6 +135,11 @@
   line-height: 18px;
 }
 
+.ie7 .yj-editor-lightbox-label {
+  float: left;
+  margin-top: 3px;
+}
+
 .yj-mention-field {
   width: 470px;
 }
