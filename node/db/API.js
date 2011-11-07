@@ -381,23 +381,21 @@ exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
       return callback({stop:'Invalid revision number'});
     }
 
+    authorID = authorID || authorName;
+
     async.waterfall([
         function(callback) {
           if(authorID) {
             authorManager.getAuthor(authorID, function(err, author) {
               if(author) {
-                author.id = authorID;
+                author.id = author.userId = authorID;
               } else {
                 err = {stop:'Author not found'}
               }
               callback(err, author);
             });
-          } else if (authorName) {
-            // TODO: How the hell do we lookup an author by name?
-            //callback({stop: 'Can\'t lookup author by name'});
-            callback(null, { id:null, name: authorName });
           } else {
-            callback({stop: 'The author does not exist'});
+            callback({stop: 'Author not found'});
           }
         },
         function(author, callback) {
@@ -406,9 +404,7 @@ exports.saveRevision = function(padID, rev, authorID, authorName, callback) {
           callback(null, author);
         },
         function(author, callback) {
-          process.nextTick(function() {
-            padMessageHandler.broadcastPublish(pad, rev, author, function() { /* we don't care */ });
-          });
+          padMessageHandler.broadcastPublish(pad, rev, author, function() { /* we don't care */ });
           callback();
       }],
       callback

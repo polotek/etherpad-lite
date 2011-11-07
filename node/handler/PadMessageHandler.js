@@ -654,18 +654,20 @@ exports.broadcastPublish = function(pad, rev, author, callback) {
   //skip this step if noone is on this pad
   if(!pad2sessions[pad.id]) { return callback(); }
 
+  var message = {
+    type: "COLLABROOM",
+    data: {
+      type:"PAD_PUBLISH"
+      , newRev: rev
+      , authorID: author.id
+      , authorName: author.name
+    }
+  }
+
   //go trough all sessions on this pad
   async.forEach(pad2sessions[pad.id],
     function(session, callback) {
-      socketio.sockets.sockets[session].json.send({
-        type: "COLLABROOM",
-        data: {
-          type:"PAD_PUBLISH"
-          , newRev: rev
-          , authorID: author.id
-          , authorName: author.name
-        }
-      });
+      socketio.sockets.sockets[session].json.send(message);
       callback();
     },
   callback);
