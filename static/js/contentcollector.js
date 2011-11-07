@@ -221,7 +221,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
   {
     state.flags[flagName]--;
   }
-  cc.incrementAttrib = function(state, attribName)
+  cc.incrementAttrib = function(state, attribName, node)
   {
     if (!state.attribs[attribName])
     {
@@ -231,7 +231,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
     {
       state.attribs[attribName]++;
     }
-    _recalcAttribString(state);
+    _recalcAttribString(state, node);
   }
   cc.decrementAttrib = function(state, attribName)
   {
@@ -282,6 +282,8 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
   function _recalcAttribString(state)
   {
     // window.console.log('contentcollector._recalcAttribString', state);
+    // HACK - get hook to parent page and yam.ui.pages to check if a paste is in progress
+    var yamPages = parent.parent.yam.ui.pages;
     var lst = [];
     for (var a in state.attribs)
     {
@@ -289,9 +291,9 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
       {
         // window.console.log('contentcollector._recalcAttribString', state.attribs[a]);
         // what happens when I kill yammer attrs here? // constrained attribute!
-        // if (a.lastIndexOf('yammer') < 0 || true) { 
+        if (yamPages.pasteInProgress || (a.lastIndexOf('yammer') < 0 && a.lastIndexOf('url') < 0)) { 
           lst.push([a, 'true']);
-        // }
+        }
       }
     }
     if (state.authorLevel > 0)
@@ -490,7 +492,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
             var mphIndex = cls.search(/yammer:/);
             cc.doAttrib(state, cls.substring(mphIndex)); //'yj-page-link '
           }
-          if (tname == 'a' && node.parentNode && node.parentNode.className.indexOf('url') >= 0) {
+          if (tname == 'a' && node.parentNode && node.parentNode.className && node.parentNode.className.indexOf('url') >= 0) {
             cc.doAttrib(state, 'url:' + node.href);
           }
           if (className2Author && cls)

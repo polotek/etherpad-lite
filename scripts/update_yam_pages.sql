@@ -1,0 +1,5 @@
+\connect yam_pages
+
+ALTER TABLE store ADD COLUMN pad_id VARCHAR(100), ADD COLUMN rev_id INT, ADD COLUMN timestamp TIMESTAMP WITH TIME ZONE, ADD COLUMN network_id BIGINT;
+
+SELECT * FROM store LIMIT 0;

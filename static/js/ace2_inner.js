@@ -4933,10 +4933,25 @@ function OUTER(gscope)
     // extra yammer event handlers
     var $ = parent.parent.yam.$;
     $(document).mousedown(function (evt) {
-      execCustomEventHooks('aceMouseDown', evt)
+      execCustomEventHooks('aceHandleMouseDown', evt);
     }).mouseup(function (evt) {
-      execCustomEventHooks('aceMouseUp', evt)
+      execCustomEventHooks('aceHandleMouseUp', evt);
+    }).blur(function (evt) {
+      execCustomEventHooks('aceHandleBlur', evt);
+    }).focus(function (evt) {
+      execCustomEventHooks('aceHandleFocus', evt);
     });
+    $(window).blur(function (evt) {
+      execCustomEventHooks('aceHandleBlur', evt);
+    }).focus(function (evt) {
+      execCustomEventHooks('aceHandleFocus', evt);
+    });
+    bindEventHandler(root, "paste", handlePaste)
+  }
+
+  function handlePaste(evt)
+  {
+    execCustomEventHooks('aceHandlePaste', evt);
   }
 
   function handleIEOuterClick(evt)
@@ -5075,13 +5090,14 @@ function OUTER(gscope)
   }
   function handleBlur(evt)
   {
-    if (browser.msie)
-    {
+    // if (browser.msie)
+    // {
       // a fix: in IE, clicking on a control like a button outside the
       // iframe can "blur" the editor, causing it to stop getting
       // events, though typing still affects it(!).
-      setSelection(null);
-    }
+      // kauffman nov 11 - killed this hack
+      // setSelection(null);
+    // }
   }
 
   function bindEventHandler(target, type, func)

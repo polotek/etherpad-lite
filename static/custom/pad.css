@@ -20,6 +20,7 @@
   background: none;
   border: none;
   padding: 4px 1px;
+  cursor: auto;
 }
 
 #editbar ul .select {
@@ -63,16 +64,48 @@
   top: 0;
 }
 
+#innerdocbody {
+  font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  color: #222 !important;
+}
+
+#innerdocbody h1, #innerdocbody h2,
+#innerdocbody h3, #innerdocbody h4,
+#innerdocbody h5, #innerdocbody h6 {
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  color: #222;
+}
+
 #innerdocbody h1 {
-  line-height: 28px;
+  font-size: 3em;
+  line-height: 1;
+  margin-bottom: 0.5em;
 }
 
 #innerdocbody h2 {
-  line-height: 22px;
+  font-size: 1.8em;
+  line-height: 1.25em;
+  margin-bottom: 0.5em;
 }
 
 #innerdocbody h3 {
-  line-height: 19px;
+  font-size: 1.6em;
+  line-height: 1.25em;
+  margin-bottom: 0.75em;
+}
+
+#innerdocbody h4 {
+  font-size: 1.2em;
+  font-weight: bold;
+  line-height: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+#innerdocbody a {
+  color: #01317E;
 }
 
 .yj-page-link {
@@ -100,6 +133,11 @@
 
 .yj-editor-lightbox-label {
   line-height: 18px;
+}
+
+.ie7 .yj-editor-lightbox-label {
+  float: left;
+  margin-top: 3px;
 }
 
 .yj-mention-field {

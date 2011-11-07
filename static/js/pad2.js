@@ -179,6 +179,7 @@ function handshake()
   //connect
   socket = io.connect(url, {
     resource: resource
+    , 'defer connection': false
   });
 
   socket.once('connect', function()
@@ -456,6 +457,7 @@ var pad = {
     yam.publish('/ui/pages/newRevision', [clientVars.collab_client_vars.rev || 0]);
     function postAceInit()
     {
+      yam.publish('/ui/pages/postAceInit');
       padeditbar.init();
       setTimeout(function()
       {
