@@ -1,4 +1,4 @@
-set :branch,     'release/2' unless exists?(:branch)
+set :branch,     'release/3' unless exists?(:branch)
 set :ports,      (9001..9012).map
 
 server 'paddie-001.sjc1.yammer.com', :paddie
