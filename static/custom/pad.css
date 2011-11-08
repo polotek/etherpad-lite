@@ -80,27 +80,27 @@
 }
 
 #innerdocbody h1 {
-  font-size: 3em;
-  line-height: 1;
+  font-size: 18px;
+  line-height: 22px;
   margin-bottom: 0.5em;
 }
 
 #innerdocbody h2 {
-  font-size: 1.8em;
-  line-height: 1.25em;
+  font-size: 16px;
+  line-height: 20px;
   margin-bottom: 0.5em;
 }
 
 #innerdocbody h3 {
-  font-size: 1.6em;
-  line-height: 1.25em;
+  font-size: 14px;
+  line-height: 18px;
   margin-bottom: 0.75em;
 }
 
 #innerdocbody h4 {
-  font-size: 1.2em;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: bold;
-  line-height: 1.25em;
   margin-bottom: 1.25em;
 }
 
