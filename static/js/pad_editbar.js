@@ -589,10 +589,12 @@ var padeditbar = (function()
     },
     _initFileButton: function() {
       var self = this
+        , config = yam.config()
         , $btn = $('#menu_right').find('.file-icon-btn')
         , title = yam.tr( $btn.attr('title') )
         , componentOpts = {
           inLightbox: true
+          , groupId: config.groupId
           , defaultActionText: yam.tr('Link')
           , defaultSelector: 'files'
         }
@@ -613,10 +615,12 @@ var padeditbar = (function()
     },
     _initPageButton: function() {
       var self = this
+        , config = yam.config()
         , $btn = $('#menu_right').find('.page-pen-icon-btn')
         , title = yam.tr( $btn.attr('title') )
         , componentOpts = {
           inLightbox: true
+          , groupId: config.groupId
           , defaultActionText: yam.tr('Link')
           , defaultSelector: 'pages'
         }
