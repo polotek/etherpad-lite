@@ -9,7 +9,7 @@ db.init(updateDatabase);
 
 function updateDatabase()
 {
-  db.db.wrappedDB.db.query('SELECT "key" FROM "store" WHERE "key" like \'pad%\' and "pad_id" IS NULL', function(err, result) {
+  db.db.wrappedDB.db.query('SELECT "key" FROM "store" WHERE "key" like \'pad:%\' and "pad_id" IS NULL', function(err, result) {
     if(err)
     {
       console.log("Error fetching rows from database: " + err);
@@ -33,7 +33,7 @@ function updateDatabase()
       (function(e) {
         var key = result.rows[e].key;
 
-        db.get(key, function(error, value){ 
+        db.db.wrappedDB.get(key, function(error, value){ 
           
           num--;
 
@@ -43,21 +43,21 @@ function updateDatabase()
             console.log("Error getting values for key: " + key);
             return;
           }
-          if(! value instanceof Object)
+          if( typeof value === 'object')
           {
-            value = JSON.parse(value); 
+            value = JSON.stringify(value); 
           }
-          
-          db.set(key, value, function(error, setResult){
-            if(!num) { done(); }
 
+          db.db.wrappedDB.set(key, value, function(error, setResult){
             if(error)
             {
               console.log("Error updating database for key: " + key + " : " + error);
+              
               return;
             }
             console.log("Successfully updated: " + key);
           });
+        
         });
       })(i);
     }

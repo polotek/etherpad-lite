@@ -40,9 +40,10 @@ exports.doesAuthorExists = function (authorID, callback)
  */
 exports.getAuthor4Token = function (token, userID, callback)
 {
+  var authorID;
   mapAuthorWithDBKey("token2author", token, userID, function(err, author)
   {
-    var authorID = author && author.authorID;
+    authorID = author && author.authorID;
     if(authorID && userID) {
       // set the new author name if given
       exports.setAuthorName(authorID, userID, function(err) {
@@ -121,10 +122,33 @@ function mapAuthorWithDBKey (mapperkey, mapper, userID, callback)
     //there is a author with this mapper
     else
     {
-      //update the timestamp of this author
-      db.setSub("globalAuthor:" + author, ["timestamp"], new Date().getTime());
-      //return the author
-      callback(null, {authorID: author});
+      // Check for the old style author id and fix it
+      if(author.indexOf('a.') === 0) {
+        // fix the mapper
+        mapperFix(author, userID, function(err, id) {
+          if(err) { return callback(err); }
+          callback(null, { authorID: id });
+        });
+      } else {
+        //update the timestamp of this author
+        db.setSub("globalAuthor:" + author, ["timestamp"], new Date().getTime());
+        callback(null, {authorID: author});
+      }
+    }
+  });
+}
+
+function mapperFix(oldAuthorID, userID, callback) {
+  exports.getAuthor(oldAuthorID, function(err, authorObj) {
+    if(err) { return callback(err); }
+    if(authorObj) {
+      db.set('globalAuthor:' + userID, authorObj, function(err) {
+        if(err) { return callback(err); }
+        db.remove('globalAuthor:' + oldAuthorID);
+        db.set('token2author:' + userID, userID, function() {
+          callback(null, userID);
+        });
+      });
     }
   });
 }

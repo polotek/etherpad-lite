@@ -654,18 +654,20 @@ exports.broadcastPublish = function(pad, rev, author, callback) {
   //skip this step if noone is on this pad
   if(!pad2sessions[pad.id]) { return callback(); }
 
+  var message = {
+    type: "COLLABROOM",
+    data: {
+      type:"PAD_PUBLISH"
+      , newRev: rev
+      , authorID: author.id
+      , authorName: author.name
+    }
+  }
+
   //go trough all sessions on this pad
   async.forEach(pad2sessions[pad.id],
     function(session, callback) {
-      socketio.sockets.sockets[session].json.send({
-        type: "COLLABROOM",
-        data: {
-          type:"PAD_PUBLISH"
-          , newRev: rev
-          , authorID: author.id
-          , authorName: author.name
-        }
-      });
+      socketio.sockets.sockets[session].json.send(message);
       callback();
     },
   callback);
@@ -774,18 +776,6 @@ function handleClientReady(client, message)
           callback(statusObject);
         }
       });
-    },
-    function(callback) {
-      // If this is the first connection of a new editing session,
-      // clear any previous cache state
-      if(!pad2sessions[message.padId] ||
-         !pad2sessions[message.padId].length) {
-        // Evicting cache here breaks initialization sometimes. Removing.
-        // padManager.evictFromCache(message.padId, callback);
-        callback();
-      } else {
-        callback();
-      }
     },
     //get all authordata of this new user
     function(callback)

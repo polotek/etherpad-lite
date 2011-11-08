@@ -264,6 +264,10 @@ var padeditbar = (function()
     // place afterwards.
     // TODO: probably move to yam.ui.pages
     _insertTextAtCursor: function (text, attrs) {
+      var start = yam.ui.pages.lastSelStart;
+      var end = yam.ui.pages.lastSelEnd;
+      // console.log('last selection', 'start', start[0], start[1], 'end', end[0], end[1]);
+
       // poll until the pad has focus again
       var focusPoller = setInterval(function () {
         // try to give focus until it sticks
@@ -272,11 +276,21 @@ var padeditbar = (function()
           // once the pad has focus kill initial poller
           clearInterval(focusPoller);
           // store the initial location of the caret for future reference
-          var initialCaret = yam.ui.pages.lastSelStart;
+          var initialCaret = yam.ui.pages.lastSelStart
+            , wasCaret = true;
+
+          if (!yam._.isEqual(initialCaret, yam.ui.pages.lastSelEnd)) {
+            wasCaret = false;
+          }
+
           // poll until the cursor is in the right place
           var setCaretPoller = setInterval(function () {
             // start trying to move the cursor back to its initial position
-            yam.ui.pages.setCaret(initialCaret[0], initialCaret[1]);
+            if (wasCaret) {
+              yam.ui.pages.setCaret(initialCaret[0], initialCaret[1]);
+            } else {
+              yam.ui.pages.setSelection(initialCaret[0], initialCaret[1], end[0], end[1]);
+            }
             // once the cursor is back at its initial position proceed with the text insert
             if (yam._.isEqual(yam.ui.pages.rep.selStart, initialCaret)) {
               // kill the poller for setting the cursor position pre inserting the text
@@ -575,10 +589,12 @@ var padeditbar = (function()
     },
     _initFileButton: function() {
       var self = this
+        , config = yam.config()
         , $btn = $('#menu_right').find('.file-icon-btn')
         , title = yam.tr( $btn.attr('title') )
         , componentOpts = {
           inLightbox: true
+          , groupId: config.groupId
           , defaultActionText: yam.tr('Link')
           , defaultSelector: 'files'
         }
@@ -599,10 +615,12 @@ var padeditbar = (function()
     },
     _initPageButton: function() {
       var self = this
+        , config = yam.config()
         , $btn = $('#menu_right').find('.page-pen-icon-btn')
         , title = yam.tr( $btn.attr('title') )
         , componentOpts = {
           inLightbox: true
+          , groupId: config.groupId
           , defaultActionText: yam.tr('Link')
           , defaultSelector: 'pages'
         }
