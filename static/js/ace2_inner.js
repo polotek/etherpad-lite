@@ -325,7 +325,8 @@ function OUTER(gscope)
 
     if (currentCallStack)
     {
-      console.error("Can't enter callstack " + type + ", already in " + currentCallStack.type);
+      // window.console.log('its all fucked man get the fuck out of here')
+      // console.error("Can't enter callstack " + type + ", already in " + currentCallStack.type);
     }
     
     var profiling = false;
