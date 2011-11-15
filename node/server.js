@@ -99,6 +99,8 @@ var setupLogging = function()
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'message'); 
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'ueberDB');
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'security');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/fatal.log'), customPatternLayout), 'fatalLog');
   }
 }
 
@@ -624,13 +626,14 @@ async.waterfall([
     process.on('SIGTERM', gracefulShutdown);
 
     process.on('uncaughtException', function(err) {
+      var fatalLog = log4js.getLogger('fatalLog');
       try {
-        runtimeLog.error('Fatal: ', err.message || 'Unknown error');
+        fatalLog.error('Fatal: ', err.message || 'Unknown error');
         metrics.error('UNCAUGHT_EXCEPTION');
         if(err.stack) {
           var stack = err.stack.split('\n');
           for(var i = 0; i < stack.length; i++) {
-            runtimeLog.error(stack[i]);
+            fatalLog.error(stack[i]);
           }
         }
       } catch(e) {}
