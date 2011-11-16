@@ -239,14 +239,15 @@ function handshake()
         denied = true;
         $("#editorloadingbox").html("<b>You do not have permission to access this pad.</b>");
         $(".yj-current-collaborators .yj-spinner").hide();
-        socket.disconnect();
+        pad.collabClient.setChannelState("DISCONNECTED", "deny");
+        
       }
       if(obj.accessStatus == "padFull")
       {
         denied = true;
         $("#editorloadingbox").html("<b>This Page has reached its maximum number of editors.</b>");
         $(".yj-current-collaborators .yj-spinner").hide();
-        socket.disconnect();
+        pad.collabClient.setChannelState("DISCONNECTED", "padFull");
       }
       else if(obj.accessStatus == "needPassword")
       {
@@ -302,7 +303,7 @@ function handshake()
       if (obj.disconnect)
       {
         padconnectionstatus.disconnected(obj.disconnect);
-        socket.disconnect();
+        pad.collabClient.setChannelState("DISCONNECTED","reset_by_server");
         return;
       }
       else
@@ -383,7 +384,6 @@ var pad = {
 
     //initialize the chat
     chat.init();
-    pad.diagnosticInfo.uniqueId = padutils.uniqueId();
     pad.initTime = +(new Date());
     pad.padOptions = clientVars.initialOptions;
 
@@ -705,7 +705,21 @@ var pad = {
     else if (newState == "DISCONNECTED" && !leavingPage)
     {
       pad.diagnosticInfo.disconnectedMessage = message;
-      pad.diagnosticInfo.padInitTime = pad.initTime;
+      pad.diagnosticInfo.socket = {};
+      
+      //we filter non objects from the socket object and put them in the diagnosticInfo 
+      //this ensures we have no cyclic data - this allows us to stringify the data
+      for(var i in socket.socket)
+      {
+        var value = socket.socket[i];
+        var type = typeof value;
+        
+        if(type == "string" || type == "number")
+        {
+          pad.diagnosticInfo.socket[i] = value;
+        }
+      }
+      
       pad.asyncSendDiagnosticInfo();
       if (typeof window.ajlog == "string")
       {
@@ -780,7 +794,7 @@ var pad = {
   },
   asyncSendDiagnosticInfo: function()
   {
-    pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
+    //pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
     var config = window.yam ? yam.config() : {}
       , url = 'ep/pad/connection-diagnostic-info';
 
@@ -944,3 +958,11 @@ var alertBar = (function()
   };
   return self;
 }());
+
+//testdisconnect
+/*function killconnection()
+{
+  if(window.console) console.log("TESTDISCONNECT!");
+  pad.collabClient.setChannelState("DISCONNECTED", "testdisconnect");
+}
+window.setTimeout("killconnection()", 8000);*/
