@@ -1,0 +1,108 @@
+#!/usr/bin/env node
+
+var nopt = require('nopt')
+	, settings = require("../node/utils/Settings")
+	, log4js = require('log4js')
+	, logger = log4js.getLogger('runtimeLog')
+	, _db = require('../node/db/DB');
+
+var parsed = nopt({
+		'pad': String
+		, 'revision': Number
+		, 'changeset': String
+		, 'force': Boolean
+		, 'namespace': String
+	}, {
+		'p': ['--pad']
+		, 'c': ['--changeset']
+		, 'cs': ['--changeset']
+		, 'ns': ['--namespace']
+	}, process.argv);
+
+var padId = parsed.pad
+	, rev = parsed.revision
+	, cs = parsed.changeset
+	, namespace = parsed.namespace || settings.namespace || 'stagepaddie';
+
+if(padId) {
+	if( !(/-/.test(padId)) ) {
+		padId = namespace + '-' + padId; 
+	}
+} else {
+	throw new Error('Invalid pad_id: ' + padId);
+}
+
+if( rev < 0 || rev % 1 !== 0) {
+	throw new Error('Invalid revision number: ' + rev);
+}
+
+if(cs) {
+	try {
+		cs = JSON.parse(cs);
+		if(!cs.changeset) {
+			throw new Error('Invalid changeset');
+		}
+	} catch(e) {
+		throw new Error('Invalid json for changeset');
+	}
+} else {
+	throw new Error('Invalid json for changeset');
+}
+
+_db.init(function() {
+
+var db = require('../node/db/DB').db;
+var pm = require('../node/db/PadManager');
+
+var getPadIfExists = function(padId, callback) {
+	pm.doesPadExists(padId, function(err, exists) {
+		if(err || !exists) { return callback(err, null); }
+
+		pm.getPad(padId, callback);
+	});
+}
+
+var updateRevision = function(padId, rev, cs, callback, wCallback) {
+	db.set('pad:' + padId + ':revs:' + rev, cs, callback, wCallback);
+}
+
+var done = function() {
+	db.close(function() {
+		console.log('done... exiting');
+		process.exit();
+	});
+}
+
+// {"changeset":"Z:5o>8|9=35=c*b+8$asdfasdf","meta":{"author":"2","timestamp":1320833114241}}
+getPadIfExists(padId, function(err, pad) {
+	if(err || !pad) {
+		throw new Error('Problem retrieving pad: ' + padId);
+	}
+
+	if(rev > pad.head) {
+		throw new Error('Invalid revision number: ' + rev);
+	}
+
+	pad.getRevision(rev, function(err, oldRev) {
+		if(err) { throw new Error('Problem retrieving revision: ' + rev); }
+
+		if(oldRev && !parsed.force) {
+			throw new Error("This changeset already exists. Try --force if you're sure");			
+		}
+
+
+		logger.info('Updating revision ' + rev + ' in pad ' + padId);
+		updateRevision(padId, rev, cs
+			, function(err) {
+				if(err) { throw new Error('Problem setting new revision: ' + rev); }
+			}
+			, function(err) {
+				if(err) { throw new Error('Problem setting new revision: ' + rev); }
+
+				logger.info('Revision ' + rev + ' updated');
+				db.doShutdown(done);
+			});
+	});
+});
+
+});
