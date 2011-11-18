@@ -599,8 +599,10 @@ async.waterfall([
       if (db && db.db && db.db.doShutdown) {
         db.db.doShutdown(function()
         {
-          runtimeLog.info("db sucessfully closed.");
-          process.exit();
+          db.db.close(function() {
+            runtimeLog.info("db sucessfully closed.");
+            process.exit();
+          });
         });
       } else {
         runtimeLog.info('no db shutdown.')
