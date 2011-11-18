@@ -827,6 +827,8 @@ function handleClientReady(client, message)
         function(callback)
         {
           pad.getAuthorsForRevisionSet(message.last_published_rev, undefined, function(err, authors){
+            if(err) { return callback(err); }
+
             async.forEach(authors, function(author, callback)
             {
               delete author.timestamp;
