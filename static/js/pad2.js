@@ -794,6 +794,7 @@ var pad = {
   },
   asyncSendDiagnosticInfo: function()
   {
+    return; // temporarily disabled
     //pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
     var config = window.yam ? yam.config() : {}
       , url = 'ep/pad/connection-diagnostic-info';
