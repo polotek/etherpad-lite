@@ -704,21 +704,10 @@ var pad = {
     }
     else if (newState == "DISCONNECTED" && !leavingPage)
     {
+      //collect data for the jsonp call
       pad.diagnosticInfo.disconnectedMessage = message;
-      pad.diagnosticInfo.socket = {};
-      
-      //we filter non objects from the socket object and put them in the diagnosticInfo 
-      //this ensures we have no cyclic data - this allows us to stringify the data
-      for(var i in socket.socket)
-      {
-        var value = socket.socket[i];
-        var type = typeof value;
-        
-        if(type == "string" || type == "number")
-        {
-          pad.diagnosticInfo.socket[i] = value;
-        }
-      }
+      pad.diagnosticInfo.padId = pad.getPadId();
+      pad.diagnosticInfo.sessionid = socket.socket.sessionid;
       
       pad.asyncSendDiagnosticInfo();
       if (typeof window.ajlog == "string")
@@ -807,10 +796,7 @@ var pad = {
       {
         dataType: 'jsonp',
         url: url,
-        data: {
-          padId: pad.getPadId(),
-          diagnosticInfo: JSON.stringify(pad.diagnosticInfo)
-        },
+        data: pad.diagnosticInfo,
         success: function()
         {},
         error: function()

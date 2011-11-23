@@ -542,7 +542,7 @@ async.waterfall([
     //The Etherpad client side sends information about how a disconnect happen
     app.get('/ep/pad/connection-diagnostic-info', function(req, res)
     {
-      runtimeLog.error("DIAGNOSTIC-INFO from pad '" + req.query.padId + "':" + req.query.diagnosticInfo);
+      runtimeLog.error("DISCONNECT-INFO: " + req.query.sessionid + " disconnect from " + req.query.padId + ", reason:" + req.query.disconnectedMessage);
       
       res.end("");
     });
