@@ -540,13 +540,11 @@ async.waterfall([
     });
 
     //The Etherpad client side sends information about how a disconnect happen
-    app.post('/ep/pad/connection-diagnostic-info', function(req, res)
+    app.get('/ep/pad/connection-diagnostic-info', function(req, res)
     {
-      new formidable.IncomingForm().parse(req, function(err, fields, files)
-      {
-        runtimeLog.error("DIAGNOSTIC-INFO: " + fields.diagnosticInfo);
-        res.end("OK");
-      });
+      runtimeLog.error("DIAGNOSTIC-INFO from pad '" + req.query.padId + "':" + req.query.diagnosticInfo);
+      
+      res.end("");
     });
 
     //The Etherpad client side sends information about client side javscript errors
