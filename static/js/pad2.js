@@ -708,7 +708,7 @@ var pad = {
       pad.diagnosticInfo.disconnectedMessage = message;
       pad.diagnosticInfo.padId = pad.getPadId();
       pad.diagnosticInfo.sessionId = socket.socket.sessionid;
-      pad.diagnosticInfo.userId = pad.myUserInfo.id;
+      pad.diagnosticInfo.userId = pad.myUserInfo.userId;
 
       pad.asyncSendDiagnosticInfo();
       if (typeof window.ajlog == "string")
