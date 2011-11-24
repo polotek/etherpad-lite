@@ -707,8 +707,9 @@ var pad = {
       //collect data for the jsonp call
       pad.diagnosticInfo.disconnectedMessage = message;
       pad.diagnosticInfo.padId = pad.getPadId();
-      pad.diagnosticInfo.sessionid = socket.socket.sessionid;
-      
+      pad.diagnosticInfo.sessionId = socket.socket.sessionid;
+      pad.diagnosticInfo.userId = pad.myUserInfo.id;
+
       pad.asyncSendDiagnosticInfo();
       if (typeof window.ajlog == "string")
       {

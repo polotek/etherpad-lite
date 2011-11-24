@@ -542,7 +542,7 @@ async.waterfall([
     //The Etherpad client side sends information about how a disconnect happen
     app.get('/ep/pad/connection-diagnostic-info', function(req, res)
     {
-      runtimeLog.error("DISCONNECT-INFO: " + req.query.sessionid + " disconnect from " + req.query.padId + ", reason:" + req.query.disconnectedMessage);
+      runtimeLog.error("DISCONNECT-INFO: " + req.query.sessionId + ' from user ' + req.query.userId + " disconnect from " + req.query.padId + ", reason:" + req.query.disconnectedMessage);
       
       res.end("");
     });
@@ -652,19 +652,19 @@ async.waterfall([
     io.set('logger', {
       debug: function (str)
       {
-        socketIOLogger.debug(str);
+        socketIOLogger.debug.apply(socketIOLogger, arguments);
       },
       info: function (str)
       {
-        socketIOLogger.info(str);
+        socketIOLogger.info.apply(socketIOLogger, arguments);
       },
       warn: function (str)
       {
-        socketIOLogger.warn(str);
+        socketIOLogger.warn.apply(socketIOLogger, arguments);
       },
       error: function (str)
       {
-        socketIOLogger.error(str);
+        socketIOLogger.error.apply(socketIOLogger, arguments);
       },
     });
 
