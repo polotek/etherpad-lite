@@ -38,6 +38,16 @@ describe('cache', function (){
     });
   });
 
+  describe('when data is written', function() {
+    it('the buffer contains dirty values', function() {});    
+  });
+
+  describe('when data is flushed', function() {
+    it('no other flush operations can start', function() {});
+    it('all dirty values are included in the flush', function() {});
+    it('all write callbacks are fired', function() {});
+  });
+
   describe('when there is a failure on flush', function (){
     it('retries the db operations', function (){
       var flushCallback = mock(function (){});
@@ -94,6 +104,12 @@ describe('cache', function (){
         // flush callback should be called once for each set operation
         expect(flushCallback).to(haveBeenCalled, 3);
       });
+    });
+
+    it('values are still read from memory', function() {});
+
+    describe('when the flush retry limit is reached', function() {
+      it('shuts down the db connection', function() {});
     });
   });
 });
