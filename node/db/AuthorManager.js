@@ -218,7 +218,6 @@ exports.getAuthorName = function (author, callback)
  */
 exports.setAuthorName = function (author, name, callback)
 {
-  console.log(author, name)
   db.setSub("globalAuthor:" + author, ["name"], name, callback);
 }
 
