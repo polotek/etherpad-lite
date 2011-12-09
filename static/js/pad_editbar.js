@@ -495,8 +495,8 @@ var padeditbar = (function()
         var didSubmit = false // flag to prevent double form submits
           , doSubmit = function () {
             if (!didSubmit) {
-              this._onLinkerSubmit();
               didSubmit = true;
+              if(this._onLinkerSubmit() === false) { didSubmit = false; }
             }
           }; 
         linker.$content = jq(Mustache.to_html(linker.template, { 
@@ -564,7 +564,8 @@ var padeditbar = (function()
         }
 
         // No host usually means invalid url
-        if(!parsed.host) {
+        var hostRe = /[a-z0-9%]|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/;
+        if(!parsed.host || !hostRe.test(parsed.host)) {
           parsed = null;
           url = null;
         }
