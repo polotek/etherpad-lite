@@ -20,6 +20,7 @@
  * limitations under the License.
  */
 
+var repl = require("./utils/Repl");
 var metrics = require('./metrics');
 var nopt = require('nopt');
 var log4js = require('log4js');
@@ -57,6 +58,9 @@ log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
 settings.env = argv.environment || settings.env;
 var customPatternLayout = log4js.layouts.patternLayout('%p [%d] %c - %m [pid:' + process.pid + ' port:' + port + ']');
+
+//start the unix socket repl
+repl.listen(port);
 
 var logDirectory = '';
 
