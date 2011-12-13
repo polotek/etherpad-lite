@@ -15,15 +15,17 @@ var setupLogging = function(port)
       process.pid + ' port:' + port + ']');
 
   log4js.clearAppenders();
-//  log4js.restoreConsole();
+  //log4js.restoreConsole();
   if(settings.env == 'development') {
     log4js.addAppender(log4js.consoleAppender(customPatternLayout));
   }
   
-  if(settings.env != 'development') {
-    var config = {
+  if(true || settings.env != 'development') {
+    var syslogPatternLayout = log4js.layouts.patternLayout('%p %c - %m [port:' + port + ']')
+      , config = {
         ident: 'paddie'
-        , layout: customPatternLayout
+        , facility: 'LOG_LOCAL2'
+        , layout: syslogPatternLayout
       }
       , appender = syslogAppender(config);
 
@@ -37,23 +39,30 @@ var setupLogging = function(port)
     log4js.addAppender(appender, 'fatalLog');
   }
 
-  if(settings.logDirectory)
-  {
-    var logDirectory = settings.logDirectory.trim().length == 0 ? 'logs' : settings.logDirectory;
+  if(settings.logDirectory) {
+    var logDirectory = settings.logDirectory.trim().length == 0 ? 
+        'logs' : settings.logDirectory;
     
-    if(!path.existsSync(logDirectory))
-    {
+    if(!path.existsSync(logDirectory)) {
       fs.mkdirSync(logDirectory, 0755, true);
     }
 
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'apiLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'message'); 
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'ueberDB');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'security');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/fatal.log'), customPatternLayout), 'fatalLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log')
+        , customPatternLayout), 'httpLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log')
+        , customPatternLayout), 'apiLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log')
+        , customPatternLayout), 'socketioLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log')
+        , customPatternLayout), 'message'); 
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log')
+        , customPatternLayout), 'ueberDB');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log')
+        , customPatternLayout), 'security');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log')
+        , customPatternLayout), 'runtimeLog');
+    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/fatal.log')
+        , customPatternLayout), 'fatalLog');
   }
 }
 
