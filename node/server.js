@@ -20,6 +20,7 @@
  * limitations under the License.
  */
 
+var repl = require("./utils/Repl");
 var metrics = require('./metrics');
 var nopt = require('nopt');
 var log4js = require('log4js');
@@ -55,6 +56,9 @@ var argv = nopt({
 
 var port = argv.port || settings.port;
 settings.env = argv.environment || settings.env;
+
+//start the unix socket repl
+repl.listen(port);
 
 logging.setupLogging(port);
 var runtimeLog = log4js.getLogger('runtimeLog');
