@@ -380,20 +380,9 @@ var padeditbar = (function()
         }
 
       var typeAhead = yam.ui.shared.typeAhead
-        , maxCount = 10
-        , userModel = 'users'
-        , domainModel = 'domains';
-      if(yam.currentUser.treatments && 
-          'new_autocomplete' in yam.currentUser.treatments &&
-          yam.currentUser.treatments.new_autocomplete) {
-        maxCount = 6;
-        userModel = typeAhead.MODEL_USER;
-        domainModel = typeAhead.MODEL_DOMAIN;
-      } else {
-        typeAhead = yam.ui.shared.typeAheadOld ? 
-          yam.ui.shared.typeAheadOld : 
-          yam.ui.shared.typeAhead;
-      }
+        , maxCount = 6
+        , userModel = typeAhead.MODEL_USER
+        , domainModel = typeAhead.MODEL_DOMAIN;
 
       var typeAheadOpts = {
           onSelect: function(linkData, evt) {
