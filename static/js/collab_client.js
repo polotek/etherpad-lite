@@ -478,6 +478,9 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
       colorId = clientVars.colorPalette[colorId];
     }
 
+    // don't show colors for current user
+    if(userId == pad.myUserInfo.userId /* && !pad.getIsHighlightingEnabled() */) { return; }
+
     var cssColor = colorId;
     if (inactive)
     {
