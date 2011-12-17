@@ -7,6 +7,7 @@ socat - UNIX-CONNECT:/tmp/paddie-9001.sock
 var net = require("net");
 var repl = require("repl");
 var util = require("util");
+var pth = require("path");
 
 var loadedModules = require("module")._cache;
 
@@ -16,11 +17,12 @@ exports.listen = function(port)
   {
     var context = {};
     var modules = [];
-    
+    var projectPath = pth.resolve('.');
+
     for(var path in loadedModules)
     {
       //this module is not part of etherpad lite, skip it
-      if(path.indexOf("etherpad-lite/node") == -1 || path.indexOf("node_modules") != -1)
+      if(path.indexOf(projectPath) == -1 || path.indexOf("node_modules") != -1)
       {
         continue;
       }
@@ -34,7 +36,7 @@ exports.listen = function(port)
       context[moduleName] = loadedModules[path].exports;
       
       //relativePath
-      var relativePath = path.substr(path.indexOf("etherpad-lite/node") + "etherpad-lite/node".length + 1);
+      var relativePath = path.substr(projectPath.length);
       
       //build the descriptonLine
       var moduleDescLine = moduleName;
@@ -48,7 +50,7 @@ exports.listen = function(port)
     }
     
     //start the repl instance on this socket
-    var replInstance = repl.start("> ", socket);
+    var replInstance = repl.start("> ", socket, null, true);
     
     //write the welcome text
     var welcomeText = "\nYou can access the modules with these variables:\n\n" + modules.sort().join("\n") + "\n\n" + 
