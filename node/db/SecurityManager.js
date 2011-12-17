@@ -74,16 +74,16 @@ var tokieAuth = function(token, padID, callback) {
           }
           if (pad.networkId != body.network || (pad.isPrivate && !isInGroup)) {
             if (pad.isPrivate && !isInGroup) {
-              securityLogger.error("tokie auth failed because the user is not in the right group: pad group - ", pad.groupId, "tokie groups - ", body.groups);
+              securityLogger.error("tokie auth failed: user " + token + " is not in the right group: pad group - ", pad.groupId, "tokie groups - ", body.groups);
             }
             if (pad.networkId != body.network) {
-              securityLogger.error("tokie auth failed because the user is not in the right network: pad network - ", pad.networkId, 'tokie network - ', body.network);
+              securityLogger.error("tokie auth failed: user " + token + " is not in the right network: pad network - ", pad.networkId, 'tokie network - ', body.network);
             }
             callback(true);
             return false;
           }
           // the user is good to go
-          securityLogger.error('tokie auth granted');
+          securityLogger.info('tokie auth granted');
           callback();
         });
 

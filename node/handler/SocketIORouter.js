@@ -21,6 +21,7 @@
 
 var log4js = require('log4js');
 var messageLogger = log4js.getLogger("message");
+var socketioLogger = log4js.getLogger("socketioLog");
 var securityManager = require("../db/SecurityManager");
 
 /**
@@ -54,6 +55,7 @@ exports.setSocketIO = function(_socket)
 
   socket.sockets.on('connection', function(client)
   {
+    socketioLogger.info('new connection: ' + client.id);
     if(socket.transports && socket.transports[client.id]) {
       messageLogger.error('socket.io transport type ', socket.transports[client.id].name);
     }
@@ -111,7 +113,7 @@ exports.setSocketIO = function(_socket)
         //this message has everything to try an authorization
         if(message.padId !== undefined && message.sessionID !== undefined && message.token !== undefined && message.password !== undefined)
         {
-          console.log("============ ", message);
+          messageLogger.debug("============ ", message);
           securityManager.checkAccess (message.padId, message.sessionID, message.token, message.authtoken, message.password, message.user_id, function(err, statusObject)
           {
             if(err) throw err;
