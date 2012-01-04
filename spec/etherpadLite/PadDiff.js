@@ -199,6 +199,8 @@ describe('PadDiff', function (){
           if(err) throw err;
           
           testPadDiff._createClearStartAtext(rev, function(err, clearedAText){
+            if(err) throw err;
+            
             //check text
             expect(clearedAText.text).to(equal,origAText.text);
             
@@ -218,6 +220,39 @@ describe('PadDiff', function (){
       
       waitFor(function(){
         expect(counter).to(equal, 0);
+      });
+    });
+  });
+  
+  describe('the _getChangesetsInBulk method', function(){    
+    it('returns the correct amount of changesets and authors', function(){
+      testPadDiff._getChangesetsInBulk(0,100,function(err, changesets, authors){
+        if(err) throw err;
+        
+        expect(changesets.length).to(equal, 100);
+        expect(authors.length).to(equal, 100);
+        
+        gotFirst100Changesets = true;
+      });
+      
+      waitFor(function(){
+        expect(gotFirst100Changesets).to(beTrue);
+      });
+    })
+    
+    it('stops at the head revision', function(){
+      //get the last 50 revisions to check them
+      testPadDiff._getChangesetsInBulk(pad.head-50,100,function(err, changesets, authors){
+        if(err) throw err;
+        
+        expect(changesets.length).to(equal, 50);
+        expect(authors.length).to(equal, 50);
+        
+        gotLast50Changesets = true;
+      });
+      
+      waitFor(function(){
+        expect(gotLast50Changesets).to(beTrue);
       });
     });
   });
