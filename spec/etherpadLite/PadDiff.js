@@ -256,4 +256,25 @@ describe('PadDiff', function (){
       });
     });
   });
+  
+  describe('the _addAuthors method', function(){   
+    it('adds new authors', function(){
+      testPadDiff._authors = ["d"];
+      testPadDiff._addAuthors(["a","b","c"]);
+      
+      expect(testPadDiff._authors.length).to(equal, 4);
+    });
+    
+    it('doesn\'t add known authors', function(){
+      testPadDiff._authors = ["a"];
+      testPadDiff._addAuthors(["a","b","c"]);
+      
+      expect(testPadDiff._authors.length).to(equal, 3);
+    });
+    
+    //clean the authors after each operation
+    after(function(){
+      testPadDiff._authors = [];
+    });
+  });
 });
