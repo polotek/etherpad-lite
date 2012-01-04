@@ -20,7 +20,7 @@ function PadDiff (pad, fromRev, toRev){
   this._fromRev = fromRev;
   this._toRev = toRev;
   this._html = null;
-  this._authors = null;
+  this._authors = [];
 }
 
 PadDiff.prototype._isClearAuthorship = function(changeset){
@@ -141,7 +141,15 @@ PadDiff.prototype._getChangesetsInBulk = function(startRev, count, callback) {
   });
 }
 
-//_getChangesetsInBulk(startRev, count) 
+PadDiff.prototype._addAuthors = function(authors) {
+  var self = this;
+  //add to array if not in the array
+  authors.forEach(function(author){
+    if(self._authors.indexOf(author) == -1){
+      self._authors.push(author);
+    }
+  });
+}
 
 //export the constructor
 module.exports = PadDiff;
