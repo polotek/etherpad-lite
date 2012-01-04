@@ -1,4 +1,5 @@
 var Changeset = require("./Changeset");
+var async = require("async");
 
 function PadDiff (pad, fromRev, toRev){      
   //check parameters
@@ -109,6 +110,38 @@ PadDiff.prototype._createClearStartAtext = function(rev, callback){
    });
   });
 }
+
+PadDiff.prototype._getChangesetsInBulk = function(startRev, count, callback) {
+  var self = this;
+  
+  //find out which revisions we need
+  var revisions = [];
+  for(var i=startRev;i<(startRev+count) && i<this._pad.head;i++){
+    revisions.push(i);
+  }
+  
+  var changesets = [], authors = [];
+  
+  //get all needed revisions
+  async.forEach(revisions, function(rev, callback){
+    self._pad.getRevision(rev, function(err, revision){
+      if(err){
+        return callback(err)
+      }
+      
+      var arrayNum = rev-startRev;
+      
+      changesets[arrayNum] = revision.changeset;
+      authors[arrayNum] = revision.meta.author;
+  
+      callback();
+    });
+  }, function(err){
+    callback(err, changesets, authors);
+  });
+}
+
+//_getChangesetsInBulk(startRev, count) 
 
 //export the constructor
 module.exports = PadDiff;
