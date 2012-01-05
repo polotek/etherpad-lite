@@ -24,6 +24,7 @@ var repl = require("./utils/Repl");
 var metrics = require('./metrics');
 var nopt = require('nopt');
 var log4js = require('log4js');
+var logging = require('./logging');
 var os = require("os");
 var socketio = require('socket.io');
 var fs = require('node-fs');
@@ -53,89 +54,14 @@ var argv = nopt({
     , 'e': ['--environment']
 }, process.argv);
 
-//set loglevel
-log4js.setGlobalLogLevel(settings.loglevel);
 var port = argv.port || settings.port;
 settings.env = argv.environment || settings.env;
-var customPatternLayout = log4js.layouts.patternLayout('%p [%d] %c - %m [pid:' + process.pid + ' port:' + port + ']');
 
 //start the unix socket repl
 repl.listen(port);
 
-var logDirectory = '';
-
-var updateLogDirectories = function()
-{
-  try
-  {
-    logDirectory = settings.logDirectory.trim().length == 0 ? 'logs' : settings.logDirectory;
-  }
-  catch(e)
-  {
-    log4js.clearAppenders();
-    log4js.addAppender(log4js.consoleAppender());
-    console.log('Error updating log directory from settings.json. Pushing logs to console');
-    logDirectory = 'logs';
-  }
-}
-
-// Sets up logging directory by reading in the directory path from 
-// externally configurable JSON file.
-var setupLogging = function()
-{ 
-  updateLogDirectories();
-  
-  if(!path.existsSync(logDirectory))
-  {
-    fs.mkdirSync(logDirectory, 0755, true);
-  }
-
-  log4js.clearAppenders();
-  if(settings.env == 'development') {
-    log4js.addAppender(log4js.consoleAppender(customPatternLayout));
-  }
-  
-  if(settings.logDirectory)
-  {
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'httpLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/http.log'), customPatternLayout), 'apiLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'socketioLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log'), customPatternLayout), 'message'); 
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'ueberDB');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'security');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log'), customPatternLayout), 'runtimeLog');
-    log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/fatal.log'), customPatternLayout), 'fatalLog');
-  }
-}
-
-try
-{
-  setupLogging();
-}
-catch (e)
-{
-  log4js.clearAppenders();
-  log4js.addAppender(log4js.consoleAppender(customPatternLayout));
-}
-
+logging.setupLogging(port);
 var runtimeLog = log4js.getLogger('runtimeLog');
-
-/*
-//try to get the git version
-var version = "";
-try
-{
-  var ref = fs.readFileSync(path.join(__dirname, "../.git/HEAD"), "utf-8");
-  var refPath = path.join(__dirname, "../.git/") + ref.substring(5, ref.indexOf("\n"));
-  version = fs.readFileSync(refPath, "utf-8");
-  version = version.substring(0, 7);
-  runtimeLog.info("Your Etherpad Lite git version is " + version);
-}
-catch(e)
-{
-  runtimeLog.warn("Can't get git version for server header\n" + e.message)
-}
-*/
 
 var serverName = "Paddie";
 
@@ -625,8 +551,6 @@ async.waterfall([
       process.on('SIGINT', gracefulShutdown);
     }
 
-    // On SIGHUP, we will rotate logs.
-    process.on('SIGHUP', setupLogging);
     process.on('SIGTERM', gracefulShutdown);
 
     process.on('uncaughtException', function(err) {

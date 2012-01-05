@@ -8,3 +8,5 @@ bin/convertSettings.json
 *.swp
 *.swo
 node/logs
+node_modules/**/out
+node_modules/**/build
