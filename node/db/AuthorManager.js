@@ -181,6 +181,10 @@ exports.getAuthor = function (author, callback)
   db.get("globalAuthor:" + author, callback);
 }
 
+exports.setAuthor = function(id, authorObj, callback) {
+  db.set('globalAuthor:' + id, authorObj, callback);  
+}
+
 /**
  * Returns the color Id of the author
  * @param {String} author The id of the author
@@ -219,6 +223,14 @@ exports.getAuthorName = function (author, callback)
 exports.setAuthorName = function (author, name, callback)
 {
   db.setSub("globalAuthor:" + author, ["name"], name, callback);
+}
+
+exports.getShowHighlighting = function(author, callback) {
+  db.getSub('globalAuthor:' + author, ['showHighlighting'], callback);  
+}
+
+exports.setShowHighlighting = function(author, show, callback) {
+  db.setSub('globalAuthor:' + author, ['showHighlighting'], show, callback);  
 }
 
 /**
