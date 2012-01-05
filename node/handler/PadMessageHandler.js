@@ -396,7 +396,9 @@ function handleUserInfoUpdate(client, message)
 
   //Tell the authorManager about the new attributes
   authorManager.setAuthorColorId(author, message.data.userInfo.colorId);
-  authorManager.setAuthorName(author, message.data.userInfo.name);
+  authorManager.setAuthorName(author, message.data.userInfo.name + '');
+  authorManager.setShowHighlighting(author
+    , message.data.userInfo.showHighlighting ? true : false);
 
   var padId = session2pad[client.id];
 
@@ -743,9 +745,11 @@ function handleClientReady(client, message)
       message.protocolVersion + '!');
   }
 
+  var authorObj;
   var author;
   var authorName;
   var authorColorId;
+  var showHighlighting;
   var pad;
   var historicalAuthorData = {};
   var readOnlyId;
@@ -781,21 +785,16 @@ function handleClientReady(client, message)
     function(callback)
     {
       async.parallel([
-        //get colorId
         function(callback)
         {
-          authorManager.getAuthorColorId(author, function(err, value)
+          authorManager.getAuthor(author, function(err, value)
           {
-            authorColorId = value;
-            callback(err);
-          });
-        },
-        //get author name
-        function(callback)
-        {
-          authorManager.getAuthorName(author, function(err, value)
-          {
-            authorName = value;
+            authorObj = value;
+            if(authorObj) {
+              showHighlighting = authorObj.showHighlighting;
+              authorColorId = authorObj.colorId;
+              authorName = authorObj.name;
+            }
             callback(err);
           });
         },
@@ -917,6 +916,7 @@ function handleClientReady(client, message)
         "clientIp": "127.0.0.1",
         "userIsGuest": true,
         "userColor": authorColorId,
+        "showHighlighting": showHighlighting || false,
         "padId": message.padId,
         "initialTitle": "Pad: " + message.padId,
         "opts": {},
