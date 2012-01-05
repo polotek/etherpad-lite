@@ -2,6 +2,7 @@ var padDiff = foounit.require(':src/utils/PadDiff');
 var settings = foounit.require(':src/utils/Settings');
 var Changeset = foounit.require(':src/utils/Changeset');
 var path = require("path");
+var async = require("async");
 var pad, testPadDiff;
 
 //init everything
@@ -242,7 +243,7 @@ describe('PadDiff', function (){
     
     it('stops at the head revision', function(){
       //get the last 50 revisions to check them
-      testPadDiff._getChangesetsInBulk(pad.head-50,100,function(err, changesets, authors){
+      testPadDiff._getChangesetsInBulk(pad.head-49,100,function(err, changesets, authors){
         if(err) throw err;
         
         expect(changesets.length).to(equal, 50);
@@ -275,6 +276,48 @@ describe('PadDiff', function (){
     //clean the authors after each operation
     after(function(){
       testPadDiff._authors = [];
+    });
+  });
+  
+  describe('the _createDiffAtext method', function(){   
+    it('returns a text that has the same text than the toRev but different attribs', function(){
+      var done = false;
+      
+      //create some test diffs with random revision numbers
+      var testDiffs = [];
+      testDiffs.push(new padDiff(pad, 111, 490));
+      testDiffs.push(new padDiff(pad, 57, 312));
+      testDiffs.push(new padDiff(pad, 0, 497));
+      testDiffs.push(new padDiff(pad, 213, 290));
+      testDiffs.push(new padDiff(pad, 333, 480));
+      
+      //run trough all testDiffs
+      async.forEachSeries(testDiffs, function(testDiff, callback){
+        
+        testDiff._createDiffAtext(function(err, newAText){
+          if(err) throw err;
+          
+          pad.getInternalRevisionAText(testDiff._toRev, function(err, origAText){
+            if(err) throw err;
+            
+            //check if we have still the same text but different attribs
+            expect(origAText.text).to(equal, newAText.text);
+            expect(origAText.attribs).toNot(equal, newAText.attribs);
+            
+            //check if there are authors in the author array
+            expect(testDiff._authors.length).toNot(equal, 0);
+            
+            callback();
+          });
+        });
+      }, function(err){
+        if(err) throw err;
+        done = true;
+      });
+      
+      waitFor(function(){
+        expect(done).to(beTrue);
+      });
     });
   });
 });

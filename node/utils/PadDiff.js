@@ -116,7 +116,7 @@ PadDiff.prototype._getChangesetsInBulk = function(startRev, count, callback) {
   
   //find out which revisions we need
   var revisions = [];
-  for(var i=startRev;i<(startRev+count) && i<this._pad.head;i++){
+  for(var i=startRev;i<(startRev+count) && i<=this._pad.head;i++){
     revisions.push(i);
   }
   
@@ -148,6 +148,60 @@ PadDiff.prototype._addAuthors = function(authors) {
     if(self._authors.indexOf(author) == -1){
       self._authors.push(author);
     }
+  });
+}
+
+PadDiff.prototype._createDiffAtext = function(callback) {
+  var self = this;
+  var bulkSize = 100;
+  
+  //get the cleaned startAText
+  self._createClearStartAtext(self._fromRev, function(err, atext){
+    if(err) throw err;
+    
+    var rev = self._fromRev + 1;
+    
+    //async while loop
+    async.whilst(
+      //loop condition
+      function () { return rev < self._toRev; },
+      
+      //loop body
+      function (callback) {
+        //get the bulk
+        self._getChangesetsInBulk(rev,bulkSize,function(err, changesets, authors){
+          var addedAuthors = [];
+          
+          //run trough all changesets
+          for(var i=0;i<changesets.length && (rev+i)<=self._toRev;i++){
+            var changeset = changesets[i];
+            
+            //skip clearAuthorship Changesets
+            if(self._isClearAuthorship(changeset)){
+              continue;
+            }
+            
+            //add this author to the authorarray
+            addedAuthors.push(authors[i]);
+            
+            //apply the changeset
+            atext = Changeset.applyToAText(changeset, atext, self._pad.pool);
+          }
+          
+          //add the authors to the PadDiff authorArray
+          self._addAuthors(addedAuthors);
+        
+          //lets continue with the next bulk 
+          rev += bulkSize;
+          callback();
+        });
+      },
+      
+      //after the loop has ended
+      function (err) {
+        callback(err, atext);
+      }
+    );
   });
 }
 
