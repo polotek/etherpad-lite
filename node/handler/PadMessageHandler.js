@@ -388,7 +388,7 @@ function handleUserInfoUpdate(client, message)
   //check if all ok
   if(message.data.userInfo.colorId == null)
   {
-    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Droped message, USERINFO_UPDATE Message has no colorId!');
+    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Dropped message, USERINFO_UPDATE Message has no colorId!');
   }
 
   //Find out the author name of this session
@@ -408,6 +408,8 @@ function handleUserInfoUpdate(client, message)
     message.data.userInfo.name = null;
   }
 
+  handleMessageProcessed(null, message);
+
   //The Client don't know about a USERINFO_UPDATE, it can handle only new user_newinfo, so change the message type
   message.data.type = "USER_NEWINFO";
 
@@ -419,7 +421,6 @@ function handleUserInfoUpdate(client, message)
       socketio.sockets.sockets[pad2sessions[padId][i]].json.send(message);
     }
   }
-  handleMessageProcessed(null, message);
 }
 
 
