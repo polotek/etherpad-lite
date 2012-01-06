@@ -478,19 +478,25 @@ function getCollabClient(ace2editor, serverVars, initialUserInfo, options)
       colorId = clientVars.colorPalette[colorId];
     }
 
-    var cssColor = colorId;
-    if (inactive)
-    {
-      editor.setAuthorInfo(userId, {
-        bgcolor: cssColor,
-        fade: 0.5
-      });
-    }
-    else
-    {
-      editor.setAuthorInfo(userId, {
-        bgcolor: cssColor
-      });
+    // if this is the current user, check highlight settings
+    if(pad.getIsHighlightingEnabled(userId)) {
+      var cssColor = colorId;
+      if (inactive)
+      {
+        editor.setAuthorInfo(userId, {
+          bgcolor: cssColor,
+          fade: 0.5
+        });
+      }
+      else
+      {
+        editor.setAuthorInfo(userId, {
+          bgcolor: cssColor
+        });
+      }
+    } else {
+      // passing no info removes the styles
+      editor.setAuthorInfo(userId);
     }
   }
 

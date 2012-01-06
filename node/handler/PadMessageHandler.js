@@ -388,7 +388,7 @@ function handleUserInfoUpdate(client, message)
   //check if all ok
   if(message.data.userInfo.colorId == null)
   {
-    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Droped message, USERINFO_UPDATE Message has no colorId!');
+    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Dropped message, USERINFO_UPDATE Message has no colorId!');
   }
 
   //Find out the author name of this session
@@ -396,7 +396,9 @@ function handleUserInfoUpdate(client, message)
 
   //Tell the authorManager about the new attributes
   authorManager.setAuthorColorId(author, message.data.userInfo.colorId);
-  authorManager.setAuthorName(author, message.data.userInfo.name);
+  authorManager.setAuthorName(author, message.data.userInfo.name + '');
+  authorManager.setShowHighlighting(author
+    , message.data.userInfo.showHighlighting ? true : false);
 
   var padId = session2pad[client.id];
 
@@ -405,6 +407,8 @@ function handleUserInfoUpdate(client, message)
   {
     message.data.userInfo.name = null;
   }
+
+  handleMessageProcessed(null, message);
 
   //The Client don't know about a USERINFO_UPDATE, it can handle only new user_newinfo, so change the message type
   message.data.type = "USER_NEWINFO";
@@ -417,7 +421,6 @@ function handleUserInfoUpdate(client, message)
       socketio.sockets.sockets[pad2sessions[padId][i]].json.send(message);
     }
   }
-  handleMessageProcessed(null, message);
 }
 
 
@@ -743,9 +746,11 @@ function handleClientReady(client, message)
       message.protocolVersion + '!');
   }
 
+  var authorObj;
   var author;
   var authorName;
   var authorColorId;
+  var showHighlighting;
   var pad;
   var historicalAuthorData = {};
   var readOnlyId;
@@ -781,21 +786,16 @@ function handleClientReady(client, message)
     function(callback)
     {
       async.parallel([
-        //get colorId
         function(callback)
         {
-          authorManager.getAuthorColorId(author, function(err, value)
+          authorManager.getAuthor(author, function(err, value)
           {
-            authorColorId = value;
-            callback(err);
-          });
-        },
-        //get author name
-        function(callback)
-        {
-          authorManager.getAuthorName(author, function(err, value)
-          {
-            authorName = value;
+            authorObj = value;
+            if(authorObj) {
+              showHighlighting = authorObj.showHighlighting;
+              authorColorId = authorObj.colorId;
+              authorName = authorObj.name;
+            }
             callback(err);
           });
         },
@@ -917,6 +917,7 @@ function handleClientReady(client, message)
         "clientIp": "127.0.0.1",
         "userIsGuest": true,
         "userColor": authorColorId,
+        "showHighlighting": showHighlighting || false,
         "padId": message.padId,
         "initialTitle": "Pad: " + message.padId,
         "opts": {},
