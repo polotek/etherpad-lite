@@ -359,8 +359,13 @@ var pad = {
   {
     return clientVars.debugEnabled;
   },
-  getIsHighlightingEnabled: function() {
-    return pad.myUserInfo.showHighlighting;
+  getIsHighlightingEnabled: function(userId) {
+    if(userId == pad.myUserInfo.userId) {
+      return pad.myUserInfo.showHighlighting;
+    }
+
+    // always true for everyone else
+    return true; 
   },
   getPrivilege: function(name)
   {
