@@ -200,7 +200,7 @@ async.waterfall([
         code = 500;
         response = "Exception performing DB query check: " + e.message;
       }
-      runtimeLog.info(response);
+      runtimeLog.debug(response);
     }
 
     databaseCheck();
