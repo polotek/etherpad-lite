@@ -972,8 +972,13 @@ function handleClientReady(client, message)
           //get the authorname & colorId
           function(callback)
           {
-            authorManager.getAuthor(sessioninfos[sessionID], function(err, author) {
-              sessionAuthor = author;
+            authorManager.getAuthor(sessioninfos[sessionID].author, function(err, author) {
+              if(author) {
+                sessionAuthor = author;
+              } else {
+                err = err || new Error('No author found in session: ' + 
+                  sessioninfos[sessionID].author);
+              }
               callback(err);
             });
           },
