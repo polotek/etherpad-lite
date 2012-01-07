@@ -162,6 +162,7 @@ exports.handleDisconnect = function(client)
           userInfo: {
             "ip": "127.0.0.1",
             "colorId": authorObj.colorId,
+            "showHighlighting": authorObj.showHighlighting || false,
             "userAgent": "Anonymous",
             "userId": author,
             "name": authorObj.name,
@@ -954,7 +955,8 @@ function handleClientReady(client, message)
             "colorId": authorColorId,
             "name": authorName,
             "userAgent": "Anonymous",
-            "userId": author
+            "userId": author,
+            "showHighlighting": showHighlighting || false
           }
         }
       };
@@ -964,30 +966,16 @@ function handleClientReady(client, message)
       //Run trough all sessions of this pad
       async.forEach(pad2sessions[message.padId], function(sessionID, callback)
       {
-        var sessionAuthorName, sessionAuthorColorId;
+        var sessionAuthor;
 
         async.series([
           //get the authorname & colorId
           function(callback)
           {
-            async.parallel([
-              function(callback)
-              {
-                authorManager.getAuthorColorId(sessioninfos[sessionID].author, function(err, value)
-                {
-                  sessionAuthorColorId = value;
-                  callback(err);
-                })
-              },
-              function(callback)
-              {
-                authorManager.getAuthorName(sessioninfos[sessionID].author, function(err, value)
-                {
-                  sessionAuthorName = value;
-                  callback(err);
-                })
-              }
-            ],callback);
+            authorManager.getAuthor(sessioninfos[sessionID], function(err, author) {
+              sessionAuthor = author;
+              callback(err);
+            });
           },
           function (callback)
           {
@@ -1004,10 +992,11 @@ function handleClientReady(client, message)
                   type: "USER_NEWINFO",
                   userInfo: {
                     "ip": "127.0.0.1",
-                    "colorId": sessionAuthorColorId,
-                    "name": sessionAuthorName,
+                    "colorId": sessionAuthor.colorId,
+                    "name": sessionAuthor.name,
                     "userAgent": "Anonymous",
-                    "userId": sessioninfos[sessionID].author
+                    "userId": sessioninfos[sessionID].author,
+                    "showHighlighting": sessionAuthor.showHighlighting || false
                   }
                 }
               };
