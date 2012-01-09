@@ -52,7 +52,8 @@ var functions = {
     "getReadOnlyID"             : ["padID"],
     "setPublicStatus"           : ["padID", "publicStatus"],
     "getPublicStatus"           : ["padID"],
-    "isPasswordProtected"       : ["padID"]
+    "isPasswordProtected"       : ["padID"],
+    "createDiff"                : ["padID", "startRev", "endRev"],
   }
   , 'POST': {
     "createGroup"               : [],
