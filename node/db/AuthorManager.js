@@ -21,6 +21,10 @@
 var db = require("./DB").db;
 var async = require("async");
 
+exports.getColorPalette = function(){
+  return ["#ff33cc", "#ff9966", "#ffcc99", "#ffadcc", "#ff6666", "#ff9999", "#cc6699", "#ff6699", "#cc99cc", "#00ccff", "#00ccff", "#3399ff", "#54d2d2", "#99ccff", "#99cccc", "#80b5ff", "#97a1f7", "#b194ff", "#34b5cb", "#cccc00", "#33cc33", "#8ed447", "#66cc99", "#78b678", "#3ecc89", "#79b6b6", "#aaab71", "#a3d8a3", "#ff0000", "#00ff00", "#00dddd", "#ff00ff", "#cccccc", "#999999", "#cbcbcb", "#c3c3c3", "#aaaaaa"];
+}
+
 /**
  * Checks if the author exists
  */
