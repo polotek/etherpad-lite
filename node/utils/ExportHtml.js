@@ -470,6 +470,8 @@ function getHTMLFromAtext(pad, atext, authorColors)
   return pieces.join('');
 }
 
+exports.getHTMLFromAtext = getHTMLFromAtext;
+
 function _analyzeLine(text, aline, apool)
 {
   var line = {};
