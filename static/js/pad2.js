@@ -331,6 +331,9 @@ var pad = {
   connect: function() {
     handshake();
   },
+  getClientVars: function() {
+    return clientVars;
+  },
   // these don't require init; clientVars should all go through here
   getPadId: function()
   {
@@ -355,6 +358,14 @@ var pad = {
   getIsDebugEnabled: function()
   {
     return clientVars.debugEnabled;
+  },
+  getIsHighlightingEnabled: function(userId) {
+    if(userId == pad.myUserInfo.userId) {
+      return pad.myUserInfo.showHighlighting;
+    }
+
+    // always true for everyone else
+    return true; 
   },
   getPrivilege: function(name)
   {
@@ -414,7 +425,8 @@ var pad = {
       name: clientVars.userName,
       ip: pad.getClientIp(),
       colorId: clientVars.userColor,
-      userAgent: pad.getDisplayUserAgent()
+      userAgent: pad.getDisplayUserAgent(),
+      showHighlighting: clientVars.showHighlighting
     };
 
     if (clientVars.specialKey)
@@ -480,6 +492,10 @@ var pad = {
     pad.myUserInfo.colorId = newColorId;
     pad.collabClient.updateUserInfo(pad.myUserInfo);
     //padchat.handleUserJoinOrUpdate(pad.myUserInfo);
+  },
+  notifyChangeHighlighting: function(showHighlighting) {
+    pad.myUserInfo.showHighlighting = showHighlighting;
+    pad.collabClient.updateUserInfo(pad.myUserInfo);    
   },
   notifyChangeTitle: function(newTitle)
   {
