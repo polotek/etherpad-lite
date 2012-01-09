@@ -44,13 +44,31 @@ function getPadPlainText(pad, revNum)
   return pieces.join('');
 }
 
-function getPadHTML(pad, revNum, callback)
+function getPadHTML(pad, revNum, authorColors, callback)
 {
   var atext = pad.atext;
   var html;
+  var colorTable;
   async.waterfall([
+  
+  //get the authorColors if option is set
+  function(callback){
+    
+    if(!authorColors){
+      return callback();
+    }
+    
+    pad.getAllAuthorColors(function(err, _colorTable){
+      if(err){
+        return callback(err);
+      }
+      
+      colorTable = _colorTable;
+      callback();
+    });
+  },
+  
   // fetch revision atext
-
 
   function (callback)
   {
@@ -73,7 +91,7 @@ function getPadHTML(pad, revNum, callback)
 
   function (callback)
   {
-    html = getHTMLFromAtext(pad, atext);
+    html = getHTMLFromAtext(pad, atext, colorTable);
     callback(null);
   }],
   // run final callback
@@ -85,7 +103,7 @@ function getPadHTML(pad, revNum, callback)
   });
 }
 
-function getHTMLFromAtext(pad, atext)
+function getHTMLFromAtext(pad, atext, authorColors)
 {
   var apool = pad.apool();
   var textLines = atext.text.slice(0, -1).split('\n');
@@ -94,6 +112,7 @@ function getHTMLFromAtext(pad, atext)
   var tags = ['strong', 'em', 'u', 's'];
   var props = ['bold', 'italic', 'underline', 'strikethrough'];
   var anumMap = {};
+  var css = "";
 
   props.forEach(function (propName, i)
   {
@@ -103,6 +122,28 @@ function getHTMLFromAtext(pad, atext)
       anumMap[propTrueNum] = i;
     }
   });
+    
+  if(authorColors){
+    css+="<style>\n";
+    
+    for (var a in apool.numToAttrib) {
+      var attr = apool.numToAttrib[a];
+      
+      //skip non author attributes
+      if(attr[0] != "author"){
+        continue;
+      }
+      
+      //add to props array
+      var propName = "author" + attr[1];
+      var newLength = props.push(propName);
+      anumMap[a] = newLength -1;
+      
+      css+=".author" + attr[1] + " {background-color: " + authorColors[attr[1]]+ "}\n";
+    }
+    
+    css+="</style>";
+  }
 
   function getLineHTML(text, attribs)
   {
@@ -119,18 +160,45 @@ function getHTMLFromAtext(pad, atext)
     var taker = Changeset.stringIterator(text);
     var assem = Changeset.stringAssembler();
 
+    function getAuthorIdFromProp(i){
+      //return if author colors are disabled
+      if (!authorColors) return false;
+      
+      var property = props[i];
+   
+      if(property.substr(0,6) == "author"){
+        return property.substr(6);
+      }
+      
+      return false;
+    }
+
     function emitOpenTag(i)
     {
-      assem.append('<');
-      assem.append(tags[i]);
-      assem.append('>');
+      var author = getAuthorIdFromProp(i);
+      
+      if(author){
+        assem.append('<span class="author');
+        assem.append(author);
+        assem.append('">');
+      } else {
+        assem.append('<');
+        assem.append(tags[i]);
+        assem.append('>');
+      }
     }
 
     function emitCloseTag(i)
     {
-      assem.append('</');
-      assem.append(tags[i]);
-      assem.append('>');
+      var author = getAuthorIdFromProp(i);
+      
+      if(author){
+        assem.append('</span>');
+      } else {
+        assem.append('</');
+        assem.append(tags[i]);
+        assem.append('>');
+      }
     }
 
     function emitOpenURL(url) {
@@ -231,6 +299,7 @@ function getHTMLFromAtext(pad, atext)
             propVals[i] = true; // set it back
           }
         }
+        
         // now each member of propVal is in {false,LEAVE,ENTER,true}
         // according to what happens at start of span
         if (propChanged)
@@ -322,6 +391,8 @@ function getHTMLFromAtext(pad, atext)
     return _processSpaces(assem.toString());
   } // end getLineHTML
   var pieces = [];
+
+  pieces.push(css);
 
   // Need to deal with constraints imposed on HTML lists; can
   // only gain one level of nesting at once, can't change type
@@ -477,8 +548,8 @@ exports.getPadHTMLDocument = function (padId, revNum, opts, callback)
 
       var foot = '</body>\n</html>\n';
     }
-
-    getPadHTML(pad, revNum, function (err, html)
+    
+    getPadHTML(pad, revNum, opts.authorColors, function (err, html)
     {
       callback(err, head + html + foot);
     });
