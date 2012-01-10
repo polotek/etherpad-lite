@@ -130,7 +130,7 @@ function getHTMLFromAtext(pad, atext, authorColors)
       var attr = apool.numToAttrib[a];
       
       //skip non author attributes
-      if(attr[0] != "author"){
+      if(attr[0] != "author" || attr[1] == ""){
         continue;
       }
       
