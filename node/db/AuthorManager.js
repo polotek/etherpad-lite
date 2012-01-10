@@ -167,7 +167,12 @@ exports.createAuthor = function(name, callback)
   //var author = "a." + randomString(16);
 
   //create the globalAuthors db entry
-  var authorObj = {"colorId" : Math.floor(Math.random()*32), "name": name, "timestamp": new Date().getTime()};
+  var authorObj = {
+    colorId: Math.floor(Math.random()*32)
+    , name: name
+    , showHighlighting: false
+    , timestamp: new Date().getTime()
+  };
 
   //set the global author db entry
   db.set("globalAuthor:" + name, authorObj);
@@ -183,6 +188,10 @@ exports.createAuthor = function(name, callback)
 exports.getAuthor = function (author, callback)
 {
   db.get("globalAuthor:" + author, callback);
+}
+
+exports.setAuthor = function(id, authorObj, callback) {
+  db.set('globalAuthor:' + id, authorObj, callback);  
 }
 
 /**
@@ -223,6 +232,14 @@ exports.getAuthorName = function (author, callback)
 exports.setAuthorName = function (author, name, callback)
 {
   db.setSub("globalAuthor:" + author, ["name"], name, callback);
+}
+
+exports.getShowHighlighting = function(author, callback) {
+  db.getSub('globalAuthor:' + author, ['showHighlighting'], callback);  
+}
+
+exports.setShowHighlighting = function(author, show, callback) {
+  db.setSub('globalAuthor:' + author, ['showHighlighting'], show, callback);  
 }
 
 /**

@@ -162,6 +162,7 @@ exports.handleDisconnect = function(client)
           userInfo: {
             "ip": "127.0.0.1",
             "colorId": authorObj.colorId,
+            "showHighlighting": authorObj.showHighlighting || false,
             "userAgent": "Anonymous",
             "userId": author,
             "name": authorObj.name,
@@ -388,7 +389,7 @@ function handleUserInfoUpdate(client, message)
   //check if all ok
   if(message.data.userInfo.colorId == null)
   {
-    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Droped message, USERINFO_UPDATE Message has no colorId!');
+    return warn('USER_INFO_UPDATE_NO_COLOR_ID', 'Dropped message, USERINFO_UPDATE Message has no colorId!');
   }
 
   //Find out the author name of this session
@@ -396,7 +397,9 @@ function handleUserInfoUpdate(client, message)
 
   //Tell the authorManager about the new attributes
   authorManager.setAuthorColorId(author, message.data.userInfo.colorId);
-  authorManager.setAuthorName(author, message.data.userInfo.name);
+  authorManager.setAuthorName(author, message.data.userInfo.name + '');
+  authorManager.setShowHighlighting(author
+    , message.data.userInfo.showHighlighting ? true : false);
 
   var padId = session2pad[client.id];
 
@@ -405,6 +408,8 @@ function handleUserInfoUpdate(client, message)
   {
     message.data.userInfo.name = null;
   }
+
+  handleMessageProcessed(null, message);
 
   //The Client don't know about a USERINFO_UPDATE, it can handle only new user_newinfo, so change the message type
   message.data.type = "USER_NEWINFO";
@@ -417,7 +422,6 @@ function handleUserInfoUpdate(client, message)
       socketio.sockets.sockets[pad2sessions[padId][i]].json.send(message);
     }
   }
-  handleMessageProcessed(null, message);
 }
 
 
@@ -743,9 +747,11 @@ function handleClientReady(client, message)
       message.protocolVersion + '!');
   }
 
+  var authorObj;
   var author;
   var authorName;
   var authorColorId;
+  var showHighlighting;
   var pad;
   var historicalAuthorData = {};
   var readOnlyId;
@@ -781,21 +787,16 @@ function handleClientReady(client, message)
     function(callback)
     {
       async.parallel([
-        //get colorId
         function(callback)
         {
-          authorManager.getAuthorColorId(author, function(err, value)
+          authorManager.getAuthor(author, function(err, value)
           {
-            authorColorId = value;
-            callback(err);
-          });
-        },
-        //get author name
-        function(callback)
-        {
-          authorManager.getAuthorName(author, function(err, value)
-          {
-            authorName = value;
+            authorObj = value;
+            if(authorObj) {
+              showHighlighting = authorObj.showHighlighting;
+              authorColorId = authorObj.colorId;
+              authorName = authorObj.name;
+            }
             callback(err);
           });
         },
@@ -917,6 +918,7 @@ function handleClientReady(client, message)
         "clientIp": "127.0.0.1",
         "userIsGuest": true,
         "userColor": authorColorId,
+        "showHighlighting": showHighlighting || false,
         "padId": message.padId,
         "initialTitle": "Pad: " + message.padId,
         "opts": {},
@@ -953,7 +955,8 @@ function handleClientReady(client, message)
             "colorId": authorColorId,
             "name": authorName,
             "userAgent": "Anonymous",
-            "userId": author
+            "userId": author,
+            "showHighlighting": showHighlighting || false
           }
         }
       };
@@ -963,30 +966,21 @@ function handleClientReady(client, message)
       //Run trough all sessions of this pad
       async.forEach(pad2sessions[message.padId], function(sessionID, callback)
       {
-        var sessionAuthorName, sessionAuthorColorId;
+        var sessionAuthor;
 
         async.series([
           //get the authorname & colorId
           function(callback)
           {
-            async.parallel([
-              function(callback)
-              {
-                authorManager.getAuthorColorId(sessioninfos[sessionID].author, function(err, value)
-                {
-                  sessionAuthorColorId = value;
-                  callback(err);
-                })
-              },
-              function(callback)
-              {
-                authorManager.getAuthorName(sessioninfos[sessionID].author, function(err, value)
-                {
-                  sessionAuthorName = value;
-                  callback(err);
-                })
+            authorManager.getAuthor(sessioninfos[sessionID].author, function(err, author) {
+              if(author) {
+                sessionAuthor = author;
+              } else {
+                err = err || new Error('No author found in session: ' + 
+                  sessioninfos[sessionID].author);
               }
-            ],callback);
+              callback(err);
+            });
           },
           function (callback)
           {
@@ -1003,10 +997,11 @@ function handleClientReady(client, message)
                   type: "USER_NEWINFO",
                   userInfo: {
                     "ip": "127.0.0.1",
-                    "colorId": sessionAuthorColorId,
-                    "name": sessionAuthorName,
+                    "colorId": sessionAuthor.colorId,
+                    "name": sessionAuthor.name,
                     "userAgent": "Anonymous",
-                    "userId": sessioninfos[sessionID].author
+                    "userId": sessioninfos[sessionID].author,
+                    "showHighlighting": sessionAuthor.showHighlighting || false
                   }
                 }
               };
