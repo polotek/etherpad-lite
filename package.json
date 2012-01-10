@@ -5,7 +5,7 @@
   "keywords"      : ["etherpad", "realtime", "collaborative", "editor"],
   "author"        : "Peter 'Pita' Martischka <petermartischka@googlemail.com>",
   "contributors": [
-                    { "name": "John McLear", 
+                    { "name": "John McLear",
                       "name": "Hans Pinckaers",
                       "name": "Robin Buse"}
                   ],
@@ -25,7 +25,8 @@
                       "node-fs"    : "0.1.0",
                       "metrics"    : "0.1.5",
                       "request"    : "2.9.3",
-                      "retry"      : "0.5.0"
+                      "retry"      : "0.5.0",
+                      "jsdom"      : "0.2.9"
                     },
   "version"       : "1.0.0"
 }
