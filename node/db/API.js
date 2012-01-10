@@ -26,6 +26,8 @@ var authorManager = require("./AuthorManager");
 var sessionManager = require("./SessionManager");
 var exportHtml = require('../utils/ExportHtml');
 var PadDiff = require("../utils/PadDiff");
+var importHtml = require("../utils/ImportHtml");
+var cleanText = require("./Pad").cleanText;
 var async = require("async");
 
 /**********************/
@@ -77,7 +79,7 @@ exports.createDiff = function(padID, startRev, endRev, callback){
       return;
     }
   }
-  
+
   //check if rev is a number
   if(endRev !== undefined && typeof endRev != "number")
   {
@@ -92,14 +94,14 @@ exports.createDiff = function(padID, startRev, endRev, callback){
       return;
     }
   }
-  
+
   //get the pad
   getPadSafe(padID, true, null, null, function(err, pad)
   {
     if(err){
       return callback(err);
     }
-    
+
     try {
       var padDiff = new PadDiff(pad, startRev, endRev);
     } catch(e) {
@@ -107,14 +109,14 @@ exports.createDiff = function(padID, startRev, endRev, callback){
     }
 
     var html, authors;
-    
+
     async.series([
       function(callback){
         padDiff.getHtml(function(err, _html){
           if(err){
             return callback(err);
           }
-          
+
           html = _html;
           callback();
         });
@@ -124,7 +126,7 @@ exports.createDiff = function(padID, startRev, endRev, callback){
           if(err){
             return callback(err);
           }
-          
+
           authors = _authors;
           callback();
         });
@@ -321,6 +323,26 @@ exports.getHTML = function(padID, rev, callback)
 
       callback(err, data);
     });
+  });
+}
+
+exports.setHTML = function(padID, html, callback)
+{
+  //get the pad
+  getPadSafe(padID, true, function(err, pad)
+  {
+    if(err)
+    {
+      callback(err);
+      return;
+    }
+
+    // add a new changeset with the new html to the pad
+    importHtml.setPadHTML(pad, cleanText(html));
+
+    //update the clients on the pad
+    padMessageHandler.updatePadClients(pad, callback);
+
   });
 }
 
