@@ -24,7 +24,8 @@ var readOnlyManager = require("./ReadOnlyManager");
 var groupManager = require("./GroupManager");
 var authorManager = require("./AuthorManager");
 var sessionManager = require("./SessionManager");
-var exportHtml = require('../utils/ExportHtml')
+var exportHtml = require('../utils/ExportHtml');
+var PadDiff = require("../utils/PadDiff");
 var async = require("async");
 
 /**********************/
@@ -57,6 +58,79 @@ exports.listSessionsOfAuthor = sessionManager.listSessionsOfAuthor;
 /************************/
 /**PAD CONTENT FUNCTIONS*/
 /************************/
+
+/**
+
+*/
+exports.createDiff = function(padID, startRev, endRev, callback){
+  //check if rev is a number
+  if(startRev !== undefined && typeof startRev != "number")
+  {
+    //try to parse the number
+    if(!isNaN(parseInt(startRev)))
+    {
+      startRev = parseInt(startRev);
+    }
+    else
+    {
+      callback({stop: "startRev is not a number"});
+      return;
+    }
+  }
+  
+  //check if rev is a number
+  if(endRev !== undefined && typeof endRev != "number")
+  {
+    //try to parse the number
+    if(!isNaN(parseInt(endRev)))
+    {
+      endRev = parseInt(endRev);
+    }
+    else
+    {
+      callback({stop: "endRev is not a number"});
+      return;
+    }
+  }
+  
+  //get the pad
+  getPadSafe(padID, true, null, null, function(err, pad)
+  {
+    if(err){
+      return callback(err);
+    }
+    
+    var padDiff = new PadDiff(pad, startRev, endRev);
+    var html, authors;
+    
+    async.series([
+      function(callback){
+        padDiff.getHtml(function(err, _html){
+          if(err){
+            return callback(err);
+          }
+          
+          html = _html;
+          callback();
+        });
+      },
+      function(callback){
+        padDiff.getAuthors(function(err, _authors){
+          if(err){
+            return callback(err);
+          }
+          
+          authors = _authors;
+          callback();
+        });
+      }
+    ], function(err){
+      callback(err, {html: html, authors: authors})
+    });
+  });
+}
+
+
 
 /**
 getText(padID, [rev]) returns the text of a pad

@@ -1,5 +1,6 @@
 var Changeset = require("./Changeset");
 var async = require("async");
+var exportHtml = require('./ExportHtml');
 
 function PadDiff (pad, fromRev, toRev){      
   //check parameters
@@ -203,6 +204,66 @@ PadDiff.prototype._createDiffAtext = function(callback) {
       }
     );
   });
+}
+
+PadDiff.prototype.getHtml = function(callback){
+  //cache the html
+  if(this._html != null){
+    return callback(null, this._html);
+  }
+  
+  var self = this;
+  var atext, html, authorColors;
+  
+  async.series([
+    //get the diff atext
+    function(callback){
+      self._createDiffAtext(function(err, _atext){
+        if(err){
+          return callback(err);
+        }
+        
+        atext = _atext;
+        callback();
+      });
+    },
+    //get the authorColor table
+    function(callback){
+      self._pad.getAllAuthorColors(function(err, _authorColors){
+        if(err){
+          return callback(err);
+        }
+        
+        authorColors = _authorColors;
+        callback();
+      });
+    },
+    //convert the atext to html
+    function(callback){
+      html = exportHtml.getHTMLFromAtext(self._pad, atext, authorColors);
+      self._html = html;
+      callback();
+    }
+  ], function(err){
+    callback(err, html);
+  });
+}
+
+PadDiff.prototype.getAuthors = function(callback){
+  var self = this;
+  
+  //check if html was already produced, if not produce it, this generates the author array at the same time
+  if(self._html == null){
+    self.getHtml(function(err){
+      if(err){
+        callback(err);
+      }
+      
+      callback(null, self._authors);
+    });
+  } else {
+    callback(null, self._authors);
+  }
 }
 
 //export the constructor
