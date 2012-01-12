@@ -328,21 +328,23 @@ exports.getHTML = function(padID, rev, callback)
 
 exports.setHTML = function(padID, html, callback)
 {
+  if(typeof html != 'string') {
+    return callback({stop: "setHTML requires HTML"});
+  }
+
   //get the pad
   getPadSafe(padID, true, function(err, pad)
   {
-    if(err)
-    {
-      callback(err);
-      return;
-    }
+    if(err) { return callback(err); }
 
     // add a new changeset with the new html to the pad
-    importHtml.setPadHTML(pad, cleanText(html));
-
-    //update the clients on the pad
-    padMessageHandler.updatePadClients(pad, callback);
-
+    importHtml.setPadHTML(pad, cleanText(html), function(err) {
+      if(!err) {
+        //update the clients on the pad
+        padMessageHandler.updatePadClients(pad, function() { /* don't care */ });
+      }
+      callback(err);
+    });
   });
 }
 

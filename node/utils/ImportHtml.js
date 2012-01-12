@@ -41,8 +41,7 @@ function setPadHTML(pad, html, callback)
   cc.collectContent(doc.childNodes[0]);
   var result = cc.finish();
   apiLogger.debug('Lines:');
-  var i;
-  for (i = 0; i < result.lines.length; i += 1)
+  for (var i = 0; i < result.lines.length; i += 1)
   {
     apiLogger.debug('Line ' + (i + 1) + ' text: ' + result.lines[i]);
     apiLogger.debug('Line ' + (i + 1) + ' attributes: ' + result.lineAttribs[i]);
@@ -85,8 +84,8 @@ function setPadHTML(pad, html, callback)
 
   // the changeset is ready!
   var theChangeset = builder.toString();
-  apiLogger.debug('The changeset: ' + theChangeset);
-  pad.appendRevision(theChangeset);
+  apiLogger.debug('setHTML changeset: ' + theChangeset);
+  pad.appendRevision(theChangeset, '', callback);
 }
 
 exports.setPadHTML = setPadHTML;
