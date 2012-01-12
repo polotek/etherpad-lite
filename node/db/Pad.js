@@ -87,8 +87,7 @@ Class('Pad', {
     {
       var self = this;
 
-      if(!author)
-        author = '';
+      author = author || '';
 
       var newAText = Changeset.applyToAText(aChangeset, this.atext, this.pool);
       Changeset.copyAText(newAText, this.atext);
@@ -103,7 +102,7 @@ Class('Pad', {
 
       //ex. getNumForAuthor
       if(author != '')
-        this.pool.putAttrib(['author', author || '']);
+        this.pool.putAttrib(['author', author + '']);
 
       if(newRev % 100 == 0)
       {
@@ -422,7 +421,7 @@ Class('Pad', {
       return this.atext.text;
     },
 
-    setText : function(newText)
+    setText : function(newText, author, callback)
     {
       //clean the new text
       newText = exports.cleanText(newText);
@@ -433,7 +432,7 @@ Class('Pad', {
       var changeset = Changeset.makeSplice(oldText, 0, oldText.length-1, newText);
 
       //append the changeset
-      this.appendRevision(changeset);
+      this.appendRevision(changeset, author, callback);
     },
 
     appendChatMessage: function(text, userId, time)
