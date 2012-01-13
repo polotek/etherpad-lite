@@ -160,6 +160,8 @@ PadDiff.prototype._createDiffAtext = function(callback) {
   self._createClearStartAtext(self._fromRev, function(err, atext){
     if(err) throw err;
     
+    var superChangeset = null;
+    
     var rev = self._fromRev + 1;
     
     //async while loop
@@ -185,8 +187,12 @@ PadDiff.prototype._createDiffAtext = function(callback) {
             //add this author to the authorarray
             addedAuthors.push(authors[i]);
             
-            //apply the changeset
-            atext = Changeset.applyToAText(changeset, atext, self._pad.pool);
+            //compose it with the superChangset            
+            if(superChangeset === null){
+              superChangeset = changeset;
+            } else {
+              superChangeset = Changeset.compose(superChangeset, changeset, self._pad.pool);
+            }
           }
           
           //add the authors to the PadDiff authorArray
@@ -200,6 +206,13 @@ PadDiff.prototype._createDiffAtext = function(callback) {
       
       //after the loop has ended
       function (err) {
+        var deletionChangeset = self._createDeletionChangeset(superChangeset,atext,self._pad.pool);
+        
+        //apply the superChangeset, which includes all addings
+        atext = Changeset.applyToAText(superChangeset,atext,self._pad.pool);
+        //apply the deletionChangeset, which adds a deletions
+        atext = Changeset.applyToAText(deletionChangeset,atext,self._pad.pool);
+      
         callback(err, atext);
       }
     );

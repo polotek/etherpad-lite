@@ -281,7 +281,7 @@ describe('PadDiff', function (){
   });
   
   describe('the _createDiffAtext method', function(){   
-    it('returns a text that has the same text than the toRev but different attribs', function(){
+    it('returns an atext that is longer or equal that the the toRev text and has different attribs', function(){
       var done = false;
       
       //create some test diffs with random revision numbers
@@ -291,6 +291,7 @@ describe('PadDiff', function (){
       testDiffs.push(new padDiff(pad, 0, 497));
       testDiffs.push(new padDiff(pad, 213, 290));
       testDiffs.push(new padDiff(pad, 333, 480));
+      testDiffs.push(new padDiff(pad, 85, 106));
       
       //run trough all testDiffs
       async.forEachSeries(testDiffs, function(testDiff, callback){
@@ -302,7 +303,7 @@ describe('PadDiff', function (){
             if(err) throw err;
             
             //check if we have still the same text but different attribs
-            expect(origAText.text).to(equal, newAText.text);
+            expect(origAText.text.length <= newAText.text.length).to(beTrue);
             expect(origAText.attribs).toNot(equal, newAText.attribs);
             
             //check if there are authors in the author array
