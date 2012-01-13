@@ -266,5 +266,186 @@ PadDiff.prototype.getAuthors = function(callback){
   }
 }
 
+PadDiff.prototype._extendChangesetWithAuthor = function(changeset, author, apool) {
+  //don't touch it if it hasn't an author value
+  if(author === ""){
+    return changeset;
+  }
+  
+  //unpack
+  var unpacked = Changeset.unpack(changeset);  
+  
+  var iterator = Changeset.opIterator(unpacked.ops);
+  var assem = Changeset.opAssembler();
+  
+  //create deleted attribs
+  var authorAttrib = apool.putAttrib(["author", author]);
+  var deletedAttrib = apool.putAttrib(["removed", true]);
+  var attribs = "*" + authorAttrib + "*" + deletedAttrib;
+  
+  //iteratore over the operators of the changeset
+  while(iterator.hasNext()){
+    var operator = iterator.next();
+    
+    //this is a delete operator, extend it with the author
+    if(operator.opcode === "-"){
+      operator.attribs = attribs;
+    }
+    
+    //append the new operator to our assembler
+    assem.append(operator);
+  }
+  
+  //return the modified changeset
+  return Changeset.pack(unpacked.oldLen, unpacked.newLen, assem.toString(), unpacked.charBank);
+}
+
+PadDiff.prototype._createDeletionChangeset = function(cs, startAText, apool) {
+  var lines = Changeset.splitTextLines(startAText.text);
+  var alines = Changeset.splitAttributionLines(startAText.attribs, startAText.text);
+  
+  // lines and alines are what the exports is meant to apply to.
+  // They may be arrays or objects with .get(i) and .length methods.
+  // They include final newlines on lines.
+
+  function lines_get(idx) {
+    if (lines.get) {
+      return lines.get(idx);
+    } else {
+      return lines[idx];
+    }
+  }
+
+  function lines_length() {
+    if ((typeof lines.length) == "number") {
+      return lines.length;
+    } else {
+      return lines.length();
+    }
+  }
+
+  function alines_get(idx) {
+    if (alines.get) {
+      return alines.get(idx);
+    } else {
+      return alines[idx];
+    }
+  }
+
+  function alines_length() {
+    if ((typeof alines.length) == "number") {
+      return alines.length;
+    } else {
+      return alines.length();
+    }
+  }
+
+  var curLine = 0;
+  var curChar = 0;
+  var curLineOpIter = null;
+  var curLineOpIterLine;
+  var curLineNextOp = Changeset.newOp('+');
+
+  var unpacked = Changeset.unpack(cs);
+  var csIter = Changeset.opIterator(unpacked.ops);
+  var builder = Changeset.builder(unpacked.newLen);
+
+  function consumeAttribRuns(numChars, func /*(len, attribs, endsLine)*/ ) {
+
+    if ((!curLineOpIter) || (curLineOpIterLine != curLine)) {
+      // create curLineOpIter and advance it to curChar
+      curLineOpIter = Changeset.opIterator(alines_get(curLine));
+      curLineOpIterLine = curLine;
+      var indexIntoLine = 0;
+      var done = false;
+      while (!done) {
+        curLineOpIter.next(curLineNextOp);
+        if (indexIntoLine + curLineNextOp.chars >= curChar) {
+          curLineNextOp.chars -= (curChar - indexIntoLine);
+          done = true;
+        } else {
+          indexIntoLine += curLineNextOp.chars;
+        }
+      }
+    }
+
+    while (numChars > 0) {
+      if ((!curLineNextOp.chars) && (!curLineOpIter.hasNext())) {
+        curLine++;
+        curChar = 0;
+        curLineOpIterLine = curLine;
+        curLineNextOp.chars = 0;
+        curLineOpIter = Changeset.opIterator(alines_get(curLine));
+      }
+      if (!curLineNextOp.chars) {
+        curLineOpIter.next(curLineNextOp);
+      }
+      var charsToUse = Math.min(numChars, curLineNextOp.chars);
+      func(charsToUse, curLineNextOp.attribs, charsToUse == curLineNextOp.chars && curLineNextOp.lines > 0);
+      numChars -= charsToUse;
+      curLineNextOp.chars -= charsToUse;
+      curChar += charsToUse;
+    }
+
+    if ((!curLineNextOp.chars) && (!curLineOpIter.hasNext())) {
+      curLine++;
+      curChar = 0;
+    }
+  }
+
+  function skip(N, L) {
+    if (L) {
+      curLine += L;
+      curChar = 0;
+    } else {
+      if (curLineOpIter && curLineOpIterLine == curLine) {
+        consumeAttribRuns(N, function () {});
+      } else {
+        curChar += N;
+      }
+    }
+  }
+
+  function nextText(numChars) {
+    var len = 0;
+    var assem = Changeset.stringAssembler();
+    var firstString = lines_get(curLine).substring(curChar);
+    len += firstString.length;
+    assem.append(firstString);
+
+    var lineNum = curLine + 1;
+    while (len < numChars) {
+      var nextString = lines_get(lineNum);
+      len += nextString.length;
+      assem.append(nextString);
+      lineNum++;
+    }
+
+    return assem.toString().substring(0, numChars);
+  }
+
+  var attribKeys = [];
+  var attribValues = [];
+  while (csIter.hasNext()) {
+    var csOp = csIter.next();
+    if (csOp.opcode == '=') {
+      skip(csOp.chars, csOp.lines);
+      builder.keep(csOp.chars, csOp.lines);
+    } else if (csOp.opcode == '+') {
+      builder.keep(csOp.chars, csOp.lines);
+    } else if (csOp.opcode == '-') {
+      var textBank = nextText(csOp.chars);
+      var textBankIndex = 0;
+      
+      consumeAttribRuns(csOp.chars, function (len, attribs, endsLine) {
+        builder.insert(textBank.substr(textBankIndex, len), csOp.attribs);
+        textBankIndex += len;
+      });
+    }
+  }
+
+  return Changeset.checkRep(builder.toString());
+};
+
 //export the constructor
 module.exports = PadDiff;
