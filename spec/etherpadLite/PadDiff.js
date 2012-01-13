@@ -1,4 +1,4 @@
-var padDiff = foounit.require(':src/utils/PadDiff');
+var padDiff;
 var settings = foounit.require(':src/utils/Settings');
 var Changeset = foounit.require(':src/utils/Changeset');
 var path = require("path");
@@ -19,8 +19,9 @@ before(function (){
   db.init(function(err){
     if(err) throw err;
   
-    //load the padManager
+    //load the modules that need an initalized db
     var padManager = foounit.require(':src/db/PadManager');
+    padDiff = foounit.require(':src/utils/PadDiff');
     
     //load the sample pad
     padManager.getPad("www.yammer.dev-19", function(err, _pad){
@@ -317,6 +318,82 @@ describe('PadDiff', function (){
       
       waitFor(function(){
         expect(done).to(beTrue);
+      });
+    });
+  });
+  
+  describe('the _extendChangesetWithAuthor method', function(){
+    var originalChangesets = [];
+    var extendedChangesets = [];
+    var authors = [];
+    
+    before(function(){
+      var revisions2Test = [];
+      for(var i=0;i<=pad.head;i++)
+      {        
+        revisions2Test.push(i);
+      }
+      
+      var counter = revisions2Test.length;
+      
+      //get all changesets, extend them and save them
+      revisions2Test.forEach(function(rev){
+        pad.getRevision(rev, function(err, revision){
+          if(err) throw err;
+          
+          var changeset = revision.changeset;
+          var author = revision.meta.author;
+          
+          var extendChangeset = testPadDiff._extendChangesetWithAuthor(changeset, author, pad.pool);
+          
+          originalChangesets[rev] = changeset;
+          extendedChangesets[rev] = extendChangeset;
+          authors[rev] = author;
+          
+          counter--;
+        });
+      });
+      
+      waitFor(function(){
+        expect(counter).to(equal, 0);
+      });
+    });
+    
+    describe(" it ", function(){
+      it("didn't change the changeset without an author", function(){
+        for(var i=0;i<=pad.head;i++)
+        {        
+          if(authors[i] === ""){
+            expect(originalChangesets[i]).to(equal, extendedChangesets[i])
+          }
+        }
+      });
+    
+      it("added a 'deleted' attribute to the attribute pool", function(){
+        expect(pad.pool.putAttrib(["removed", true]), true).toNot(equal, -1);
+      });
+      
+      it("it added the correct attributes to all minus operators of changesets with an author", function(){
+        for(var i=0;i<=pad.head;i++)
+        {        
+          if(authors[i] !== ""){
+            var unpacked = Changeset.unpack(extendedChangesets[i]);  
+            var iterator = Changeset.opIterator(unpacked.ops);
+            
+            var authorAttrib = pad.pool.putAttrib(["author", authors[i]]);
+            var deletedAttrib = pad.pool.putAttrib(["removed", true]);
+            var attribs = "*" + authorAttrib + "*" + deletedAttrib;
+            
+            //iteratore over the operators of the changeset
+            while(iterator.hasNext()){
+              var operator = iterator.next();
+              
+              if(operator.opcode === "-"){
+                expect(operator.attribs).to(equal,attribs);
+              }
+            }
+          }
+        }
       });
     });
   });

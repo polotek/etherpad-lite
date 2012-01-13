@@ -266,5 +266,39 @@ PadDiff.prototype.getAuthors = function(callback){
   }
 }
 
+PadDiff.prototype._extendChangesetWithAuthor = function(changeset, author, apool) {
+  //don't touch it if it hasn't an author value
+  if(author === ""){
+    return changeset;
+  }
+  
+  //unpack
+  var unpacked = Changeset.unpack(changeset);  
+  
+  var iterator = Changeset.opIterator(unpacked.ops);
+  var assem = Changeset.opAssembler();
+  
+  //create deleted attribs
+  var authorAttrib = apool.putAttrib(["author", author]);
+  var deletedAttrib = apool.putAttrib(["removed", true]);
+  var attribs = "*" + authorAttrib + "*" + deletedAttrib;
+  
+  //iteratore over the operators of the changeset
+  while(iterator.hasNext()){
+    var operator = iterator.next();
+    
+    //this is a delete operator, extend it with the author
+    if(operator.opcode === "-"){
+      operator.attribs = attribs;
+    }
+    
+    //append the new operator to our assembler
+    assem.append(operator);
+  }
+  
+  //return the modified changeset
+  return Changeset.pack(unpacked.oldLen, unpacked.newLen, assem.toString(), unpacked.charBank);
+}
+
 //export the constructor
 module.exports = PadDiff;
