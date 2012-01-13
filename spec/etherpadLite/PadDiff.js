@@ -397,4 +397,66 @@ describe('PadDiff', function (){
       });
     });
   });
+  
+  describe('the _createDeletionChangeset method', function(){
+    //the changeset it outputs has the correct startLength
+    //it output Length is larger or the same than the input length
+    //
+    
+    var originalChangesets = [];
+    var addDeletionsChangesets = [];
+    
+    before(function(){
+      var revisions2Test = [];
+      for(var i=1;i<=pad.head;i++)
+      {        
+        revisions2Test.push(i);
+      }
+      
+      var counter = revisions2Test.length;
+      
+      //get all changesets, extend them and save them
+      revisions2Test.forEach(function(rev){
+        pad.getRevision(rev, function(err, revision){
+          pad.getInternalRevisionAText(rev-1, function(err, origAText){
+            if(err) throw err;
+            
+            var changeset = revision.changeset;
+            
+            var addDeletions= testPadDiff._createDeletionChangeset(changeset, origAText, pad.pool);
+            
+            originalChangesets[rev] = changeset;
+            addDeletionsChangesets[rev] = addDeletions;
+            
+            counter--;
+          });
+        });
+      });
+      
+      waitFor(function(){
+        expect(counter).to(equal, 0);
+      });
+    });
+    
+    describe(" it ", function(){
+      it("the oldLen of the new Changeset = the newLength of the oldChangeset", function(){
+        for(var i=1;i<=pad.head;i++)
+        {        
+          var deletionUnpacked = Changeset.unpack(addDeletionsChangesets[i]);
+          var originalUnpacked = Changeset.unpack(originalChangesets[i]);
+          
+          expect(deletionUnpacked.oldLen).to(equal, originalUnpacked.newLen);
+        }
+      });
+      
+      it("the newLen of the deletionChangeset must be greater or equal than the oldLen", function(){
+        for(var i=1;i<=pad.head;i++)
+        {        
+          var deletionUnpacked = Changeset.unpack(addDeletionsChangesets[i]);
+          
+          expect(deletionUnpacked.newLen >= deletionUnpacked.oldLen).to(beTrue);
+        }
+      });
+    });
+  });
 });
