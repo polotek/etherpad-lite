@@ -36,7 +36,7 @@ $(window).bind('beforeunload', function(){
   leavingPage = true;
   /* TODO: Enable this to bring in a warning before leaving the page
   if (clientVars.numConnectedUsers == 1 &&
-  pad.collabClient.getCurrentRevisionNumber() != yam.config().lastPublishedRevision) {
+  pad.collabClient.getCurrentRevisionNumber() != pad.getYammerConfig().lastPublishedRevision) {
     return "You're the last editor on this page, and there are unpublished changes."
   }
   */
@@ -159,7 +159,7 @@ function savePassword()
 
 function handshake()
 {
-  var config = window.yam && yam.config() || {};
+  var config = pad.getYammerConfig();
 
   var loc = document.location;
 
@@ -184,7 +184,7 @@ function handshake()
 
   socket.once('connect', function()
   {
-    var config = window.yam && yam.config() || {};
+    var config = pad.getYammerConfig();
 
     var padId = document.location.pathname.substring(document.location.pathname.lastIndexOf("/") + 1);
 
@@ -197,20 +197,20 @@ function handshake()
     //var token = readCookie("token");
     //if (token == null)
     //{
-      token = window.yam ? (yam.currentUser.id+'') : undefined;//randomString();
+      token = window.yam ? (pad.yammerUser.id+'') : undefined;//randomString();
       //createCookie("token", token, 60);
     //}
 
     var sessionID = readCookie("sessionID");
     var password = readCookie("password");
-    var userId = window.yam ? (yam.currentUser.id+'') : undefined;
-    var authToken = window.yam ? (yam.currentUser.web_oauth_access_token+'') : undefined;
+    var userId = window.yam ? (pad.yammerUser.id+'') : undefined;
+    var authToken = window.yam ? (pad.yammerUser.web_oauth_access_token+'') : undefined;
 
     var msg = {
       "component": "pad",
       "type": "CLIENT_READY",
       "padId": padId,
-      "last_published_rev": yam.config().lastPublishedRevision,
+      "last_published_rev": config.lastPublishedRevision,
       "sessionID": sessionID,
       "password": password,
       "token": token,
@@ -328,7 +328,9 @@ var pad = {
   preloadedImages: false,
   padOptions: {},
 
-  connect: function() {
+  connect: function(currentUser, getYammerConfig) {
+    pad.yammerUser = currentUser;
+    pad.getYammerConfig = getYammerConfig;
     handshake();
   },
   getClientVars: function() {
@@ -801,7 +803,7 @@ var pad = {
   asyncSendDiagnosticInfo: function()
   {
     //pad.diagnosticInfo.collabDiagnosticInfo = pad.collabClient.getDiagnosticInfo();
-    var config = window.yam ? yam.config() : {}
+    var config = pad.getYammerConfig()
       , url = 'ep/pad/connection-diagnostic-info';
 
     if(config.paddieURL) { url = config.paddieURL + url; }

@@ -2,16 +2,15 @@ var path = require('path');
 var fs = require('fs');
 var settings = require('./utils/Settings');
 var log4js = require('log4js');
-var syslogAppender = require('log4js-syslog').appender;
 
 //set loglevel
 log4js.setGlobalLogLevel(settings.loglevel);
 
-// Sets up logging directory by reading in the directory path from 
+// Sets up logging directory by reading in the directory path from
 // externally configurable JSON file.
 var setupLogging = function(port)
 {
-  var customPatternLayout = log4js.layouts.patternLayout('%p [%d] %c - %m [pid:' + 
+  var customPatternLayout = log4js.layouts.patternLayout('%p [%d] %c - %m [pid:' +
       process.pid + ' port:' + port + ']');
 
   log4js.clearAppenders();
@@ -19,8 +18,9 @@ var setupLogging = function(port)
   if(settings.env == 'development') {
     log4js.addAppender(log4js.consoleAppender(customPatternLayout));
   }
-  
-  if(true || settings.env != 'development') {
+
+  if(settings.env != 'development') {
+    var syslogAppender = require('log4js-syslog').appender;
     var syslogPatternLayout = log4js.layouts.patternLayout('%p %c - %m [port:' + port + ']')
       , config = {
         ident: 'paddie'
@@ -40,9 +40,9 @@ var setupLogging = function(port)
   }
 
   if(settings.logDirectory) {
-    var logDirectory = settings.logDirectory.trim().length == 0 ? 
+    var logDirectory = settings.logDirectory.trim().length == 0 ?
         'logs' : settings.logDirectory;
-    
+
     if(!path.existsSync(logDirectory)) {
       fs.mkdirSync(logDirectory, 0755, true);
     }
@@ -54,7 +54,7 @@ var setupLogging = function(port)
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log')
         , customPatternLayout), 'socketioLog');
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/socketio.log')
-        , customPatternLayout), 'message'); 
+        , customPatternLayout), 'message');
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log')
         , customPatternLayout), 'ueberDB');
     log4js.addAppender(log4js.fileAppender(path.normalize(logDirectory + '/runtime.log')
