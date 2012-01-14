@@ -10,11 +10,20 @@ var util = require("util");
 var pth = require("path");
 
 var loadedModules = require("module")._cache;
+var runtimeLog = require('log4js').getLogger('runtimeLog');
 
 exports.listen = function(port)
 {
-  net.createServer(function (socket) 
+  var errHandler = function(e) {
+    /* just log it and move on */
+    runtimeLog.error('Repl server error. Shutting down');
+    runtimeLog.error(e);
+    server.close();
+  }
+  var server = net.createServer(function (socket) 
   {
+    socket.on('error', errHandler);
+
     var context = {};
     var modules = [];
     var projectPath = pth.resolve('.');
@@ -87,5 +96,7 @@ exports.listen = function(port)
         replInstance.outputStream.write(str + "\n")
       }
     }
-  }).listen("/tmp/paddie-"+port +".sock");
+  })
+  .on('error', errHandler)
+  .listen("/tmp/paddie-"+port +".sock");
 }
