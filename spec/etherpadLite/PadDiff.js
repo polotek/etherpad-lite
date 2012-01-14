@@ -295,7 +295,7 @@ describe('PadDiff', function (){
       
       //run trough all testDiffs
       async.forEachSeries(testDiffs, function(testDiff, callback){
-        
+              
         testDiff._createDiffAtext(function(err, newAText){
           if(err) throw err;
           
@@ -383,7 +383,7 @@ describe('PadDiff', function (){
             
             var authorAttrib = pad.pool.putAttrib(["author", authors[i]]);
             var deletedAttrib = pad.pool.putAttrib(["removed", true]);
-            var attribs = "*" + authorAttrib + "*" + deletedAttrib;
+            var attribs = "*" + Changeset.numToString(authorAttrib) + "*" + Changeset.numToString(deletedAttrib);
             
             //iteratore over the operators of the changeset
             while(iterator.hasNext()){

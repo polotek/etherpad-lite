@@ -179,6 +179,8 @@ PadDiff.prototype._createDiffAtext = function(callback) {
           for(var i=0;i<changesets.length && (rev+i)<=self._toRev;i++){
             var changeset = changesets[i];
             
+            changeset = self._extendChangesetWithAuthor(changeset, authors[i], self._pad.pool);
+            
             //skip clearAuthorship Changesets
             if(self._isClearAuthorship(changeset)){
               continue;
@@ -294,7 +296,7 @@ PadDiff.prototype._extendChangesetWithAuthor = function(changeset, author, apool
   //create deleted attribs
   var authorAttrib = apool.putAttrib(["author", author]);
   var deletedAttrib = apool.putAttrib(["removed", true]);
-  var attribs = "*" + authorAttrib + "*" + deletedAttrib;
+  var attribs = "*" + Changeset.numToString(authorAttrib) + "*" + Changeset.numToString(deletedAttrib);
   
   //iteratore over the operators of the changeset
   while(iterator.hasNext()){
