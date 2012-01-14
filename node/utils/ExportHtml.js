@@ -130,16 +130,23 @@ function getHTMLFromAtext(pad, atext, authorColors)
       var attr = apool.numToAttrib[a];
       
       //skip non author attributes
-      if(attr[0] != "author" || attr[1] == ""){
-        continue;
+      if(attr[0] === "author" && attr[1] !== ""){
+        //add to props array
+        var propName = "author" + attr[1];
+        var newLength = props.push(propName);
+        anumMap[a] = newLength -1;
+        
+        css+="." + propName + " {background-color: " + authorColors[attr[1]]+ "}\n";
+      } else if(attr[0] === "removed") {
+        var propName = "removed";
+        
+        var newLength = props.push(propName);
+        anumMap[a] = newLength -1;
+        
+        css+=".removed {text-decoration: line-through;}\n";
       }
       
-      //add to props array
-      var propName = "author" + attr[1];
-      var newLength = props.push(propName);
-      anumMap[a] = newLength -1;
-      
-      css+=".author" + attr[1] + " {background-color: " + authorColors[attr[1]]+ "}\n";
+      console.log(attr);
     }
     
     css+="</style>";
@@ -160,14 +167,18 @@ function getHTMLFromAtext(pad, atext, authorColors)
     var taker = Changeset.stringIterator(text);
     var assem = Changeset.stringAssembler();
 
-    function getAuthorIdFromProp(i){
+    function getSpanClassFor(i){
       //return if author colors are disabled
       if (!authorColors) return false;
       
       var property = props[i];
    
       if(property.substr(0,6) == "author"){
-        return property.substr(6);
+        return property;
+      }
+      
+      if(property == "removed"){
+        return "removed"
       }
       
       return false;
@@ -175,11 +186,11 @@ function getHTMLFromAtext(pad, atext, authorColors)
 
     function emitOpenTag(i)
     {
-      var author = getAuthorIdFromProp(i);
+      var spanClass = getSpanClassFor(i);
       
-      if(author){
-        assem.append('<span class="author');
-        assem.append(author);
+      if(spanClass){
+        assem.append('<span class="');
+        assem.append(spanClass);
         assem.append('">');
       } else {
         assem.append('<');
@@ -190,9 +201,9 @@ function getHTMLFromAtext(pad, atext, authorColors)
 
     function emitCloseTag(i)
     {
-      var author = getAuthorIdFromProp(i);
+      var spanClass = getSpanClassFor(i);
       
-      if(author){
+      if(spanClass){
         assem.append('</span>');
       } else {
         assem.append('</');
