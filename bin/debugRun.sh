@@ -10,7 +10,7 @@ if [ -d "../bin" ]; then
 fi
 
 #prepare the enviroment
-bin/installDeps.sh || exit 1
+#bin/installDeps.sh || exit 1
 
 hash node-inspector > /dev/null 2>&1 || {
   echo "You need to install node-inspector to run the tests!" >&2
