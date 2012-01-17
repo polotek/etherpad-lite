@@ -23,9 +23,7 @@
                       "log4js"     : "0.4.1",
                       "log4js-syslog": "*",
                       "node-fs"    : "0.1.0",
-                      "metrics"    : "0.1.5",
-                      "foounit"    : "0.1.0",
-                      "underscore" : "1.2.3"
+                      "metrics"    : "0.1.5"
                     },
   "version"       : "1.0.0"
 }
