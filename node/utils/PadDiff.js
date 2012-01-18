@@ -6,20 +6,17 @@ function PadDiff (pad, fromRev, toRev){
   //check parameters
   if(!pad || !pad.id || !pad.atext || !pad.pool)
   {
-    throw new Error("first parameter is not a pad");
+    throw new Error('Invalid pad');
   }
-  if(typeof fromRev != "number" || fromRev < 0 || fromRev > pad.head)
-  {
-    throw new Error("fromRev '" + fromRev + "' is invalid");
-  }
-  if(typeof toRev != "number" || toRev < 0 || toRev <= fromRev || toRev > pad.head)
-  {
-    throw new Error("toRev '" + fromRev + "' is invalid");
-  }
+
+  var range = pad.getValidRevisionRange(fromRev, toRev);
+  if(!range) { throw new Error('Invalid revision range.' + 
+      ' startRev: ' + fromRev +
+      ' endRev: ' + toRev); }
   
   this._pad = pad;
-  this._fromRev = fromRev;
-  this._toRev = toRev;
+  this._fromRev = range.startRev;
+  this._toRev = range.endRev;
   this._html = null;
   this._authors = [];
 }

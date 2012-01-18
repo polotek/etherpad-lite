@@ -69,7 +69,7 @@ exports.createDiff = function(padID, startRev, endRev, callback){
     //try to parse the number
     if(!isNaN(parseInt(startRev)))
     {
-      startRev = parseInt(startRev);
+      startRev = parseInt(startRev, 10);
     }
     else
     {
@@ -84,7 +84,7 @@ exports.createDiff = function(padID, startRev, endRev, callback){
     //try to parse the number
     if(!isNaN(parseInt(endRev)))
     {
-      endRev = parseInt(endRev);
+      endRev = parseInt(endRev, 10);
     }
     else
     {
