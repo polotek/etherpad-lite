@@ -155,7 +155,7 @@ PadDiff.prototype._createDiffAtext = function(callback) {
   
   //get the cleaned startAText
   self._createClearStartAtext(self._fromRev, function(err, atext){
-    if(err) throw err;
+    if(err) { return callback(err); }
     
     var superChangeset = null;
     
@@ -268,7 +268,7 @@ PadDiff.prototype.getAuthors = function(callback){
   if(self._html == null){
     self.getHtml(function(err){
       if(err){
-        callback(err);
+        return callback(err);
       }
       
       callback(null, self._authors);
