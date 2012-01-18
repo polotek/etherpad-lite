@@ -100,7 +100,12 @@ exports.createDiff = function(padID, startRev, endRev, callback){
       return callback(err);
     }
     
-    var padDiff = new PadDiff(pad, startRev, endRev);
+    try {
+      var padDiff = new PadDiff(pad, startRev, endRev);
+    } catch(e) {
+      return callback({stop:e.message});
+    }
+
     var html, authors;
     
     async.series([
