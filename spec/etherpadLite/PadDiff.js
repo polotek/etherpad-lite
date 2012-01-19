@@ -93,11 +93,6 @@ describe('PadDiff', function (){
         new padDiff(pad, {}, 1);
       }).to(throwError);
       
-      //over 9000 (larger than the end revision)
-      expect(function(){
-        new padDiff(pad, 1, 9001);
-      }).to(throwError);
-      
       //smaller than the start rev
       expect(function(){
         new padDiff(pad, 9010, 9000);
@@ -292,7 +287,7 @@ describe('PadDiff', function (){
       testDiffs.push(new padDiff(pad, 213, 290));
       testDiffs.push(new padDiff(pad, 333, 480));
       testDiffs.push(new padDiff(pad, 85, 106));
-      
+ 
       //run trough all testDiffs
       async.forEachSeries(testDiffs, function(testDiff, callback){
               
