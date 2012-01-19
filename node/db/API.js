@@ -27,7 +27,6 @@ var sessionManager = require("./SessionManager");
 var exportHtml = require('../utils/ExportHtml');
 var PadDiff = require("../utils/PadDiff");
 var importHtml = require("../utils/ImportHtml");
-var cleanText = require("./Pad").cleanText;
 var async = require("async");
 
 /**********************/
@@ -338,7 +337,7 @@ exports.setHTML = function(padID, html, callback)
     if(err) { return callback(err); }
 
     // add a new changeset with the new html to the pad
-    importHtml.setPadHTML(pad, cleanText(html), function(err) {
+    importHtml.setPadHTML(pad, html, function(err) {
       if(err) { return callback(err); }
 
       //update the clients on the pad

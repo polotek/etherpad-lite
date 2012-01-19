@@ -20,9 +20,12 @@ var log4js = require('log4js');
 var Changeset = require("./Changeset");
 var contentcollector = require("./contentcollector");
 var map = Array.prototype.map;
+var cleanText = require('../db/Pad').cleanText;
 
 function setPadHTML(pad, html, callback)
 {
+  html = html ? cleanText(html) : '';
+
   var apiLogger = log4js.getLogger("ImportHtml");
 
   // Clean the pad. This makes the rest of the code easier
