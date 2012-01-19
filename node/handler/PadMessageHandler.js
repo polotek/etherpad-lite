@@ -827,7 +827,8 @@ function handleClientReady(client, message)
         //get all author data out of the database
         function(callback)
         {
-          pad.getAuthorsForRevisionSet(message.last_published_rev, undefined, function(err, authors){
+          var startRev = message.last_published_rev || 0;
+          pad.getAuthorsForRevisionSet(startRev, undefined, function(err, authors){
             if(err) { return callback(err); }
 
             async.forEach(authors, function(author, callback)
