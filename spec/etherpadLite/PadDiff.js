@@ -276,7 +276,7 @@ describe('PadDiff', function (){
   });
   
   describe('the _createDiffAtext method', function(){   
-    it('returns an atext that is longer or equal that the the toRev text and has different attribs', function(){
+    it('returns an atext that is longer or equal that the the toRev text', function(){
       var done = false;
       
       //create some test diffs with random revision numbers
@@ -287,6 +287,9 @@ describe('PadDiff', function (){
       testDiffs.push(new padDiff(pad, 213, 290));
       testDiffs.push(new padDiff(pad, 333, 480));
       testDiffs.push(new padDiff(pad, 85, 106));
+      testDiffs.push(new padDiff(pad, 85, 86));
+      testDiffs.push(new padDiff(pad, 0, 1));
+      testDiffs.push(new padDiff(pad, 233, 234));
  
       //run trough all testDiffs
       async.forEachSeries(testDiffs, function(testDiff, callback){
@@ -297,10 +300,9 @@ describe('PadDiff', function (){
           pad.getInternalRevisionAText(testDiff._toRev, function(err, origAText){
             if(err) throw err;
             
-            //check if we have still the same text but different attribs
+            //check if we have a larger or at least the same text 
             expect(origAText.text.length <= newAText.text.length).to(beTrue);
-            expect(origAText.attribs).toNot(equal, newAText.attribs);
-            
+
             //check if there are authors in the author array
             expect(testDiff._authors.length).toNot(equal, 0);
             
