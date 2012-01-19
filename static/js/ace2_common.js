@@ -79,7 +79,7 @@ if (typeof exports !== "undefined")
   var navigator = {userAgent: "node-js"};
 }
 // Figure out what browser is being used (stolen from jquery 1.2.1)
-userAgent = navigator.userAgent.toLowerCase();
+var userAgent = navigator.userAgent.toLowerCase();
 var browser = {
   version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
   safari: /webkit/.test(userAgent),
