@@ -164,7 +164,7 @@ PadDiff.prototype._createDiffAtext = function(callback) {
     //async while loop
     async.whilst(
       //loop condition
-      function () { return rev < self._toRev; },
+      function () { return rev <= self._toRev; },
       
       //loop body
       function (callback) {
