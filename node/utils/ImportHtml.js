@@ -19,7 +19,7 @@ var log4js = require('log4js');
 
 var Changeset = require("./Changeset");
 var contentcollector = require("./contentcollector");
-var map = require("../../static/js/ace2_common.js").map;
+var map = Array.prototype.map;
 
 function setPadHTML(pad, html, callback)
 {
@@ -32,27 +32,18 @@ function setPadHTML(pad, html, callback)
 
   // Parse the incoming HTML with jsdom
   var doc = jsdom(html.replace(/>\n+</g, '><'));
-  apiLogger.debug('html:');
-  apiLogger.debug(html);
 
   // Convert a dom tree into a list of lines and attribute liens
   // using the content collector object
   var cc = contentcollector.makeContentCollector(true, null, pad.pool);
   cc.collectContent(doc.childNodes[0]);
   var result = cc.finish();
-  apiLogger.debug('Lines:');
-  for (var i = 0; i < result.lines.length; i += 1)
-  {
-    apiLogger.debug('Line ' + (i + 1) + ' text: ' + result.lines[i]);
-    apiLogger.debug('Line ' + (i + 1) + ' attributes: ' + result.lineAttribs[i]);
-  }
 
   // Get the new plain text and its attributes
-  var newText = map(result.lines, function (e) {
+  var newText = map.call(result.lines, function (e) {
     return e + '\n';
   }).join('');
-  apiLogger.debug('newText:');
-  apiLogger.debug(newText);
+
   var newAttribs = result.lineAttribs.join('|1+1') + '|1+1';
 
   function eachAttribRun(attribs, func /*(startInNewText, endInNewText, attribs)*/ )
