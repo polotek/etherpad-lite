@@ -36,6 +36,10 @@ function setPadHTML(pad, html, callback)
   // Parse the incoming HTML with jsdom
   var doc = jsdom(html.replace(/>\n+</g, '><'));
 
+  if(!(doc.childNodes && doc.childNodes.length)) {
+    return callback(new Error('Failed to parse HTML'));
+  }
+
   // Convert a dom tree into a list of lines and attribute liens
   // using the content collector object
   var cc = contentcollector.makeContentCollector(true, null, pad.pool);
