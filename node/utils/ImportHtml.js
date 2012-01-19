@@ -40,11 +40,15 @@ function setPadHTML(pad, html, callback)
     return callback(new Error('Failed to parse HTML'));
   }
 
-  // Convert a dom tree into a list of lines and attribute liens
-  // using the content collector object
-  var cc = contentcollector.makeContentCollector(true, null, pad.pool);
-  cc.collectContent(doc.childNodes[0]);
-  var result = cc.finish();
+  try {
+    // Convert a dom tree into a list of lines and attribute liens
+    // using the content collector object
+    var cc = contentcollector.makeContentCollector(true, null, pad.pool);
+    cc.collectContent(doc.childNodes[0]);
+    var result = cc.finish();
+  } catch(e) {
+    return callback(new Error('Failed to convert HTML'));   
+  }
 
   // Get the new plain text and its attributes
   var newText = map.call(result.lines, function (e) {
