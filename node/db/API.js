@@ -339,11 +339,13 @@ exports.setHTML = function(padID, html, callback)
 
     // add a new changeset with the new html to the pad
     importHtml.setPadHTML(pad, cleanText(html), function(err) {
-      if(!err) {
-        //update the clients on the pad
-        padMessageHandler.updatePadClients(pad, function() { /* don't care */ });
-      }
-      callback(err);
+      if(err) { return callback(err); }
+
+      //update the clients on the pad
+      padMessageHandler.updatePadClients(pad
+          , function() { /* don't care */ });
+
+      return callback(err);
     });
   });
 }
