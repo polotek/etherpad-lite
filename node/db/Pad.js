@@ -14,9 +14,6 @@ var padManager = require("./PadManager");
 var padMessageHandler = require("../handler/PadMessageHandler");
 var readOnlyManager = require("./ReadOnlyManager");
 var crypto = require("crypto");
-var request = require('request');
-var retry = require('retry');
-var runtimeLog = require('log4js').getLogger('runtimeLog');
 
 /**
  * Copied from the Etherpad source code. It converts Windows line breaks to Unix line breaks and convert Tabs to spaces
@@ -65,14 +62,6 @@ Class('Pad', {
     }, // passwordHash
 
     id : { is : 'r' },
-
-    yammerId: {
-      is: 'r'
-      , init: function() {
-        var pos = this.id.lastIndexOf('-');
-        return this.id.substring(pos+1);
-      }
-    },
 
     networkId : { is : 'r' },
 
@@ -701,53 +690,6 @@ Class('Pad', {
     {
       this.passwordHash = password == null ? null : hash(password, generateSalt());
       db.setSub("pad:"+this.id, ["passwordHash"], this.passwordHash);
-    },
-    /**
-     * Alert workfeed that this pad should be activated
-     * @param  {String} authToken - oauth2 token form WF
-     */
-    activate: function(authToken, callback) {
-      var wf = settings.workfeed
-        , op = null
-        , url = null;
-
-      if(!wf) { return callback(new Error('Cannot activate page. No workfeed configuration')); }
-
-      op = retry.operation({
-          retries: 3 // 3 retries
-          , factor: 10 // backoff by factors of 10
-          , minTimeout: 100 // wait at least 100 ms between retries
-          , maxTimeout: 1000 // max time between retries
-          , randomize: false // don't randomize times
-        });
-
-      url = wf.host + 
-          (wf.port ? ':' + wf.port : '') +
-          (wf.pathPrefix || '') + '/pages'
-          + '/' + this.yammerId + '/activate.json'
-
-      runtimeLog.info('Activating page ' + this.id);
-      op.attempt(function(tries) {
-        if(tries > 1) {
-          runtimeLog.debug('... retrying');
-        }
-        request.post(url, function(err, status, data) {
-          //console.log(arguments);
-
-          // done retrying
-          if(!err && status >= 200 && status < 300) {
-            return callback(null, true);
-          } else {
-            // maybe retry if there's an error or the wasn't successful
-            if(op.retry(err || true)) { return; }
-
-            err = op.mainError();
-            runtimeLog.error('Page activation failed. ' + err.message);
-            runtimeLog.error(err.stack);
-            return callback(err, false);
-          }
-        });
-      });
     },
     isCorrectPassword: function(password)
     {
