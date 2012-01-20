@@ -18,7 +18,11 @@ exports.Pages = {
       , op = null
       , opts = null;
 
-    if(!wf) { return callback(new Error('Cannot activate page. No workfeed configuration')); }
+    if(!wf) { return callback(new Error('Cannot activate page. No workfeed configuration'), false); }
+
+    if(!authToken || typeof authToken != 'string') {
+      return callback(new Error('Cannot activate page. Invalid authToken: ' + authToken), false);
+    }
 
     op = retry.operation({
         retries: 2 // 3 retries
@@ -47,10 +51,10 @@ exports.Pages = {
       }
 
       request.put(opts, function(err, res, data) {
-        var status = res.statusCode;
+        var status = res ? res.statusCode : 0;
 
         // done retrying
-        if(status >= 200 && status < 300) {
+        if(!err && status >= 200 && status < 300) {
           runtimeLog.info('Activated ' + pad.id);
           return callback(null, true);
         } else {
@@ -60,11 +64,14 @@ exports.Pages = {
           if(op.retry(expectRetry)) { return; }
 
           err = op.mainError();
-          runtimeLog.error('Failed to activate ' + pad.id + '. ' + err.message);
+          runtimeLog.error('Failed to activate ' + pad.id + '.');
 
           return callback(err, false);
         }
       });
     });
+
+    // if we got here, the request is in flight
+    return true;
   }
 }
