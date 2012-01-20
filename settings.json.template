@@ -48,4 +48,10 @@
     "host" : "localhost",
     "port" : 7070
   }
+
+  /* Workfeed details */
+  , "workfeed": {
+    "host": "https:\/\/localhost"
+    , "pathPrefix": "/api/v1"
+  }
 }

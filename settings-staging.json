@@ -39,5 +39,10 @@
         "host":"stagetokie-004.sjc1.yammer.com",
         "port":7080
   }
+
+  , "workfeed": {
+    "host": "https:\/\/www.staging.yammer.com"
+    , "pathPrefix": "/api/v1"
+  }
 }
 
