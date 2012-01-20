@@ -8,5 +8,6 @@ bin/convertSettings.json
 *.swp
 *.swo
 node/logs
+.lock-wscript
 node_modules/**/out
 node_modules/**/build
