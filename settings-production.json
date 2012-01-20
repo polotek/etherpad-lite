@@ -39,5 +39,10 @@
         "host":"tokie.sjc1.yammer.com",
         "port":80
   }
+
+  , "workfeed": {
+    "host": "https:\/\/www.yammer.com"
+    , "pathPrefix": "/api/v1"
+  }
 }
 
