@@ -14,9 +14,6 @@ var padManager = require("./PadManager");
 var padMessageHandler = require("../handler/PadMessageHandler");
 var readOnlyManager = require("./ReadOnlyManager");
 var crypto = require("crypto");
-var request = require('request');
-var retry = require('retry');
-var runtimeLog = require('log4js').getLogger('runtimeLog');
 
 /**
  * Copied from the Etherpad source code. It converts Windows line breaks to Unix line breaks and convert Tabs to spaces
@@ -65,14 +62,6 @@ Class('Pad', {
     }, // passwordHash
 
     id : { is : 'r' },
-
-    yammerId: {
-      is: 'r'
-      , init: function() {
-        var pos = this.id.lastIndexOf('-');
-        return this.id.substring(pos+1);
-      }
-    },
 
     networkId : { is : 'r' },
 
