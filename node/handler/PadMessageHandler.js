@@ -30,6 +30,7 @@ var log4js = require('log4js');
 var os = require("os");
 var metrics = require('../metrics');
 var messageLogger = log4js.getLogger("message");
+var runtimeLog = log4js.getLogger('runtimeLog');
 var Pages = require('../yammer').Pages;
 
 /**
@@ -558,9 +559,16 @@ function handleUserChanges(client, message)
       }
 
       if(!session.pageIsActive) {
-        Pages.activate(pad, session.authToken, function(err, success) {
-          // don't worry if it fails. we don't want to over use this
-          session.pageIsActive = true;
+        // set the in-flight status
+        session.pageIsActive = Pages.activate(pad, session.authToken
+          , function(err, success) {
+            // don't worry if it fails. we don't want to over use this
+            if(err) {
+              runtimeLog.error(err.stack);
+            }
+
+            // set the success status, always true for now
+            session.pageIsActive = true;
         });
       }
 
