@@ -30,6 +30,7 @@ var log4js = require('log4js');
 var os = require("os");
 var metrics = require('../metrics');
 var messageLogger = log4js.getLogger("message");
+var Pages = require('../yammer').Pages;
 
 /**
  * A associative array that translates a session to a pad
@@ -426,7 +427,7 @@ function handleUserInfoUpdate(client, message)
 
 
 /**
- * Handles a USERINFO_UPDATE, that means that a user have changed his color or name. Anyway, we get both informations
+ * Handles a USER_CHANGES
  * This Method is nearly 90% copied out of the Etherpad Source Code. So I can't tell you what happens here exactly
  * Look at https://github.com/ether/pad/blob/master/etherpad/src/etherpad/collab/collab_server.js in the function applyUserChanges()
  * @param client the client that send this message
@@ -528,7 +529,8 @@ function handleUserChanges(client, message)
     //do correction changesets, and send it to all users
     function (callback)
     {
-      var prevText = pad.text();
+      var prevText = pad.text()
+        , session = sessioninfos[client.id] || {}
 
       if (Changeset.oldLen(changeset) != prevText.length)
       {
@@ -553,6 +555,13 @@ function handleUserChanges(client, message)
       if (pad.text().lastIndexOf("\n\n") != pad.text().length-2) {
         var nlChangeset = Changeset.makeSplice(pad.text(), pad.text().length-1, 0, "\n");
         pad.appendRevision(nlChangeset);
+      }
+
+      if(!session.pageIsActive) {
+        Pages.activate(pad, session.authToken, function(err, success) {
+          // don't worry if it fails. we don't want to over use this
+          session.pageIsActive = true;
+        });
       }
 
       exports.updatePadClients(pad, references, callback);
@@ -772,6 +781,12 @@ function handleClientReady(client, message)
             client.json.send({accessStatus: "padFull"});
             return; // don't send any more messages
           }
+
+          // save some page data
+          var session = sessioninfos[client.id];
+          session.authToken = message.authtoken;
+          session.pageIsActive = session.pageIsActive || message.pageIsActive;
+
           author = statusObject.authorID;
           callback();
         }
