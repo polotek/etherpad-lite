@@ -16,7 +16,7 @@ exports.Pages = {
   , activate: function(pad, authToken, callback) {
     var wf = settings.workfeed
       , op = null
-      , url = null;
+      , opts = null;
 
     if(!wf) { return callback(new Error('Cannot activate page. No workfeed configuration')); }
 
@@ -28,10 +28,17 @@ exports.Pages = {
         , randomize: false // don't randomize times
       });
 
-    url = wf.host + 
+    opts = {
+      url: wf.host + 
         (wf.port ? ':' + wf.port : '') +
         (wf.pathPrefix || '') + '/pages'
         + '/' + this.getYammerId(pad.id) + '/activate.json'
+      , headers: {
+        Host: 'paddie'
+        , 'Content-Type': 'application/javascript'
+        , Authorization: 'Bearer ' + authToken
+      }
+    }
 
     runtimeLog.info('Activating page ' + pad.id);
     op.attempt(function(tries) {
@@ -39,11 +46,12 @@ exports.Pages = {
         runtimeLog.debug('... retrying activation of ' + pad.id);
       }
 
-      request.post(url, function(err, res, data) {
+      request.put(opts, function(err, res, data) {
         var status = res.statusCode;
 
         // done retrying
         if(status >= 200 && status < 300) {
+          runtimeLog.info('Activated ' + pad.id);
           return callback(null, true);
         } else {
           // maybe retry
