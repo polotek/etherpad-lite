@@ -33,11 +33,16 @@
 
   "logDirectory": "/var/log/paddie",
 
-  "archiveDirectory": "/var/log/paddie/archives",
+  "archiveDirectory": "/var/log/paddie/archives"
 
-  "tokie": {
+  , "tokie": {
         "host":"tokie.sjc1.yammer.com",
         "port":80
+  }
+
+  , "workfeed": {
+    "host": "http:\/\/workfeed.sjc1.yammer.com"
+    , "pathPrefix": "/api/v1"
   }
 }
 

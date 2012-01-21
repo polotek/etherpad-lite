@@ -64,6 +64,8 @@ exports.archiveDirectory = "";
 
 exports.tokie = false;
 
+exports.workfeed = false;
+
 exports.env = "production";
 
 //read the settings sync
@@ -102,7 +104,7 @@ for(var i in settings)
   //this setting is unkown, output a warning and throw it away
   else
   {
-    console.warn("Unkown Setting: '" + i + "'");
+    console.warn("Unknown Setting: '" + i + "'");
     console.warn("This setting doesn't exist or it was removed");
   }
 }

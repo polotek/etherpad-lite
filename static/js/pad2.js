@@ -216,6 +216,7 @@ function handshake()
       "token": token,
       "user_id": userId,
       "authtoken": authToken,
+      "pageIsActive": config.pageIsActive || false,
       "protocolVersion": 2
     };
     socket.json.send(msg);

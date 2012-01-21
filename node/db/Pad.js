@@ -589,7 +589,7 @@ Class('Pad', {
             _this.passwordHash = null;
 
 
-          callback(null);
+          return callback(null);
         }
         //this pad doesn't exist, so create it
         else
