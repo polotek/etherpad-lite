@@ -1,7 +1,9 @@
 var settings = require('../utils/Settings');
 var request = require('request');
 var retry = require('retry');
-var runtimeLog = require('log4js').getLogger('runtimeLog');
+var log4js = require('log4js');
+var runtimeLog = log4js.getLogger('runtimeLog');
+var httpLog = log4js.getLogger('httpLog');
 
 exports.Pages = {
   getYammerId: function(padId) {
@@ -53,6 +55,7 @@ exports.Pages = {
       request.put(opts, function(err, res, data) {
         var status = res ? res.statusCode : 0;
 
+        httpLog.info('CLIENT_REQUEST ' + opts.url + ' ' + status );
         // done retrying
         if(!err && status >= 200 && status < 300) {
           runtimeLog.info('Activated ' + pad.id);
