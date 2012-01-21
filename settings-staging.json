@@ -41,7 +41,7 @@
   }
 
   , "workfeed": {
-    "host": "https:\/\/stageworkfeed.sjc1.yammer.com"
+    "host": "http:\/\/stageworkfeed.sjc1.yammer.com"
     , "pathPrefix": "/api/v1"
   }
 }
