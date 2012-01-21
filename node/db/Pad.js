@@ -180,6 +180,27 @@ Class('Pad', {
 
       return authors;
     },
+    
+    getAllAuthorColors : function(callback) 
+    {
+      var authors = this.getAllAuthors();
+      var returnTable = {};
+      var colorPalette = authorManager.getColorPalette();
+      
+      async.forEach(authors, function(author, callback){
+        authorManager.getAuthorColorId(author, function(err, colorId){
+          if(err){
+            return callback(err);
+          }
+          
+          returnTable[author]=colorPalette[colorId];
+          
+          callback();
+        });
+      }, function(err){
+        callback(err, returnTable);
+      });
+    },
 
     getRevisionSet: function(startRev, endRev, opts, callback) {
       if(typeof opts == 'function') {
@@ -189,18 +210,15 @@ Class('Pad', {
 
       opts = opts || {};
 
-      startRev = (startRev !== null || startRev !== undefined) && parseInt(startRev, 10);
-      endRev = (endRev !== null || endRev !== undefined) && parseInt(endRev, 10);
-
-      if(typeof startRev != 'number') { return callback(new Error('You must specify a start revision')); }
-
-      var head = this.getHeadRevisionNumber();
-      if(typeof endRev == 'number' && !isNaN(endRev)) {
-        if(endRev > head) { return callback(new Error('Invalid end revision')) };
+      var range = this.getValidRevisionRange(startRev, endRev);
+      if(range) {
+        startRev = range.startRev;
+        endRev = range.endRev;
       } else {
-        endRev = head;
+        return callback(new Error('Invalid revision range.' + 
+            ' startRev: ' + startRev +
+            ' endRev: ' + endRev));
       }
-      if(startRev < 0 || startRev > endRev) { return callback(new Error('Invalid start revision')); }
 
       var self = this
          , apool = self.pool
@@ -691,7 +709,28 @@ Class('Pad', {
       this.passwordHash = password == null ? null : hash(password, generateSalt());
       db.setSub("pad:"+this.id, ["passwordHash"], this.passwordHash);
     },
+    getValidRevisionRange: function(startRev, endRev) {
+      startRev = parseInt(startRev, 10);
 
+      var head = this.getHeadRevisionNumber();
+      endRev = endRev ? parseInt(endRev, 10) : head;
+
+      if(isNaN(startRev) || startRev < 0 || startRev > head) {
+        startRev = null;
+      }
+
+      if(isNaN(endRev) || endRev < startRev) {
+        endRev = null;
+      } else if(endRev > head) {
+        endRev = head;
+      }
+
+      if(startRev !== null && endRev !== null) {
+        return { startRev: startRev , endRev: endRev }
+      }
+
+      return null;
+    },
     isCorrectPassword: function(password)
     {
       return compare(this.passwordHash, password)
