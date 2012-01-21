@@ -41,11 +41,17 @@
   /* The log level we are using, can be: DEBUG, INFO, WARN, ERROR */
   "loglevel": "INFO",
 
-  "logDirectory": "logs",
+  "logDirectory": "logs"
 
   /* Tokie details */
-  "tokie" : {
+  , "tokie" : {
     "host" : "localhost",
     "port" : 7070
+  }
+
+  /* Workfeed details */
+  , "workfeed": {
+    "host": "https:\/\/localhost"
+    , "pathPrefix": "/api/v1"
   }
 }

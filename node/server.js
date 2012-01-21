@@ -20,6 +20,13 @@
  * limitations under the License.
  */
 
+// The early catch all to make sure we catch any random errors
+var catchAll = function(e) {
+  console.error(e);
+  process.exit(1);
+}
+process.on('uncaughtException', catchAll);
+
 var repl = require("./utils/Repl");
 var metrics = require('./metrics');
 var nopt = require('nopt');
@@ -553,6 +560,8 @@ async.waterfall([
 
     process.on('SIGTERM', gracefulShutdown);
 
+    // unattach catchAll and do the real one
+    process.removeListener('uncaughtException', catchAll);
     process.on('uncaughtException', function(err) {
       var fatalLog = log4js.getLogger('fatalLog');
       try {

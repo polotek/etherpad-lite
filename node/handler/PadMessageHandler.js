@@ -30,6 +30,8 @@ var log4js = require('log4js');
 var os = require("os");
 var metrics = require('../metrics');
 var messageLogger = log4js.getLogger("message");
+var runtimeLog = log4js.getLogger('runtimeLog');
+var Pages = require('../yammer').Pages;
 
 /**
  * A associative array that translates a session to a pad
@@ -426,7 +428,7 @@ function handleUserInfoUpdate(client, message)
 
 
 /**
- * Handles a USERINFO_UPDATE, that means that a user have changed his color or name. Anyway, we get both informations
+ * Handles a USER_CHANGES
  * This Method is nearly 90% copied out of the Etherpad Source Code. So I can't tell you what happens here exactly
  * Look at https://github.com/ether/pad/blob/master/etherpad/src/etherpad/collab/collab_server.js in the function applyUserChanges()
  * @param client the client that send this message
@@ -528,7 +530,8 @@ function handleUserChanges(client, message)
     //do correction changesets, and send it to all users
     function (callback)
     {
-      var prevText = pad.text();
+      var prevText = pad.text()
+        , session = sessioninfos[client.id] || {}
 
       if (Changeset.oldLen(changeset) != prevText.length)
       {
@@ -553,6 +556,20 @@ function handleUserChanges(client, message)
       if (pad.text().lastIndexOf("\n\n") != pad.text().length-2) {
         var nlChangeset = Changeset.makeSplice(pad.text(), pad.text().length-1, 0, "\n");
         pad.appendRevision(nlChangeset);
+      }
+
+      if(!session.pageIsActive) {
+        // set the in-flight status
+        session.pageIsActive = Pages.activate(pad, session.authToken
+          , function(err, success) {
+            // don't worry if it fails. we don't want to over use this
+            if(err) {
+              runtimeLog.error(err.stack);
+            }
+
+            // set the success status, always true for now
+            session.pageIsActive = true;
+        });
       }
 
       exports.updatePadClients(pad, references, callback);
@@ -772,6 +789,12 @@ function handleClientReady(client, message)
             client.json.send({accessStatus: "padFull"});
             return; // don't send any more messages
           }
+
+          // save some page data
+          var session = sessioninfos[client.id];
+          session.authToken = message.authtoken;
+          session.pageIsActive = session.pageIsActive || message.pageIsActive;
+
           author = statusObject.authorID;
           callback();
         }
@@ -827,7 +850,8 @@ function handleClientReady(client, message)
         //get all author data out of the database
         function(callback)
         {
-          pad.getAuthorsForRevisionSet(message.last_published_rev, undefined, function(err, authors){
+          var startRev = message.last_published_rev || 0;
+          pad.getAuthorsForRevisionSet(startRev, undefined, function(err, authors){
             if(err) { return callback(err); }
 
             async.forEach(authors, function(author, callback)
@@ -914,7 +938,7 @@ function handleClientReady(client, message)
             "rev": pad.getHeadRevisionNumber(),
             "globalPadId": message.padId
         },
-        "colorPalette": ["#ff33cc", "#ff9966", "#ffcc99", "#ffadcc", "#ff6666", "#ff9999", "#cc6699", "#ff6699", "#cc99cc", "#00ccff", "#00ccff", "#3399ff", "#54d2d2", "#99ccff", "#99cccc", "#80b5ff", "#97a1f7", "#b194ff", "#34b5cb", "#cccc00", "#33cc33", "#8ed447", "#66cc99", "#78b678", "#3ecc89", "#79b6b6", "#aaab71", "#a3d8a3", "#ff0000", "#00ff00", "#00dddd", "#ff00ff", "#cccccc", "#999999", "#cbcbcb", "#c3c3c3", "#aaaaaa"],
+        "colorPalette": authorManager.getColorPalette(),
         "clientIp": "127.0.0.1",
         "userIsGuest": true,
         "userColor": authorColorId,
