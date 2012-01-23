@@ -290,6 +290,8 @@ describe('PadDiff', function (){
       testDiffs.push(new padDiff(pad, 85, 86));
       testDiffs.push(new padDiff(pad, 0, 1));
       testDiffs.push(new padDiff(pad, 233, 234));
+      testDiffs.push(new padDiff(pad, 472, 473));
+      testDiffs.push(new padDiff(pad, 471, 472));
  
       //run trough all testDiffs
       async.forEachSeries(testDiffs, function(testDiff, callback){
@@ -303,9 +305,12 @@ describe('PadDiff', function (){
             //check if we have a larger or at least the same text 
             expect(origAText.text.length <= newAText.text.length).to(beTrue);
 
-            //check if there are authors in the author array
-            expect(testDiff._authors.length).toNot(equal, 0);
-            
+            //if the text has changed, there must be authors in the author array
+            if(origAText.text != newAText.text) {
+              //check if there are authors in the author array
+              expect(testDiff._authors.length).toNot(equal, 0);
+            }
+
             callback();
           });
         });
