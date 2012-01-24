@@ -205,13 +205,16 @@ PadDiff.prototype._createDiffAtext = function(callback) {
       
       //after the loop has ended
       function (err) {
-        var deletionChangeset = self._createDeletionChangeset(superChangeset,atext,self._pad.pool);
+        //if there are only clearAuthorship changesets, we don't get a superChangeset, so we can skip this step
+        if(superChangeset){
+          var deletionChangeset = self._createDeletionChangeset(superChangeset,atext,self._pad.pool);
         
-        //apply the superChangeset, which includes all addings
-        atext = Changeset.applyToAText(superChangeset,atext,self._pad.pool);
-        //apply the deletionChangeset, which adds a deletions
-        atext = Changeset.applyToAText(deletionChangeset,atext,self._pad.pool);
-      
+          //apply the superChangeset, which includes all addings
+          atext = Changeset.applyToAText(superChangeset,atext,self._pad.pool);
+          //apply the deletionChangeset, which adds a deletions
+          atext = Changeset.applyToAText(deletionChangeset,atext,self._pad.pool);
+        }      
+
         callback(err, atext);
       }
     );
