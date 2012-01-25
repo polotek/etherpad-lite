@@ -28,5 +28,8 @@
                       "retry"      : "0.5.0",
                       "jsdom"      : "0.2.9"
                     },
+  "devDependencies": {
+    "foounit": "~0.1"
+  },
   "version"       : "1.0.0"
 }
