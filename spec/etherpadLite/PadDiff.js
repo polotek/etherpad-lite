@@ -1,42 +1,25 @@
-var padDiff;
-var settings = foounit.require(':src/utils/Settings');
-var Changeset = foounit.require(':src/utils/Changeset');
-var path = require("path");
-var async = require("async");
+var async = require("async")
+  , padManager = foounit.require(':src/db/PadManager')
+  , Changeset = foounit.require(':src/utils/Changeset')
+  , padDiff = foounit.require(':src/utils/PadDiff');
+
 var pad, testPadDiff;
 
-//init everything
-before(function (){
-  //use the sample pad database
-  settings.dbType = "dirty";
-  settings.dbSettings = { "filename" : path.join(__dirname, "../samplePad_dirty.db") };
-  
-  //since the db settings are manipulated, we can load the db module
-  var db = foounit.require(':src/db/DB'); 
-  
-  //init database
-  var padLoaded = false;
-  db.init(function(err){
+// get a new pad each time
+before(function (){  
+  pad = null;
+
+  //load the sample pad
+  padManager.getPad("www.yammer.dev-19", function(err, _pad){
     if(err) throw err;
-  
-    //load the modules that need an initalized db
-    var padManager = foounit.require(':src/db/PadManager');
-    padDiff = foounit.require(':src/utils/PadDiff');
     
-    //load the sample pad
-    padManager.getPad("www.yammer.dev-19", function(err, _pad){
-      if(err) throw err;
-      
-      pad = _pad;
-      padLoaded = true;
-      
-      testPadDiff = new padDiff(pad, 0, 490);
-    });
+    pad = _pad;
+    
+    testPadDiff = new padDiff(pad, 0, 490);
   });
-  
-  //wait for database init
-  waitFor(function (){
-    expect(padLoaded).to(beTrue);
+
+  waitFor(function() {
+    expect(pad).toNot(beNull);
   });
 });
 
