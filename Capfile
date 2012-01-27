@@ -108,16 +108,16 @@ namespace :deploy do
       user      = $? == 0 ? "@#{permalink}" : `whoami`.chomp.downcase
       
       body = case yn_step.to_i
-        when 0: "#{user} is deploying Paddie branch=#{branch} to #{stage}"
-        when 1: "Finished deploying!"
-        else     "Expect the unexpected!"
+        when 0 then "#{user} is deploying Paddie branch=#{branch} to #{stage}"
+        when 1 then "Finished deploying!"
+        else        "Expect the unexpected!"
       end
       
       groupid = case stage.to_s
-        when /thunderdome/: 1380
-        when /prod/       : 323
-        when /stage/      : 849
-        else                849
+        when /thunderdome/ then 1380
+        when /prod/        then 323
+        when /stage/       then 849
+        else                    849
       end
       
       params    = []
