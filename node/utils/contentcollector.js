@@ -21,6 +21,8 @@ var Changeset = require("../utils/Changeset");
 
 var _MAX_LIST_LEVEL = 8;
 
+var headingTagRe = /^h(\d)$/i;
+
 function sanitizeUnicode(s)
 {
   return s.replace(/[\uffff\ufffe\ufeff\ufdd0-\ufdef\ud800-\udfff]/g, '?');
@@ -84,7 +86,9 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
 
   function isBlockElement(n)
   {
-    return !!_blockElems[(dom.nodeTagName(n) || "").toLowerCase()];
+    var isblock = !!_blockElems[(dom.nodeTagName(n) || "").toLowerCase()];
+    isblock = isblock || headingTagRe.test(dom.nodeTagName(n));
+    return isblock;
   }
 
   function textify(str)
@@ -223,7 +227,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
   {
     state.flags[flagName]--;
   }
-  cc.incrementAttrib = function(state, attribName)
+  cc.incrementAttrib = function(state, attribName, node)
   {
     if (!state.attribs[attribName])
     {
@@ -233,7 +237,7 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
     {
       state.attribs[attribName]++;
     }
-    _recalcAttribString(state);
+    _recalcAttribString(state, node);
   }
   cc.decrementAttrib = function(state, attribName)
   {
@@ -281,6 +285,16 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
     _recalcAttribString(state);
   }
 
+  function _enterHeading(state, hNum) {
+    state.headingType = hNum;
+    _recalcAttribString(state);
+  }
+
+  function _exitHeading(state) {
+    state.headingType = null;
+    _recalcAttribString(state);
+  }
+
   function _recalcAttribString(state)
   {
     var lst = [];
@@ -301,6 +315,13 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
         lst.push(authorAttrib);
       }
     }
+
+    if(state.headingType) {
+      var headingAttrib = ['heading', state.headingType];
+      apool.putAttrib(headingAttrib, true);
+      lst.push(headingAttrib);
+    }
+
     state.attribString = Changeset.makeAttribsString('+', lst, apool);
   }
 
@@ -472,6 +493,10 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
           {
             cc.doAttrib(state, "strikethrough");
           }
+          if(headingTagRe.test(tname)) {
+            cc.startNewLine(state);
+            _enterHeading(state, tname.match(headingTagRe)[1]);
+          }
           if (tname == "ul")
           {
             var type;
@@ -535,6 +560,10 @@ function makeContentCollector(collectStyles, browser, apool, domInterface, class
         if (oldAuthorOrNull)
         {
           _exitAuthor(state, oldAuthorOrNull);
+        }
+        if(state.headingType) {
+          _exitHeading(state);
+          cc.startNewLine(state);
         }
       }
     }
