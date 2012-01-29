@@ -201,6 +201,27 @@ Class('Pad', {
       });
     },
 
+    getAllAuthorColors : function(callback)
+    {
+      var authors = this.getAllAuthors();
+      var returnTable = {};
+      var colorPalette = authorManager.getColorPalette();
+
+      async.forEach(authors, function(author, callback){
+        authorManager.getAuthorColorId(author, function(err, colorId){
+          if(err){
+            return callback(err);
+          }
+
+          returnTable[author]=colorPalette[colorId];
+
+          callback();
+        });
+      }, function(err){
+        callback(err, returnTable);
+      });
+    },
+
     getRevisionSet: function(startRev, endRev, opts, callback) {
       if(typeof opts == 'function') {
         callback = opts;

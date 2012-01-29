@@ -22,9 +22,9 @@ var run = function() {
   fu.require(':spec/etherpadLite/contentcollector');
   fu.run();
 }
-  
+
 //since the db settings are manipulated, we can load the db module
-var db = foounit.require(':src/db/DB'); 
+var db = foounit.require(':src/db/DB');
 
 //init database
 var padLoaded = false;
